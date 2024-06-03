@@ -8,3 +8,77 @@ export const metadata = {
   }
 }
 
+When I joined Hugging Face nearly 3 years ago, the Transformers documentation was very different from its current form today. It focused on text models and how to train or use them for inference on natural language tasks (text classification, summarization, language modeling, etc.).
+
+<div class="flex justify-center">
+  <img class="rounded-sm" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/transformers-docs.png"/>
+</div>
+<p class="text-xs">The main version of the Transformers documentation today compared to version 4.10.0 from nearly 3 years ago.</p>
+
+As transformer models increasingly became the default way to approach AI, the documentation expanded significantly to include new models and new usage patterns. But the new content was added incrementally without really considering how the audience and transformer landscape have evolved.
+
+I think this is why the documentation experience (DocX) feels disjointed, difficult to navigate, and outdated. Basically, a mess.
+
+This is why a Transformers documentation redesign is necessary to make sense of this mess. The goal is to:
+
+1. Write for developers interested in building products with AI.
+2. Allow organic documentation structure and growth that scales naturally instead of rigidly adhering to a predefined structure.
+3. Create a more unified documentation experience by *integrating* content rather than *amending* it to the existing documentation. 
+
+## A new audience [#a-new-audience]
+
+<Tweet
+  id="1631493327844528134"
+/>
+
+The Transformers documentation was initially written for machine learning engineers and researchers, model tinkerers.
+
+Now that AI is more mainstream and mature, and not just a fad, developers are growing interested in learning how to build AI into products. This means realizing developers interact with documentation unlike machine learning engineers and researchers.
+
+Two key distinctions are:
+
+* Developers typically start with code examples and are searching for a solution to something they're trying to solve.
+* Developers who aren't familiar with AI can be overwhelmed by Transformers. The value of code examples are reduced - or worse, useless, if you don't understand the context in which they're used.
+
+With the redesign, the Transformers documentation will be more code-first and solution-oriented. The redesign will also feature a more *complete* and beginner-friendly onboarding experience that bridges code and concept.
+
+Once developers have a basic understanding, they can progressively level up their understanding of the library.
+
+## Toward a more organic structure [#organic-structure]
+
+One of my first projects at Hugging Face was to align the Transformers documentation with [Diátaxis](https://diataxis.fr/), a documentation *approach* based on user needs (learning, solving, understanding, reference).
+
+<Tweet
+  id="1380196353062621185"
+/>
+
+But somewhere along the way, I started using Diátaxis as a *plan* instead of a *guide*. I tried to force content to fit neatly into one of the 4 prescribed categories.
+
+Rigidity prevented naturally occuring content structures from emerging and prevented the documentation from adapting and scaling. Documentation about one topic soon spanned several sections, because it was what the structure dictated, and not because it made sense.
+
+It's okay if the structure is complex, but it's not okay if it's complex *and* not easy to find your way around.
+
+The redesign will replace rigidity for flexibility to enable the documentation to grow and evolve.
+
+## Integration versus amendment [#integration-versus-amendment]
+
+Tree rings provide a record of the climate in the past (drought, flood, wildfire, etc.). In a way, the Transformers documentation also has its own tree rings or *eras* that capture the evolution of the transformer landscape:
+
+1. **Not just text** era: Transformer models are used across modalities like [computer vision](https://hf.co/docs/transformers/tasks/image_classification), [audio](https://hf.co/docs/transformers/tasks/asr), [multimodal](https://hf.co/docs/transformers/tasks/text-to-speech), and not just text.
+2. **Large language model (LLM)** era: Transformer models are scaled to billions of parameters, leading to new ways of interacting with them, such as [prompting](https://hf.co/docs/transformers//tasks/prompting) and [chat](https://hf.co/docs/transformers/conversations). You start to see a lot more documentation about how to efficiently train LLMs, like using [parameter efficient finetuning (PEFT)](https://hf.co/docs/transformers/peft) methods, [distributed training](https://hf.co/docs/transformers/accelerate), and [data parallelism](https://hf.co/docs/transformers/perf_train_gpu_many).
+3. **Optimization** era: Running LLMs for inference or training can be a challenge unless you are GPU Rich, so now there is a ton of interest in how to democratize LLMs for the GPU Poor. There is more documentation about methods like [quantization](https://hf.co/docs/transformers/quantization/overview), [FlashAttention](https://hf.co/docs/transformers/llm_optims#flashattention-2), optimizing the [key-value cache](https://hf.co/docs/transformers/llm_tutorial_optimization#32-the-key-value-cache), [Low-Rank Adaptation (LoRA)](https://hf.co/docs/transformers/peft), and more.
+
+Each era *incrementally* added new content to the documentation, unbalancing and obscuring previous parts of the documentation. Content is sprawled over a greater surface, navigation is more complex.
+
+<div class="flex justify-center">
+  <img class="rounded-sm" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/transformer.png"/>
+</div>
+<p class="text-xs">In the tree ring model, new content is layered progressively over the previous material. Whereas in the integrated model, content coexists together as a part of the overall documentation.</p>
+
+A redesign will help rebalance the overall documentation experience. Content will feel native and integrated rather than bolted on.
+
+The next post will document the redesign process.
+
+---
+
+<p class="text-sm">Shout out to [@evilpingwin](https://x.com/evilpingwin) for the feedback and motivation to redesign the docs.</p>
