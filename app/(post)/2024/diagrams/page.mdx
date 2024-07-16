@@ -20,7 +20,7 @@ I mentioned this problem in my last two posts about how the documentation needs 
 To solve this issue:
 
 1. Create a diagram (block diagram, Venn diagram, mind map) of how content is related and observe what structures organically develop.
-2. Structure the content with deep and shallow hierarchies.
+2. Experiment with deep and shallow hierarchies for the content.
 
 ## The North Star [#the-north-star]
 
@@ -36,7 +36,7 @@ Both are valid, but they're limited interpretations. Transformers is more than.
 
 This is the North Star, and our guiding principle for restructuring the documentation.
 
-Those other lenses are important for organizing content, but they shouldn't be used to ground the library with.
+Those other lenses are important for organizing content, but they shouldn't be used to ground the library.
 
 ## Content mapping [#content-mapping]
 
@@ -50,15 +50,15 @@ The diagrams I chose focus on showing how separate parts of Transformers are rel
     <img class="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/block-diagram.png"/>
 </div>
 
-1. At the highest level, you'll find content about the Transformers library. Design choices, and how to contribute.
-2. The second layer is the core of Transformers:
+1. At the highest level, you'll find content about the library. Design choices, and how to contribute.
+2. The second layer is the core:
     - **pretrained models**: how to use the base model and tokenizer classes, how to export models to other formats for production, how to quantize models for training or inference, and task guides (a collection of recipes for training models to perform inference on a variety of tasks)
     - **training**: how to finetune pretrained models with the [transformers.Trainer](https://hf.co/documentation/transformers/main_classes/trainer#transformers.Trainer) API, distributed training on GPUs/CPUs and parallelism schemes, and hardware-specific training content on devices like TPUs and Apple silicon
     - **inference**: how to use the high-level [transformers.Pipeline](https://hf.co/documentation/transformers/main_classes/pipelines#transformers.Pipeline) API for inference, using LLMs for text generation, chat applications with LLMs, and optimizing inference with PyTorch and TensorFlow
 
 You can see how structure develops internally within the block diagram.
 
-For example, the training content is mainly built from 3 substructures: the [transformers.Trainer](https://hf.co/documentation/transformers/main_classes/trainer#transformers.Trainer) API, distributed training, and hardware-specific training.
+For example, the training content is mainly composed of 3 substructures: the [transformers.Trainer](https://hf.co/documentation/transformers/main_classes/trainer#transformers.Trainer) API, distributed training, and hardware-specific training.
 
 ### Venn diagram [#venn-diagram]
 
@@ -114,10 +114,10 @@ There are 2 important considerations for structuring content:
 
 Diagrams organize content by helping us see how they're interrelated, and structures arrange the organized content in a way that represents the library as a whole.
 
-In the previous two posts, I described why the Transformers documentation needs a redesign and I also outlined the major issues with the current documentation. This post focused on how to organize the content and how to structure it.
+In the previous two posts, I described why the documentation needs a redesign and I also outlined the major issues with its current form. This post focused on how to organize the content and how to structure it.
 
 With the mess identified and a general plan for tidying it up, it's time to get to work. ✌️
 
 ***
 
-I'll be focusing on actually redesigning the documentation now. I'll be back with more updates once the redesign is complete!
+<p class="text-sm">I'll be focusing on actually redesigning the documentation now. I'll be back with more updates once the redesign is complete!</p>

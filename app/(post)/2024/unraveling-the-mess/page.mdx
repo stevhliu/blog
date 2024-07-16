@@ -50,7 +50,7 @@ Developers may not have a deep understanding of how transformer models work. Dev
 > "I feel thin, sort of stretched, like butter scraped over too much bread."
 > - J.R.R. Tolkien, The Fellowship of the Ring
 
-This is an accurate description of the documentation.
+This is an accurate description of the Transformers documentation.
 
 Users have difficulty surfacing the information they need because it is spread too widely. It is hard to retrace their steps after going down a rabbit hole of links. They have to plod through the documentation because they are unsure and lost. Too much time is spent navigating rather than coding.
 
@@ -58,11 +58,11 @@ Users have difficulty surfacing the information they need because it is spread t
     <img class="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/caveman-spongebob.png"/>
 </div>
 
-For example, let's say you're a developer and you want to find some content about how to generate text. Where do you start?
+For example, let's say you're a developer and you want to find content about how to generate text. Where do you start?
 
 <Callout emoji="✦">This example relies on manually navigating the documentation. You could use ⌘+K to search for something, but you need to know the exact words to search for, which may not be possible if you're new to ML.</Callout>
 
-You start by Googling (most visitors enter the documentation through Google rather than directly) something like "hugging face text generation". You click on the 3rd link which describes [Text generation strategies](https://hf.co/docs/transformers/generation_strategies). Your developer instincts subconsciously compels you to scroll until you find some code. You find code that generates a translation. Not interested. You keep scrolling until you finally reach a section about different [decoding strategies](https://hf.co/docs/transformers/generation_strategies#decoding-strategies). You copy and paste the code examples and start experimenting with them. Uh-oh, you get some unintelligible output. What do you do?
+You start by Googling (most visitors enter the documentation through Google rather than directly) something like "hugging face text generation". You click on the 3rd link which describes [Text generation strategies](https://hf.co/docs/transformers/generation_strategies). You scroll until you find some code. You find code that generates a translation. Not interested. You keep scrolling until you finally reach a section about different [decoding strategies](https://hf.co/docs/transformers/generation_strategies#decoding-strategies). You copy and paste the code examples and start experimenting with them. Uh-oh, you get some unintelligible output. What do you do?
 
 If you scanned up the left navigation bar, you might've clicked on the [Generation with LLMs](https://hf.co/docs/transformers/llm_tutorial) tutorial and found a description of common pitfalls and the solution to your issue.
 
@@ -80,12 +80,12 @@ In the fairy tale, Goldilocks and the Three Bears, Goldilocks tries 3 things (po
 
 MLE's probably find that there is, for example:
 
-- Not enough guidance about how to customize certain classes (like the [Trainer](https://hf.co/docs/transformers/main_classes/trainer) class), not enough advanced usage examples of the [generate()](https://hf.co/docs/transformers/main_classes/text_generation#transformers.GenerationMixin.generate) method, and not enough examples of how to pretrain models from scratch.
+- Not enough guidance about how to customize certain classes (like the [transformers.Trainer](https://hf.co/docs/transformers/main_classes/trainer) class), not enough advanced usage examples of the [generate()](https://hf.co/docs/transformers/main_classes/text_generation#transformers.GenerationMixin.generate) method, and not enough examples of how to pretrain models from scratch.
 - Too much duplicate information and basic content.
 
 Developers probably find that there is, for example:
 
-- Not enough beginner-friendly content, not enough details about what specific parameters do in classes (like [TrainingArguments](https://huggingface.co/docs/transformers/main/en/main_classes/trainer#transformers.TrainingArguments)), not enough explanation about how things work.
+- Not enough beginner-friendly content, not enough details about what specific parameters do in classes (like [transformers.TrainingArguments](https://huggingface.co/docs/transformers/main/en/main_classes/trainer#transformers.TrainingArguments)), not enough explanation about how things work.
 - Too much technical information.
 
 ## Conclusion [#conclusion]
