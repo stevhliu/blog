@@ -1,38 +1,39 @@
-export const runtime = "edge";
+
+export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
+import { readFileSync } from "fs";
+import { join } from "path";
+
+export async function generateStaticParams() {
+  return (await getPosts()).map(post => ({ id: post.id }));
+}
 
 // fonts
-const inter300 = fetch(
-  new URL(
-    `../../../../node_modules/@fontsource/inter/files/inter-latin-300-normal.woff`,
-    import.meta.url
-  )
-).then(res => res.arrayBuffer());
+const fontsDir = join(process.cwd(), "fonts");
 
-const inter500 = fetch(
-  new URL(
-    `../../../../node_modules/@fontsource/inter/files/inter-latin-500-normal.woff`,
-    import.meta.url
-  )
-).then(res => res.arrayBuffer());
+const inter300 = readFileSync(
+  join(fontsDir, "inter-latin-300-normal.woff")
+);
 
-const inter600 = fetch(
-  new URL(
-    `../../../../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff`,
-    import.meta.url
-  )
-).then(res => res.arrayBuffer());
+const inter500 = readFileSync(
+  join(fontsDir, "inter-latin-500-normal.woff")
+);
 
-const robotoMono400 = fetch(
-  new URL(
-    `../../../../node_modules/@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff`,
-    import.meta.url
-  )
-).then(res => res.arrayBuffer());
+const inter600 = readFileSync(
+  join(fontsDir, "inter-latin-600-normal.woff")
+);
 
-export async function GET(_req: Request, { params: { id } }) {
+const robotoMono400 = readFileSync(
+  join(fontsDir, "roboto-mono-latin-400-normal.woff")
+);
+
+export async function GET(_req: Request, props) {
+  const params = await props.params;
+
+  const { id } = params;
+
   const posts = await getPosts();
   const post = posts.find(p => p.id === id);
   if (!post) {
@@ -47,10 +48,10 @@ export async function GET(_req: Request, { params: { id } }) {
       >
         <header tw="flex text-[36px] w-full">
           <div tw="font-bold" style={font("Inter 600")}>
-            Steven Liu
+            Guillermo Rauch
           </div>
           <div tw="grow" />
-          <div tw="text-[28px]">stevhliu.com</div>
+          <div tw="text-[28px]">rauchg.com</div>
         </header>
 
         <main tw="flex grow pb-3 flex-col items-center justify-center">
@@ -78,19 +79,19 @@ export async function GET(_req: Request, { params: { id } }) {
       fonts: [
         {
           name: "Inter 300",
-          data: await inter300,
+          data: inter300,
         },
         {
           name: "Inter 500",
-          data: await inter500,
+          data: inter500,
         },
         {
           name: "Inter 600",
-          data: await inter600,
+          data: inter600,
         },
         {
           name: "Roboto Mono 400",
-          data: await robotoMono400,
+          data: robotoMono400,
         },
       ],
     }

@@ -1,32 +1,25 @@
-export const runtime = "edge";
 export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
+import { readFileSync } from "fs";
+import { join } from "path";
 
-export default async function MainOG() {
-  // fonts
-  const inter300 = fetch(
-    new URL(
-      `../node_modules/@fontsource/inter/files/inter-latin-300-normal.woff`,
-      import.meta.url
-    )
-  ).then(res => res.arrayBuffer());
+const fontsDir = join(process.cwd(), "fonts");
 
-  const inter600 = fetch(
-    new URL(
-      `../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff`,
-      import.meta.url
-    )
-  ).then(res => res.arrayBuffer());
+const inter300 = readFileSync(
+  join(fontsDir, "inter-latin-300-normal.woff")
+);
 
-  const robotoMono400 = fetch(
-    new URL(
-      `../node_modules/@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff`,
-      import.meta.url
-    )
-  ).then(res => res.arrayBuffer());
+const inter600 = readFileSync(
+  join(fontsDir, "inter-latin-600-normal.woff")
+);
 
+const robotoMono400 = readFileSync(
+  join(fontsDir, "roboto-mono-latin-400-normal.woff")
+);
+
+export async function GET() {
   const posts = await getPosts();
 
   return new ImageResponse(
@@ -37,10 +30,10 @@ export default async function MainOG() {
       >
         <header tw="flex text-[36px] w-full">
           <div tw="font-bold" style={font("Inter 600")}>
-            Steven Liu
+            Guillermo Rauch
           </div>
           <div tw="grow" />
-          <div tw="text-[28px]">stevhliu.com</div>
+          <div tw="text-[28px]">rauchg.com</div>
         </header>
 
         <main tw="flex mt-10 flex-col w-full" style={font("Roboto Mono 400")}>
@@ -57,7 +50,7 @@ export default async function MainOG() {
             >
               <div tw="flex text-gray-400 w-24">
                 {posts[i - 1] === undefined ||
-                getYear(post.date) !== getYear(posts[i - 1].date)
+                  getYear(post.date) !== getYear(posts[i - 1].date)
                   ? getYear(post.date)
                   : ""}
               </div>
@@ -74,15 +67,15 @@ export default async function MainOG() {
       fonts: [
         {
           name: "Inter 300",
-          data: await inter300,
+          data: inter300,
         },
         {
           name: "Inter 600",
-          data: await inter600,
+          data: inter600,
         },
         {
           name: "Roboto Mono 400",
-          data: await robotoMono400,
+          data: robotoMono400,
         },
       ],
     }

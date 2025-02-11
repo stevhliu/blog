@@ -1,38 +1,32 @@
-export const runtime = "edge";
 export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
+import { readFileSync } from "fs";
+import { join } from "path";
 import commaNumber from "comma-number";
 
-export default async function AboutOG() {
-  // stevhliu photo
-  const stevhliuPhoto = fetch(
-    new URL(`../../public/images/stevhliu.PNG`, import.meta.url)
-  ).then(res => res.arrayBuffer());
+// Image
+const stevhliuPhoto = toArrayBuffer(
+  readFileSync(join(process.cwd(), "public/images/stevhliu.PNG"))
+);
 
-  // fonts
-  const inter300 = fetch(
-    new URL(
-      `../../node_modules/@fontsource/inter/files/inter-latin-300-normal.woff`,
-      import.meta.url
-    )
-  ).then(res => res.arrayBuffer());
+// Fonts
+const fontsDir = join(process.cwd(), "fonts");
 
-  const inter500 = fetch(
-    new URL(
-      `../../node_modules/@fontsource/inter/files/inter-latin-500-normal.woff`,
-      import.meta.url
-    )
-  ).then(res => res.arrayBuffer());
+const inter300 = readFileSync(
+  join(fontsDir, "inter-latin-300-normal.woff")
+);
 
-  const robotoMono400 = fetch(
-    new URL(
-      `../../node_modules/@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff`,
-      import.meta.url
-    )
-  ).then(res => res.arrayBuffer());
+const inter500 = readFileSync(
+  join(fontsDir, "inter-latin-500-normal.woff")
+);
 
+const robotoMono400 = readFileSync(
+  join(fontsDir, "roboto-mono-latin-400-normal.woff")
+);
+
+export async function GET() {
   const posts = await getPosts();
   const viewsSum = posts.reduce((sum, post) => sum + post.views, 0);
 
@@ -50,7 +44,7 @@ export default async function AboutOG() {
                 tw="rounded-full h-74"
                 alt="Steven Liu"
                 // @ts-ignore
-                src={await stevhliuPhoto}
+                src={stevhliuPhoto}
               />
             </div>
 
@@ -60,6 +54,9 @@ export default async function AboutOG() {
               </div>
               <div tw="flex mb-5" style={font("Roboto Mono 400")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Technical writer at Hugging Face
+              </div>
+              <div tw="flex mb-5" style={font("Roboto Mono 400")}>
+                <span tw="text-gray-400 mr-3">&mdash;</span> Transformers, Diffuseres
               </div>
               <div tw="flex" style={font("Roboto Mono 400")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Lives in Sebastopol, CA
@@ -82,15 +79,15 @@ export default async function AboutOG() {
       fonts: [
         {
           name: "Inter 300",
-          data: await inter300,
+          data: inter300,
         },
         {
           name: "Inter 500",
-          data: await inter500,
+          data: inter500,
         },
         {
           name: "Roboto Mono 400",
-          data: await robotoMono400,
+          data: robotoMono400,
         },
       ],
     }
@@ -100,4 +97,11 @@ export default async function AboutOG() {
 // lil helper for more succinct styles
 function font(fontFamily: string) {
   return { fontFamily };
+}
+
+function toArrayBuffer(buffer) {
+  return buffer.buffer.slice(
+    buffer.byteOffset,
+    buffer.byteOffset + buffer.byteLength
+  );
 }

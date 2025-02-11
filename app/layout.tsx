@@ -19,6 +19,7 @@ export const metadata = {
       "Steven Liu is a technical writer at Hugging Face.",
     url: "https://stevhliu.com",
     siteName: "Steven Liu's blog",
+    images: ["/opengraph-image"]
   },
   twitter: {
     card: "summary_large_image",
