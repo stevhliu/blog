@@ -8,12 +8,12 @@ export const metadata = {
   }
 }
 
-<Callout emoji="✦">2/10/25 - Lightly edited and consolidated the other posts into this single post.</Callout>
+<Callout emoji="✦">2/10/25 - Lightly edited to consolidate the redesign process and motivation into a single post.</Callout>
 
 When I joined Hugging Face over 3 years ago, the Transformers docs were very different from the current `main` version. It focused on training and inference with text models for natural language tasks (text classification, summarization, language modeling, etc.).
 
-<div class="flex justify-center">
-  <img class="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/transformers-docs.png"/>
+<div className="flex justify-center">
+  <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/transformers-docs.png"/>
 </div>
 
 As transformer models increasingly became the [default architecture](https://x.com/karpathy/status/1468370605229547522), the docs expanded significantly to include new modalities and usage patterns. But new content was added incrementally without really considering how the audience and Transformers have evolved.
@@ -28,20 +28,20 @@ A redesign is necessary to make sense of this mess. The goal is to:
 
 ## The North Star [#the-north-star]
 
-AI moves fast and it's easy to lose sight of what Transformers is. You can interpret the library through a couple lenses.
+AI moves fast and it's easy to lose sight of what we think Transformers should offer. You can interpret the library through a couple lenses.
 
 - by modality (text, audio, vision, multimodal, video)
 - by use cases (chat, agents, text generation)
 - by API ([Pipeline](https://hf.co/documentation/transformers/main_classes/pipelines#transformers.Pipeline), [Trainer](https://hf.co/documentation/transformers/main_classes/trainer#transformers.Trainer), [generate](https://hf.co/documentation/transformers/main_classes/text_generation))
 
-None of these are wrong, but they're each a single facet of Transformers.
+None of these are wrong, but they're only single facets of Transformers.
 
 > The Transformers library is a library of pretrained models (mostly Transformer architectures but not only).
 > - Sylvain Gugger
 
-There can be new modalities, use cases, and APIs, but at the end of the day, Transformers is really a collection of pretrained models you can use for training or inference.
+There can be new modalities, use cases, and APIs, but at the end of the day, Transformers is really a collection of pretrained models for training or inference.
 
-This is the North Star that will guide the redesign.
+This is the North Star for guiding the redesign.
 
 ## A new audience [#a-new-audience]
 
@@ -66,9 +66,9 @@ Once developers have a basic understanding, they can progressively level up thei
 
 One of my first projects at Hugging Face aligned the docs with [Diátaxis](https://diataxis.fr/), a documentation approach based on user needs (learning, solving, understanding, reference).
 
-But somewhere along the way, I started using Diátaxis as a *plan* instead of a *guide*. I tried to force content to fit neatly into one of the 4 prescribed categories.
+Somewhere along the way, I started using Diátaxis as a *plan* instead of a *guide*. I tried to force content to fit neatly into one of the 4 prescribed categories.
 
-Rigidity prevented natural content structures from emerging and bloated the docs. Docs about one topic soon spanned several sections, because it was what the structure dictated, not because it made sense.
+Natural content structures were blocked from emerging and the docs grew bloated. Docs about one topic soon spanned several sections, because it was what the structure dictated, not because it made sense.
 
 It's okay if the structure is complex, but it's not okay if it's complex and not easy to use.
 
@@ -76,21 +76,21 @@ The redesign will allow the docs to grow organically according to the [North Sta
 
 ## Natively integrated content [#natively-integrated-content]
 
-<div class="flex justify-center">
-  <img class="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/ring_diagram.png"/>
+<div className="flex justify-center">
+  <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/ring_diagram.png"/>
 </div>
-<p class="text-xs">New content is layered progressively over the previous content instead of coexisting as a part of the overall docs.</p>
+<Caption>New content is layered progressively over the previous content instead of coexisting as a part of the overall docs.</Caption>
 
 Tree rings provide a climatological record of the past (drought, flood, wildfire, etc.). The docs also has its own tree rings that capture its evolution.
 
 1. **Not just text**: Transformer models are adapted for [computer vision](https://hf.co/docs/transformers/tasks/image_classification), [audio](https://hf.co/docs/transformers/tasks/asr), [multimodal](https://hf.co/docs/transformers/tasks/text-to-speech), and more.
 2. **Large language models (LLMs)**: Transformer models are scaled to billions of parameters, leading to new interaction types ([prompting](https://hf.co/docs/transformers//tasks/prompting) and [chat](https://hf.co/docs/transformers/conversations)). There are more docs about how to efficiently train LLMs, such as [parameter efficient finetuning (PEFT)](https://hf.co/docs/transformers/peft) methods, [distributed training](https://hf.co/docs/transformers/accelerate), and [data parallelism](https://hf.co/docs/transformers/perf_train_gpu_many).
-3. **Optimization**: Training or inference with LLMs can be a challenge unless you are [GPU Rich](https://semianalysis.com/2023/08/28/google-gemini-eats-the-world-gemini/#the-gpu-rich). So now, there is a ton of interest in how to democratize LLMs for the GPU Poor. There is more docs about [quantization](https://hf.co/docs/transformers/quantization/overview), [FlashAttention](https://hf.co/docs/transformers/llm_optims#flashattention-2), optimizing the [key-value cache](https://hf.co/docs/transformers/llm_tutorial_optimization#32-the-key-value-cache), [Low-Rank Adaptation (LoRA)](https://hf.co/docs/transformers/peft), and more.
+3. **Optimization**: Training or inference with LLMs can be a challenge unless you are [GPU Rich](https://semianalysis.com/2023/08/28/google-gemini-eats-the-world-gemini/#the-gpu-rich). So now, there is a ton of interest in how to democratize LLMs for the GPU Poor. There are more docs about [quantization](https://hf.co/docs/transformers/quantization/overview), [FlashAttention](https://hf.co/docs/transformers/llm_optims#flashattention-2), optimizing the [key-value cache](https://hf.co/docs/transformers/llm_tutorial_optimization#32-the-key-value-cache), [Low-Rank Adaptation (LoRA)](https://hf.co/docs/transformers/peft), and more.
 
 Each phase *incrementally* added new content to the docs, unbalancing and obscuring its previous parts. Content is sprawled over a greater surface, navigation is more complex.
 
-The redesign will help rebalance the overall DocX. Content will feel native and integrated rather than added on.
+The redesign will help rebalance the overall DocX. Content will be native and integrated rather than added on.
 
 ---
 
-<p class="text-sm">🤗 Shout out to [@evilpingwin](https://x.com/evilpingwin) for the feedback and motivation to redesign the docs.</p>
+<p className="text-sm">🤗 Shout out to [@evilpingwin](https://x.com/evilpingwin) for the feedback and motivation to redesign the docs.</p>

@@ -1,0 +1,82 @@
+export const metadata = {
+  title: 'Model docs design',
+  description: 'Model docs design',
+  openGraph: {
+    title: 'Model docs design',
+    description: 'Model docs design',
+    images: [{ url: '/og/model-docs-design' }]
+  }
+}
+
+The next milestone in the [Transformers redesign](/2024/redesigning-the-transformers-documentation) is to refresh and standardize the model API docs.
+
+As our [audience](/2024/redesigning-the-transformers-documentation#a-new-audience) shifts from researchers to developers, users are not as interested in understanding how the library works as they are in applying a model toward their products and use cases.
+
+With models like GPT becoming a household name, ***model docs*** are increasingly important for helping developers learn how to use a model. Some of the most popular models have thousands of pageviews every month.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/kIhb5pEo_j0?si=hYdjx1Q6ODZJYNic" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+<Caption>ChatGPT ad from Super Bowl 2025.</Caption>
+
+Each model doc should be:
+
+* a mini manual describing how to use it
+* written to maximize the clarity of how the model works in a *vacuum*
+
+## Initial design
+
+Traditionally, the model docs are loosely formatted and its structure varies from page to page.
+
+<Figure>
+  <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/llama-example.png" alt="Llama model doc" />
+  <Caption><a href="https://huggingface.co/docs/transformers/main/en/model_doc/llama">Llama</a> model doc.</Caption>
+</Figure>
+
+<div className="space-y-4">
+  <div className="flex gap-4">
+    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 text-sm font-medium font-mono">
+      1
+    </span>
+    <span className="flex items-center justify-center w-2 h-6 text-sm font-medium font-mono">
+      and
+    </span>
+    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-600 text-sm font-medium font-mono">
+      2
+    </span>
+    <span>cite the research paper and authors</span>
+  </div>
+  <div className="flex gap-4">
+    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-sky-100 text-sky-600 text-sm font-medium font-mono">
+      3
+    </span>
+    <span>includes usage tips and anything else the model contributor may want you to know</span>
+  </div>
+</div>
+
+Most of this information is not directly actionable to developers. It doesn't tell you how to use it for inference or finetune Llama.
+
+According to a [research study](https://www.nngroup.com/articles/f-shaped-pattern-reading-web-content/) by Nielsen Norman Group, users consume web content in a F-shaped pattern. This means you need to front-load the most important content in the beginning. While research attribution is important, it isn't the *most* important takeaway and it doesn't meet developer expectations.
+
+The current model docs assume the user is familiar with Transformers' usage patterns and APIs. From initializing the pretrained model weights, to preprocessing text, generating new text, and then decoding everything.
+
+We can't make this assumption anymore.
+
+Users are **eager** to start using a model - whether they're familiar with Transformers or not - and experience that ah-ha moment of AI working.
+
+This is where we need to meet the users expectations.
+
+## Hearthstone inspiration
+
+Hearthstone is a deck-building strategy card game. It is relatively easy to pick up because each card tells you everything you need to know about it.
+
+<Figure>
+  <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/deathwing.png" alt="Deathwing" />
+  <Caption>Deathwing, Dragonlord from the Whispers of the Old Gods set.</Caption>
+</Figure>
+
+At a glance, the mana cost, attack, and health immediately stand out. The text box describes the cards unique ability, and if you hover over the card, it'll tell you that Deathrattle is an ability that is triggered when the card is destroyed.
+
+There are many options for building a deck around the card, but it would add too much text if it also suggested how you could use it with other cards.
+
+Instead, each card only describes exactly how to use it in isolation. It is concise and compatible with the overall mechanics and rules of the game.
+
+Likewise, the model docs need to be entirely self-contained without overwhelming the user with all the intricacies of using Transformers.
