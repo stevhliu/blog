@@ -8,13 +8,13 @@ export const metadata = {
   }
 }
 
-<Callout emoji="✦">2/10/25 - Lightly edited to consolidate the redesign process and motivation into a single post.</Callout>
+<Callout emoji="✦">2/10/25 - Edited to consolidate the redesign process and motivation into a single post.</Callout>
 
 When I joined Hugging Face over 3 years ago, the Transformers docs were very different from the current `main` version. It focused on training and inference with text models for natural language tasks (text classification, summarization, language modeling, etc.).
 
-<div className="flex justify-center">
+<Figure>
   <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/transformers-docs.png"/>
-</div>
+</Figure>
 
 As transformer models increasingly became the [default architecture](https://x.com/karpathy/status/1468370605229547522), the docs expanded significantly to include new modalities and usage patterns. But new content was added incrementally without really considering how the audience and Transformers have evolved.
 
@@ -76,9 +76,9 @@ The redesign will allow the docs to grow organically according to the [North Sta
 
 ## Natively integrated content [#natively-integrated-content]
 
-<div className="flex justify-center">
+<Figure>
   <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/ring_diagram.png"/>
-</div>
+</Figure>
 <Caption>New content is layered progressively over the previous content instead of coexisting as a part of the overall docs.</Caption>
 
 Tree rings provide a climatological record of the past (drought, flood, wildfire, etc.). The docs also has its own tree rings that capture its evolution.
