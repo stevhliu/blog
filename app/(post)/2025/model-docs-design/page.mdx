@@ -17,11 +17,9 @@ And as models like GPT become a household name - some of the most popular models
 <iframe width="560" height="315" src="https://www.youtube.com/embed/kIhb5pEo_j0?si=hYdjx1Q6ODZJYNic" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
 <Caption>ChatGPT ad from Super Bowl 2025.</Caption>
 
-Each model doc should be a mini manual describing how to use it in isolation.
-
 ## Initial design
 
-Traditionally, the model docs are loosely formatted and it can vary from page to page.
+Traditionally, the model docs are loosely formatted and can vary from page to page.
 
 <Figure>
   <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/llama-example.png" alt="Llama model doc" />
@@ -66,7 +64,7 @@ For some design inspiration, I turned to Hearthstone, a deck-building strategy c
   <Caption>Deathwing, Dragonlord from the Whispers of the Old Gods set.</Caption>
 </Figure>
 
-At a glance, the <span className="text-blue-500 font-medium font-semibold">mana cost</span>, <span className="text-amber-500 font-medium font-semibold">attack</span>, and <span className="text-red-500 font-medium font-semibold">health</span> immediately stand out. Based on these values, you can intuit the games basic mechanics.
+At a glance, the <span className="text-blue-500 font-medium font-semibold">mana cost</span>, <span className="text-amber-500 font-medium font-semibold">attack</span>, and <span className="text-red-500 font-medium font-semibold">health</span> immediately stand out. Based on these values, you can intuit the basic mechanics.
 
 - You can only use a card if you have enough mana.
 - Each card has a certain attack power and health. They dictate what happens when it interacts with an opponents card.
@@ -75,14 +73,14 @@ The text box describes a cards ability. If it is a special ability - like **Deat
 
 The card only tells you *precisely* what you need to know to play or use it. Nothing more, nothing less.
 
-Every Hearthstone card follows this same design. This makes it easy to learn a new card because the design is consistent and you know what to expect. You spend *less* time on figuring out how it works and more time on how to build a deck around it.
+Every Hearthstone card follows this same design. This makes it easy to learn a new card because the design is consistent and you know what to expect. You spend *less* time figuring out how it works and more time on how to build a deck around it.
 
 ## The second phase
 
 The next model doc design will focus on getting a working model in the developers hands as fast as possible. Code examples will headline each model doc to deliver the most important information first.
 
-It will also focus on bringing a consistent layout to every model card. This allows users to easily hotswap models - if they're already familiar with an existing one - without having to be a Transformers expert.
+It will also focus on bringing a consistent layout to every model doc. This allows users to easily hotswap models - if they're already familiar with an existing one - without having to be a Transformers expert.
 
-Understanding how to generate text from the Llama model doc is applicable to generating text with Gemma and other large language models.
+Understanding how to generate text with Llama is applicable to generating text with Gemma and other large language models.
 
 Spend *less* time reading the docs and more time coding and building.
