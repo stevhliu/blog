@@ -10,16 +10,16 @@ export const metadata = {
 
 The next milestone in the [Transformers redesign](/2024/redesigning-the-transformers-documentation) is to refresh and standardize the model docs.
 
-As our [audience](/2024/redesigning-the-transformers-documentation#a-new-audience) shifts from researchers to developers, users are more interested in figuring out how to use a model compared to the research and technical details underlying it.
+As our [audience](/2024/redesigning-the-transformers-documentation#a-new-audience) shifts from researchers to developers, users are more interested in figuring out how to use a model compared to the underlying research and technical details.
 
-And as models like GPT become a household name - some of the most popular models have thousands of pageviews every month - **good model docs** are a very important resource for developers.
+And with models like GPT becoming a household name, **good model docs** - some of the most popular models have thousands of pageviews every month - are a very important resource for developers.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/kIhb5pEo_j0?si=hYdjx1Q6ODZJYNic" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
 <Caption>ChatGPT ad from Super Bowl 2025.</Caption>
 
 ## Initial design
 
-Traditionally, the model docs are loosely formatted and can vary from page to page.
+Traditionally, the model docs are loosely formatted and may vary from page to page.
 
 <Figure>
   <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/llama-example.png" alt="Llama model doc" />
@@ -40,40 +40,40 @@ Traditionally, the model docs are loosely formatted and can vary from page to pa
     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-sky-100 text-sky-600 text-sm font-medium font-semibold font-mono">
       3
     </span>
-    <span>provides instructions for converting the weights to the Transformers format</span>
+    <span>any usage instructions the contributor wants you to know</span>
   </div>
 </div>
 
-The initial doc design was for Transformers first adopters, mainly researchers. The first two paragraphs read like it's from an arXiv paper, which makes sense, because it's something researchers are comfortable with and accustomed to.
+The initial doc design is for Transformers first adopters who were mainly researchers. The first two paragraphs read like they're from an arXiv paper, which makes sense, because it's something researchers are comfortable with and accustomed to.
 
 The downside is that this type of content isn't as meaningful for developers.
 
 - It doesn't tell you how to inference or finetune with Llama.
 - It assumes users are familiar with Transformers usage patterns and APIs (initializing the pretrained model weights, preprocessing, generating, etc.).
 
-According to an [eyetracking research study](https://www.nngroup.com/articles/f-shaped-pattern-reading-web-content/) by Nielsen Norman Group, users consume web content in a F-shaped pattern. The first few words on the first few lines of a page receive the most focus.
+According to an [eyetracking research study](https://www.nngroup.com/articles/f-shaped-pattern-reading-web-content/) by Nielsen Norman Group, users consume web content in a F-shaped pattern. **The first few words on the first few lines of a page receive the most focus**.
 
 This means the model docs need to front-load the most important content in the beginning because users are **eager** to start using a model - whether they're familiar with Transformers or not - and experience that *whoaaaaa* moment of everything just working.
 
 ## Some Hearthstone inspiration
 
-For some design inspiration, I turned to Hearthstone, a deck-building strategy card game. It is easy to learn (but difficult to master) because every card tells you everything you need to know about it.
+While I was thinking about the next iteration of the model docs, I was inspired by [Hearthstone](https://hearthstone.blizzard.com/), a deck-building strategy card game. It is easy to learn (but difficult to master) because every card tells you everything you need to know about it.
 
 <Figure>
   <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/deathwing.png" alt="Deathwing" />
   <Caption>Deathwing, Dragonlord from the Whispers of the Old Gods set.</Caption>
 </Figure>
 
-At a glance, the <span className="text-blue-500 font-medium font-semibold">mana cost</span>, <span className="text-amber-500 font-medium font-semibold">attack</span>, and <span className="text-red-500 font-medium font-semibold">health</span> immediately stand out. Based on these values, you can intuit the basic mechanics.
+At a glance, the <span className="text-blue-500 font-medium font-semibold">mana cost</span>, <span className="text-amber-500 font-medium font-semibold">attack</span>, and <span className="text-red-500 font-medium font-semibold">health</span> immediately stand out. Based on these values, you can intuit the games basic mechanics.
 
 - You can only use a card if you have enough mana.
 - Each card has a certain attack power and health. They dictate what happens when it interacts with an opponents card.
 
 The text box describes a cards ability. If it is a special ability - like **Deathrattle** - hovering over the card triggers another text box describing its usage condition.
 
-The card only tells you *precisely* what you need to know to play or use it. Nothing more, nothing less.
+The card only tells you **precisely** what you need to know to play or use it. Nothing more, nothing less.
 
-Every Hearthstone card follows this same design. This makes it easy to learn a new card because the design is consistent and you know what to expect. You spend *less* time figuring out how it works and more time on how to build a deck around it.
+Every Hearthstone card follows this same design. This makes it easy to learn a new card because the design is consistent and you know what to expect. You spend **less** time figuring out how it works and more time on how to build a deck around it.
 
 ## The second phase
 
@@ -83,4 +83,4 @@ It will also focus on bringing a consistent layout to every model doc. This allo
 
 Understanding how to generate text with Llama is applicable to generating text with Gemma and other large language models.
 
-Spend *less* time reading the docs and more time coding and building.
+Spend **less** time reading the docs and more time coding and building.
