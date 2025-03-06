@@ -1,0 +1,104 @@
+export const metadata = {
+  title: 'The Hugging-Verse',
+  description: 'A quick guide to what Hugging Face is',
+  openGraph: {
+    title: 'The Hugging-Verse',
+    description: 'A quick guide to what Hugging Face is',
+    images: [{ url: '/og/hf-universe' }]
+  }
+}
+
+A question I often see is **what is Hugging Face**? The most common answer is usually some variant of "Hugging Face is the GitHub of machine learning".
+
+It is a good one-liner given the breadth of Hugging Face's quest to **enable collaborative machine learning (ML)**. However, it also hides the depth of what we do. The Hugging Face ecosystem, or Hugging-Verse, is large and it can often feel like we are doing too much without a strong focus.
+
+But I believe the Hugging-Verse needs to be extensive because we're pursuing such an ambitious quest.
+
+<Figure>
+  <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/hf-universe.png" alt="The Hugging-Verse" />
+  <Caption>Image generated from the <a href="https://huggingface.co/linoyts/huggy_flux_fal_lora?text=a+TOK+hugging+face+emoji,+a+NASA+spaceflight+mission+patch+of+a+cute+hugging+face+emoji+in+space">linoyts/huggy_flux_fal_lora</a> checkpoint fine-tuned on <a href="https://huggingface.co/Chunte">Chunte's</a> art.</Caption>
+</Figure>
+
+Think about games like Baldur's Gate 3. It is an enormous game you can easily spend 100+ hours on in a single playthrough. Alongside the main quest, there are over 50+ side quests that add a ton of richness, worldbuilding, and depth to the game.
+
+At Hugging Face, the main libraries and Hub platform advance the main quest. All the other libraries, research projects, courses, tools and services are side quests that enrich the Hugging-Verse.
+
+It can be overwhelming though if you're new, so here is my high-level walkthrough.
+
+<Callout emoji="✦">If you only take one thing away from this post, remember, side quests are *optional*. You don't need to complete them. Focus on a main library like Transformers and using the Hub at first if you aren't sure where to start.</Callout>
+
+## Libraries
+
+The Hugging-Verse contains many libraries related to nearly every aspect of ML.
+
+The main ones, Transformers and Diffusers, offer access to pretrained models for inference and fine-tuning. They're generalist libraries that're able to do a little bit of everything.
+
+Specialist or side libraries focus on specific ML topics such as:
+
+- distributed training (Accelerate, picotron, nanotron)
+- serving large language models in production (Text Generation Inference)
+- evaluation (Lighteval, Leaderboards)
+- on-device models (Transformers.js, Optimum)
+
+Where you start in the Hugging-Verse depends on what you're trying to do. There aren't specific leveling paths. You don't need to learn one library first and then progress to the next one.
+
+If you're just getting started in ML, focus on Transformers. Learn the side libraries on the go or as needed.
+
+If you're interested in a specific topic, like scaling training for large language models, then focus on libraries like Accelerate, picotron, and nanotron.
+
+Browse the table below to see what libraries are available.
+
+<iframe
+  src="https://huggingface.co/datasets/stevhliu/hf-libraries/embed/viewer/main/train"
+  width="100%"
+  height="500px"
+></iframe>
+
+## Hub
+
+The [Hub](https://hf.co/) is the most visible part of Hugging Face. It is a Git-based platform for anyone interested in ML to access or share models, datasets, and Spaces. Every public repository provides free storage for your ML artifacts. Social features like [posts](https://huggingface.co/?post=true), [articles](https://huggingface.co/new-blog), and the Community tab enable open collaboration and discussion.
+
+[Model](https://huggingface.co/models) repositories include a widget to run inference with a model inside your browser. The widget is powered by the [Serverless Inference API](https://huggingface.co/docs/api-inference/index), but it also supports [other inference providers](https://huggingface.co/blog/inference-providers) like Replicate and fal.
+
+[Dataset](https://huggingface.co/datasets) repositories have a [Dataset Viewer](https://huggingface.co/docs/hub/datasets-viewer) that make it easy to preview a datasets contents. Explore a dataset in more detail with the [Data Studio](https://huggingface.co/docs/hub/datasets-viewer) feature, allowing you to run SQL queries (or ask AI to craft a SQL query for you) on the dataset, also directly in the browser.
+
+<Tweet
+    id="1894432966077468955"
+/>
+
+[Spaces](https://huggingface.co/spaces) provide a scaffold to create and deploy ML apps with Gradio, Streamlit, HTML, and even Docker containers. A free tier Space runs on a basic 16GB CPU. Upgrade to more powerful GPUs and persistent storage if your app needs it. PRO subscribers have access to [ZeroGPU](https://huggingface.co/docs/hub/spaces-zerogpu), a shared cluster of A100 GPUs that are automatically allocated to a Space to complete a workload and then released to the next Space.
+
+<Figure>
+  <img className="rounded-xl" src="https://cdn-uploads.huggingface.co/production/uploads/5f17f0a0925b9863e28ad517/naVZI-v41zNxmGlhEhGDJ.gif" alt="ZeroGPU" />
+</Figure>
+
+## HuggingChat
+
+[HuggingChat](https://huggingface.co/chat/) is an open version of ChatGPT, providing access to some of the latest models like DeepSeek-R1. You can modify the system prompt of each model and create or use assistants.
+
+HuggingChat is powered by [Text Generation Inference](https://huggingface.co/docs/text-generation-inference), and it is also available on [macOS](https://github.com/huggingface/chat-macOS) for running language models locally.
+
+## Research
+
+Hugging Face is also engaged in research projects that empower the entire ML ecosystem. The goal isn't necessarily to train the best models. Instead, we're trying to create new and interesting research that benefits everyone.
+
+Collaboration >>> competition.
+
+As an example, the recently released [The Ultra-Scale Playbook](http://hf.co/spaces/nanotron/ultrascale-playbook) is a culmination of everything the research team has learned about distributed training. It is freely available to anyone who is interested in scaling training of large language models to thousands of GPUs.
+
+<Tweet
+    id="1892273133547078036"
+/>
+
+Some other research projects include:
+
+- [open-r1](https://huggingface.co/blog/open-r1): fully reproduce the DeepSeek-R1 model, an open and powerful reasoning model comparable to the OpenAI o-series models.
+- [SmolLM](https://huggingface.co/HuggingFaceTB): release high-quality pretraining datasets (FineWeb, Cosmopedia) and small language and vision language models.
+
+These types of projects enable other researchers to build on top of ours and push the field forward together.
+
+## Courses
+
+Educational content, such as the courses and cookbook, at [hf.co/learn](hf.co/learn) provide an accessible starting point for learning ML. A large part of our quest hinges on lowering the barrier for everyone to learn ML and convert them into active participants.
+
+There are several courses - agents, reinforcement learning, diffusion, etc. - available, but if you're absolutely new to ML, start with the [NLP course](https://huggingface.co/learn/nlp-course). Otherwise, just pick a topic you're interested in to get started!

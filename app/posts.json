@@ -1,6 +1,11 @@
 {
   "posts": [
     {
+      "id": "hf-universe",
+      "date": "Mar 6, 2025",
+      "title": "The Hugging-Verse"
+    },
+    {
       "id": "model-docs-design",
       "date": "Feb 20, 2025",
       "title": "Model docs design"
