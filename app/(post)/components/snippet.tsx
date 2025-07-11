@@ -19,7 +19,11 @@ export async function Snippet({
   language = "python",
   theme = "catppuccin-mocha",
 }: SnippetProps) {
-  const html = await highlightCode(children.trim(), language, theme);
+  const html = await highlightCode(
+    typeof children === "string" ? children.trim() : "",
+    language,
+    theme
+  );
 
   return (
     <div className="my-6">
