@@ -1,6 +1,11 @@
 {
   "posts": [
     {
+      "id": "sonoma-in-ai",
+      "date": "July 11, 2025",
+      "title": "Big parameters, small GPUs"
+    },
+    {
       "id": "hf-universe",
       "date": "Mar 10, 2025",
       "title": "Welcome to the Hugging-Verse"

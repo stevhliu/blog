@@ -1,24 +1,35 @@
-import { Caption } from "./caption";
+import { codeToHtml } from 'shiki';
 
-export const Snippet = ({ children, scroll = true, caption = null }) => (
-  <div className="my-6">
-    <pre
-      className={`
-      p-4
-      text-sm
-      bg-gray-800 text-white
-      dark:bg-[#222] dark:text-gray-300
+export async function highlightCode(
+  code: string,
+  lang: string = 'python',
+  theme: string
+) {
+  return await codeToHtml(code, { lang, theme });
+}
 
-      ${
-        scroll
-          ? "overflow-scroll"
-          : "whitespace-pre-wrap break-all overflow-hidden"
-      }
-    `}
-    >
-      <code>{children}</code>
-    </pre>
+type SnippetProps = {
+  children: string;
+  language?: string;
+  theme?: string;
+};
 
-    {caption != null ? <Caption>{caption}</Caption> : null}
-  </div>
-);
+export async function Snippet({
+  children,
+  language = "python",
+  theme = "catppuccin-mocha",
+}: SnippetProps) {
+  const html = await highlightCode(children.trim(), language, theme);
+
+  return (
+    <div className="my-6">
+      <div className="bg-white dark:bg-[#232334] rounded-lg">
+        <div
+          className="text-xs md:text-sm"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      </div>
+    </div>
+  );
+}
+

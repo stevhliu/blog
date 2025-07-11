@@ -28,3 +28,10 @@
     }
   }
 }
+
+/* Add generous padding and rounding inside all Shiki code blocks */
+pre.shiki {
+  padding: 1rem 1rem;
+  border-radius: 0.75rem;
+  margin: 0;
+}
