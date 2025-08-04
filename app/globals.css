@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    font-family: "Inter", sans-serif;
+    font-family: "Geist Sans", sans-serif;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     -webkit-tap-highlight-color: transparent;
     color-scheme: light;
@@ -24,8 +24,13 @@
 
   @supports (font-variation-settings: normal) {
     :root {
-      font-family: "Inter var", sans-serif;
+      font-family: "Geist Sans", sans-serif;
     }
+  }
+
+  /* Only apply Geist Mono to specific monospace contexts */
+  .font-mono, pre, pre code {
+    font-family: "Geist Mono", monospace;
   }
 }
 
@@ -34,4 +39,5 @@ pre.shiki {
   padding: 1rem 1rem;
   border-radius: 0.75rem;
   margin: 0;
+  font-family: "Geist Mono", monospace;
 }

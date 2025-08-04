@@ -1,0 +1,146 @@
+export const metadata = {
+  title: 'Attention please',
+  description: 'An overview of different attention variants',
+  openGraph: {
+    title: 'Attention please',
+    description: 'An overview of different attention variants',
+    images: [{ url: '/og/attention-please' }]
+  }
+}
+
+<FloatingTOC
+  items={[
+    { text: "self-attention", href: "#self-attention" },
+    { text: "causal self-attention", href: "#causal-self-attention" },
+    { text: "multi-head attention", href: "#multi-head-attention" },
+    { text: "multi-query attention", href: "#multi-query-attention" },
+    { text: "grouped-query attention", href: "#grouped-query-attention" },
+    { text: "resources", href: "#resources" }
+  ]}
+/>
+
+It's interesting that **attention** is something that can be quantified. Like, I don't have a way of measuring how I personally pay attention, but I imagine it's very caveman-like.
+
+If you told me to take out the trash on Monday night, my brain would probably compile it to something like "trash, Monday night". Just the essential keywords.
+
+But for transformer models, attention is calculable.
+
+> An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.
+> - [Attention Is All You Need](https://huggingface.co/papers/1706.03762)
+
+This post tries to very simply and very plainly explain how the original self-attention works while eschewing as much jargon as possible.
+
+## self-attention
+
+Self-attention (scaled dot-product attention) computes how much each word in a sequence should "pay attention" to every other word in that same sequence. It's what makes transformers contextually aware.
+
+You need 3 matrices to compute self-attention. These matrices are created by multiplying the <HoverWord 
+  word="word embeddings"
+  description="Vectors of numbers that represent words in a way that captures meaning and relationships."
+/> (x) by 3 <HoverWord
+  word="weight matrices"
+  description="Learnable parameters that are optimized during training."
+/>
+(W<sub>k</sub>, W<sub>q</sub>, W<sub>v</sub>).
+
+- Query (Q) is compared to all the K's (including itself) to calculate how much attention to pay to each word.
+- Key (K) is multiplied by Q to produce the attention scores for each word. When you multiply two matrices, this is also known as a dot product. A dot product compares how similar two vectors are. In self-attention, this compares how similar two tokens are and thus how much attention to pay.
+- Value (V) weights each word with their attention scores to determine what information every other word offers.
+
+Before multiplying V by the attention scores, you need to *scale* the attention scores by dividing by the square root of the dimension of the matrix. For example, if the matrix dimension is 64, you would divide the attention scores by 8. Scaling prevents the attention scores from becoming too large or too small.
+
+It also prevents the <HoverWord
+  word="softmax"
+  description="A function that exponentiates a value and divides by the sum of all the exponentiated values."
+/> from being overwhelmed by any one word. The softmax converts the attention scores into probabilities that add up to 1.
+
+Try calculating the attention score for the word `Fear` by hand for the following sequence to really get a feel for how it works.
+
+<Table 
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "[0.2, 0.1, 0.8]", "[0.3, 0.5, 0.2]", "[0.1, 0.7, 0.4]"],
+    ["is", "[0.5, 0.2, 0.3]", "[0.1, 0.4, 0.6]", "[0.8, 0.1, 0.2]"],
+  ]}
+  className="my-8"
+/>
+
+<Collapsible trigger="Show calculations">
+  1. Multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
+
+     `[0.2, 0.1, 0.8] * [0.3, 0.5, 0.2]` = `0.2*0.3 + 0.1*0.5 + 0.8*0.2` = `0.31`
+
+     For the word `Fear`, the attention score is `0.31`.
+
+     `[0.5, 0.2, 0.3] * [0.1, 0.4, 0.6]` = `0.5*0.1 + 0.2*0.4 + 0.3*0.6` = `0.38`
+
+     For the word `is`, the attention score is `0.38`.
+
+  2. Scale the attention scores by dividing by the square root of 3 (the vector dimension).
+
+     `[0.31 / 1.732, 0.38 / 1.732]` = `[0.179, 0.219]`
+
+  3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
+
+     `[e^0.179 / (e^0.179 + e^0.219), e^0.219 / (e^0.179 + e^0.219)]` = `[0.456, 0.544]`
+
+  4. Weight V by the attention scores.
+
+      `0.456 * [0.1, 0.7, 0.4]` = `[0.0456, 0.3192, 0.1824]`
+
+      `0.544 * [0.8, 0.1, 0.2]` = `[0.4352, 0.0544, 0.1088]`
+
+  5. Add the weighted values together.
+
+      `[0.0456 + 0.4352, 0.3192 + 0.0544, 0.1824 + 0.1088]` = `[0.4808, 0.3736, 0.2912]`
+
+  This is the final self-attention output for `Fear`.
+</Collapsible>
+
+## causal self-attention
+
+Causal self-attention is used in decoder models like GPT and other modern large language models. These models predict the next word in a sequence so it is important to prevent the model from seeing the next word in the sequence.
+
+In contrast, bidirectional attention models like BERT has full visibility of the entire sequence.
+
+A mask blocks attention to future words. The mask is implemented as `-inf` to words that should be blocked. This way, when softmax is applied, the `-inf` scores becomes ~0.
+
+Try calculating the attention score for the word `is` by hand for the following sequence.
+
+<Table 
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "[0.2, 0.1, 0.8]", "[0.3, 0.5, 0.2]", "[0.1, 0.7, 0.4]"],
+    ["is", "[0.5, 0.2, 0.3]", "[0.1, 0.4, 0.6]", "[0.8, 0.1, 0.2]"],
+    ["the", "[0.1, 0.6, 0.3]", "[0.4, 0.2, 0.5]", "[0.2, 0.9, 0.1]"],
+  ]}
+  className="my-8"
+/>
+
+<Collapsible trigger="Show calculations">
+1. Multiply Q<sub>is</sub> by K for every word in the sequence to get the attention score.
+
+    `[0.5, 0.2, 0.3] * [0.3, 0.5, 0.2]` = `0.5*0.3 + 0.2*0.5 + 0.3*0.2` = `0.31`
+
+    `[0.5, 0.2, 0.3] * [0.1, 0.4, 0.6]` = `0.5*0.1 + 0.2*0.4 + 0.3*0.6` = `0.38`
+
+    `[0.5, 0.2, 0.3] * [0.4, 0.2, 0.5]` = `0.5*0.4 + 0.2*0.2 + 0.3*0.5` = `0.41`
+
+    The attention score is `[0.31, 0.38, 0.41]`.
+
+2. Set `0.41` to `-inf` to block attention to the future word (`the`).
+
+    `[0.31, 0.38, -inf]`
+    
+    The rest of the calculation is the same as self-attention.
+</Collapsible>
+
+## multi-head attention
+
+## multi-query attention
+
+## grouped-query attention
+
+## resources
+
+- [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html) and [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) blog posts

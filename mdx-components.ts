@@ -17,6 +17,11 @@ import { Callout } from "app/(post)/components/callout";
 import { YouTube } from "app/(post)/components/youtube";
 import { Ref, FootNotes, FootNote } from "app/(post)/components/footnotes";
 import { Blockquote as blockquote } from "app/(post)/components/blockquote";
+import { TOC } from "app/(post)/components/toc";
+import { FloatingTOC } from "app/(post)/components/floating-toc";
+import { HoverWord } from "app/(post)/components/hover-word";
+import { Table } from "app/(post)/components/table";
+import { Collapsible } from "app/(post)/components/collapsible";
 
 export function useMDXComponents(components: {
   [component: string]: React.ComponentType;
@@ -46,5 +51,10 @@ export function useMDXComponents(components: {
     Ref,
     FootNotes,
     FootNote,
+    TOC,
+    FloatingTOC,
+    HoverWord,
+    Table,
+    Collapsible,
   };
 }

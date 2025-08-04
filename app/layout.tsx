@@ -1,13 +1,15 @@
 import "./globals.css";
 
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { themeEffect } from "./theme-effect";
 import { Analytics } from "./analytics";
 import { Header } from "./header";
 import { Footer } from "./footer";
 import { doge } from "./doge";
 
-const inter = Inter({ subsets: ["latin"] });
+const geistSans = GeistSans;
+const geistMono = GeistMono;
 
 export const metadata = {
   title: "Steven Liu's blog",
@@ -41,7 +43,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.className} antialiased`}
+      className={`${geistSans.className} antialiased`}
       suppressHydrationWarning={true}
     >
       <head>

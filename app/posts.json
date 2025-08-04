@@ -1,6 +1,11 @@
 {
   "posts": [
     {
+      "id": "attention-please",
+      "date": "Aug 15, 2025",
+      "title": "Attention please"
+    },
+    {
       "id": "sonoma-in-ai",
       "date": "July 11, 2025",
       "title": "Big parameters, small GPUs"

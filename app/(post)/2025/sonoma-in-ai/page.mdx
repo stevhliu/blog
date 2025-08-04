@@ -16,17 +16,19 @@ This post recaps and summarizes the talk with some additional details and code e
   <img className="rounded-xl" src="https://chunte-hfba.static.hf.space/images/Outlined%20Huggies/GPU%20Huggy.png" alt="Hugging Face GPU" />
 </Figure>
 
-## table of contents
-
-- [memory maths](#memory-maths)
-- [Big Model Inference](#big-model-inference)
-- [torch_dtype](#torch_dtype)
-- [quantization](#quantization)
-- [offloading](#offloading)
-- [tensor parallelism](#tensor-parallelism)
-- [device_map](#device_map)
-- [kv cache](#kv-cache)
-- [resources](#resources)
+<FloatingTOC
+  items={[
+    { text: "memory maths", href: "#memory-maths" },
+    { text: "Big Model Inference", href: "#big-model-inference" },
+    { text: "torch_dtype", href: "#torch_dtype" },
+    { text: "quantization", href: "#quantization" },
+    { text: "offloading", href: "#offloading" },
+    { text: "tensor parallelism", href: "#tensor-parallelism" },
+    { text: "device_map", href: "#device_map" },
+    { text: "kv cache", href: "#kv-cache" },
+    { text: "resources", href: "#resources" }
+  ]}
+/>
 
 ## memory maths [#memory-maths]
 

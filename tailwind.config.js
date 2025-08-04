@@ -5,7 +5,11 @@ module.exports = {
   darkMode: "class",
   content: ["./app/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        mono: ["Geist Mono", "monospace"],
+      },
+    },
   },
   plugins: [
     plugin(function ({ addVariant }) {
