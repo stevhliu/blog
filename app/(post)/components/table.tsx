@@ -6,24 +6,24 @@ interface TableProps {
   headers: string[];
   data: string[][];
   className?: string;
+  caption?: string;
+  title?: string;
 }
 
 const HOVER_COLORS = [
-  'bg-red-50 dark:bg-red-950/20',
-  'bg-orange-50 dark:bg-orange-950/20',
-  'bg-yellow-50 dark:bg-yellow-950/20',
-  'bg-green-50 dark:bg-green-950/20',
-  'bg-blue-50 dark:bg-blue-950/20',
-  'bg-indigo-50 dark:bg-indigo-950/20',
-  'bg-purple-50 dark:bg-purple-950/20',
-  'bg-pink-50 dark:bg-pink-950/20',
-  'bg-teal-50 dark:bg-teal-950/20',
-  'bg-cyan-50 dark:bg-cyan-950/20',
+  'bg-green-100 dark:bg-green-800/30',
+  'bg-blue-100 dark:bg-blue-800/30',
+  'bg-purple-100 dark:bg-purple-800/30',
+  'bg-pink-100 dark:bg-pink-800/30',
+  'bg-orange-100 dark:bg-orange-800/30',
+  'bg-teal-100 dark:bg-teal-800/30',
+  'bg-indigo-100 dark:bg-indigo-800/30',
+  'bg-rose-100 dark:bg-rose-800/30',
 ] as const;
 
 type HoverColor = typeof HOVER_COLORS[number];
 
-export function Table({ headers, data, className = "" }: TableProps) {
+export function Table({ headers, data, className = "", caption, title }: TableProps) {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [hoverColor, setHoverColor] = useState<HoverColor>(HOVER_COLORS[0]);
 
@@ -42,7 +42,15 @@ export function Table({ headers, data, className = "" }: TableProps) {
 
   return (
     <div className={`w-full overflow-auto ${className}`}>
+      {title && (
+        <h3 className="mb-4 text-lg font-semibold text-center">{title}</h3>
+      )}
       <table className="w-full caption-bottom text-sm">
+        {caption && (
+          <caption className="mt-4 text-sm text-muted-foreground">
+            {caption}
+          </caption>
+        )}
         <thead className="[&_tr]:border-b">
           <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
             {headers.map((header, index) => (

@@ -30,7 +30,7 @@ But for transformer models, attention is calculable.
 
 This post tries to very simply and very plainly explain how the original self-attention works while eschewing as much jargon as possible.
 
-## self-attention
+## self-attention [#self-attention]
 
 Self-attention (scaled dot-product attention) computes how much each word in a sequence should "pay attention" to every other word in that same sequence. It's what makes transformers contextually aware.
 
@@ -43,18 +43,18 @@ You need 3 matrices to compute self-attention. These matrices are created by mul
 />
 (W<sub>k</sub>, W<sub>q</sub>, W<sub>v</sub>).
 
-- Query (Q) is compared to all the K's (including itself) to calculate how much attention to pay to each word.
-- Key (K) is multiplied by Q to produce the attention scores for each word. When you multiply two matrices, this is also known as a dot product. A dot product compares how similar two vectors are. In self-attention, this compares how similar two tokens are and thus how much attention to pay.
-- Value (V) weights each word with their attention scores to determine what information every other word offers.
+- Query (Q) is compared to all the Ks (including itself) to calculate how much attention to pay to each word. Q is the information you're looking for.
+- Key (K) is multiplied by Q to produce the attention scores for each word. When you multiply two matrices, this is also known as a dot product. A dot product compares how similar two vectors are. In self-attention, this compares how similar two tokens are and thus how much attention to pay. K is the information a word contains.
+- Value (V) weights each word with their attention scores to determine what information every other word offers. V is the information you get from each word.
 
-Before multiplying V by the attention scores, you need to *scale* the attention scores by dividing by the square root of the dimension of the matrix. For example, if the matrix dimension is 64, you would divide the attention scores by 8. Scaling prevents the attention scores from becoming too large or too small.
+Before multiplying V by the attention scores, you need to *scale* the attention scores by dividing by the square root of the dimension of the matrix. For example, if the matrix dimension is 64, divide the attention scores by 8. Scaling prevents the attention scores from becoming too large or too small.
 
 It also prevents the <HoverWord
   word="softmax"
   description="A function that exponentiates a value and divides by the sum of all the exponentiated values."
 /> from being overwhelmed by any one word. The softmax converts the attention scores into probabilities that add up to 1.
 
-Try calculating the attention score for the word `Fear` by hand for the following sequence to really get a feel for how it works.
+Try calculating the self-attention score for the word `Fear` by hand for the following sequence to really get a feel for how it works.
 
 <Table 
   headers={["Word", "Q", "K", "V"]}
@@ -68,44 +68,40 @@ Try calculating the attention score for the word `Fear` by hand for the followin
 <Collapsible trigger="Show calculations">
   1. Multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
 
-     `[0.2, 0.1, 0.8] * [0.3, 0.5, 0.2]` = `0.2*0.3 + 0.1*0.5 + 0.8*0.2` = `0.31`
+     `[0.2, 0.1, 0.8]*[0.3, 0.5, 0.2]` = `0.2*0.3 + 0.1*0.5 + 0.8*0.2` = `0.31`
 
-     For the word `Fear`, the attention score is `0.31`.
-
-     `[0.5, 0.2, 0.3] * [0.1, 0.4, 0.6]` = `0.5*0.1 + 0.2*0.4 + 0.3*0.6` = `0.38`
-
-     For the word `is`, the attention score is `0.38`.
+     `[0.2, 0.1, 0.8]*[0.1, 0.4, 0.6]` = `0.2*0.1 + 0.1*0.4 + 0.8*0.6` = `0.54`
 
   2. Scale the attention scores by dividing by the square root of 3 (the vector dimension).
 
-     `[0.31 / 1.732, 0.38 / 1.732]` = `[0.179, 0.219]`
+     `[0.31/1.732, 0.54/1.732]` = `[0.179, 0.311]`
 
   3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
 
-     `[e^0.179 / (e^0.179 + e^0.219), e^0.219 / (e^0.179 + e^0.219)]` = `[0.456, 0.544]`
+     `[e^0.179 / (e^0.179 + e^0.311), e^0.311 / (e^0.179 + e^0.311)]` = `[0.467, 0.532]`
 
   4. Weight V by the attention scores.
 
-      `0.456 * [0.1, 0.7, 0.4]` = `[0.0456, 0.3192, 0.1824]`
+      `0.467*[0.1, 0.7, 0.4]` = `[0.0467, 0.3269, 0.1868]`
 
-      `0.544 * [0.8, 0.1, 0.2]` = `[0.4352, 0.0544, 0.1088]`
+      `0.532*[0.8, 0.1, 0.2]` = `[0.4256, 0.0532, 0.1064]`
 
   5. Add the weighted values together.
 
-      `[0.0456 + 0.4352, 0.3192 + 0.0544, 0.1824 + 0.1088]` = `[0.4808, 0.3736, 0.2912]`
+      `[0.0467+0.4256, 0.3269+0.0532, 0.1868+0.1064]` = `[0.4723, 0.3801, 0.2932]`
 
   This is the final self-attention output for `Fear`.
 </Collapsible>
 
-## causal self-attention
+## causal self-attention [#causal-self-attention]
 
 Causal self-attention is used in decoder models like GPT and other modern large language models. These models predict the next word in a sequence so it is important to prevent the model from seeing the next word in the sequence.
 
 In contrast, bidirectional attention models like BERT has full visibility of the entire sequence.
 
-A mask blocks attention to future words. The mask is implemented as `-inf` to words that should be blocked. This way, when softmax is applied, the `-inf` scores becomes ~0.
+A mask blocks attention to future words. The mask is implemented as `-inf` for words that should be blocked. This way, when softmax is applied, the `-inf` scores becomes ~0.
 
-Try calculating the attention score for the word `is` by hand for the following sequence.
+Try calculating the causal self-attention score for the word `is` by hand for the following sequence.
 
 <Table 
   headers={["Word", "Q", "K", "V"]}
@@ -120,27 +116,394 @@ Try calculating the attention score for the word `is` by hand for the following 
 <Collapsible trigger="Show calculations">
 1. Multiply Q<sub>is</sub> by K for every word in the sequence to get the attention score.
 
-    `[0.5, 0.2, 0.3] * [0.3, 0.5, 0.2]` = `0.5*0.3 + 0.2*0.5 + 0.3*0.2` = `0.31`
+    `[0.5, 0.2, 0.3]*[0.3, 0.5, 0.2]` = `0.5*0.3+0.2*0.5+0.3*0.2` = `0.31`
 
-    `[0.5, 0.2, 0.3] * [0.1, 0.4, 0.6]` = `0.5*0.1 + 0.2*0.4 + 0.3*0.6` = `0.38`
+    `[0.5, 0.2, 0.3]*[0.1, 0.4, 0.6]` = `0.5*0.1+0.2*0.4+0.3*0.6` = `0.38`
 
-    `[0.5, 0.2, 0.3] * [0.4, 0.2, 0.5]` = `0.5*0.4 + 0.2*0.2 + 0.3*0.5` = `0.41`
+    `[0.5, 0.2, 0.3]*[0.4, 0.2, 0.5]` = `0.5*0.4+0.2*0.2+0.3*0.5` = `0.41`
 
     The attention score is `[0.31, 0.38, 0.41]`.
 
-2. Set `0.41` to `-inf` to block attention to the future word (`the`).
+2. Scale the attention scores by dividing by the square root of 3 (the vector dimension).
 
-    `[0.31, 0.38, -inf]`
+    `[0.31/1.732, 0.38/1.732, 0.41/1.732]` = `[0.179, 0.219, 0.237]`
+
+3. Set `0.237` to `-inf` to block attention to the future word (`the`).
+
+    `[0.179, 0.3219, -inf]`
     
     The rest of the calculation is the same as self-attention.
 </Collapsible>
 
-## multi-head attention
+## multi-head attention [#multi-head-attention]
 
-## multi-query attention
+The original self-attention can be considered single-head attention. Multi-head attention (MHA) adds more heads to increase model capacity and learn other patterns (grammar, repeated words, track long-distance dependencies, etc.).
 
-## grouped-query attention
+The calculations are the same as self-attention, but you split the embedding size by the number of heads. Each head independently computes scaled dot-product attention, the outputs are concatenated, and multipled by a weight matrix to combine all the information.
 
-## resources
+Models like [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) use MHA.
+
+Try calculating the multi-head attention score for the word `Fear` by hand for the following sequence.
+
+<Table 
+  title="Head 1"
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "2.0", "2.0", "2.0"],
+    ["is", "3.0", "3.0", "3.0"],
+  ]}
+  className="my-8"
+/>
+
+<Table 
+  title="Head 2"
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "4.0", "1.0", "3.0"],
+    ["is", "6.0", "1.5", "4.5"],
+  ]}
+  className="my-8"
+/>
+
+<Collapsible trigger="Show calculations">
+
+1. For both heads, multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+
+    `[2.0*2.0, 2.0*3.0]` = `[4.0, 6.0]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
+
+    `[4.0*1.0, 4.0*1.5]` = `[4.0, 6.0]`
+
+    </div>
+    </div>
+
+2. Scale the attention scores of each head by dividing by the square root of 2 (the vector dimension).
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+
+    `[4.0/1.414, 6.0/1.414]` = `[2.828, 4.243]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
+
+    `[4.0/1.414, 6.0/1.414]` = `[2.828, 4.243]`
+
+    </div>
+    </div>
+
+3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+
+    `[e^2.828 / (e^2.828 + e^4.243), e^4.243 / (e^2.828 + e^4.243)]` = `[0.195, 0.804]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
+
+    `[e^2.828 / (e^2.828 + e^4.243), e^4.243 / (e^2.828 + e^4.243)]` = `[0.195, 0.804]`
+
+    </div>
+    </div>
+
+3. Weight V by the attention scores.
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+
+    `0.195*2.0`+`0.804*3.0` = `2.802`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
+
+    `0.195*3.0`+`0.804*4.5` = `4.203`
+
+    </div>
+    </div>
+
+4. Concatenate the outputs of each head and multiply by a transposed weight matrix (Wᵀ) to combine the information.
+
+    `[2.802, 4.203]*[1.0, 1.0]ᵀ` = `4.203`
+
+This is the final multi-head attention output for `Fear`.
+
+</Collapsible>
+
+## multi-query attention [#multi-query-attention]
+
+[Multi-query attention](https://huggingface.co/papers/1911.02150) (MQA) is the same as MHA except all Qs share the same K and V.
+
+MQA has the advantage of being more memory efficient and faster at decoding. Each head doesn't need to store its own K and V. This makes an especially big difference for really long sequences. Models like [Gemma](https://huggingface.co/google/gemma-2b) use MQA.
+
+Try calculating the multi-query attention score for the word `Fear` by hand for the following sequence.
+
+<Table 
+  title="Head 1"
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "2.0", "1.0", "3.0"],
+    ["is", "3.0", "1.5", "4.5"],
+  ]}
+  className="my-8"
+/>
+
+<Table 
+  title="Head 2"
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "4.0", "1.0", "3.0"],
+    ["is", "6.0", "1.5", "4.5"],
+  ]}
+  className="my-8"
+/>
+
+<Collapsible trigger="Show calculations">
+
+1. For both heads, multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
+  
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+
+    `[2.0*1.0, 2.0*1.5]` = `[2.0, 3.0]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
+
+    `[4.0*1.0, 6.0*1.5]` = `[4.0, 9.0]`
+    </div>
+    </div>
+
+2. Scale the attention scores of each head by dividing by the square root of 2 (the vector dimension).
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+
+    `[2.0/1.414, 3.0/1.414]` = `[1.414, 2.121]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
+
+    `[4.0/1.414, 9.0/1.414]` = `[2.828, 6.364]`
+
+    </div>
+    </div>
+
+3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+
+    `[e^1.414 / (e^1.414 + e^2.121), e^2.121 / (e^1.414 + e^2.121)]` = `[0.33, 0.67]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
+
+    `[e^2.828 / (e^2.828 + e^6.364), e^6.364 / (e^2.828 + e^6.364)]` = `[0.195, 0.971]`
+
+    </div>
+    </div>
+
+4. Weight V by the attention scores.
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+
+    `0.33*3.0`+`0.67*4.5` = `4.01`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
+
+    `0.195*3.0`+`0.971*4.5` = `4.95`
+
+    </div>
+    </div>
+
+5. Concatenate the outputs of each head and multiply by a weight matrix to combine the information.
+
+    `[4.01, 4.95]*[[0.5, 1.0], [1.5, 1.0]]` = `[9.43, 8.96]`
+
+This is the final multi-query attention output for `Fear`.
+
+</Collapsible>
+
+## grouped-query attention [#grouped-query-attention]
+
+[Grouped-query attention](https://huggingface.co/papers/2305.13245) (GQA) is similar to MHA and MQA except each *group* of Qs share the same K and V. A different group of Qs share a different set of K and V.
+
+GQA takes the best of both MHA and MQA. It's faster than MHA because it still has fewer Ks and Vs and it's more expressive than MQA because it has more Qs.
+
+Models like [Llama 3](https://huggingface.co/meta-llama/Meta-Llama-3-8B) and [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) use GQA.
+
+Try calculating the grouped-query attention score for the word `Fear` by hand for the following sequence. Head 0 and 1 make up Group 0 and Head 2 and 3 make up Group 1.
+
+<Table
+  title="Group 0, Head 0"
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "2.0", "1.0", "2.0"],
+    ["is", "3.0", "1.5", "3.0"],
+  ]}
+  className="my-8"
+/>
+
+<Table
+  title="Group 0, Head 1"
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "4.0", "1.0", "2.0"],
+    ["is", "6.0", "1.5", "3.0"],
+  ]}
+  className="my-8"
+/>
+
+<Table 
+  title="Group 1, Head 2"
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "1.0", "2.0", "4.0"],
+    ["is", "1.5", "3.0", "6.0"],
+  ]}
+  className="my-8"
+/>
+
+<Table 
+  title="Group 1, Head 3"
+  headers={["Word", "Q", "K", "V"]}
+  data={[
+    ["Fear", "3.0", "2.0", "4.0"],
+    ["is", "4.5", "3.0", "6.0"],
+  ]}
+  className="my-8"
+/>
+
+<Collapsible trigger="Show calculations">
+
+1. For each head in group 0, multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Group 0</span></div>
+
+    Head 0 -> `[2.0*1.0, 2.0*1.5]` = `[2.0, 3.0]`
+
+    Head 1 -> `[4.0*1.0, 4.0*1.5]` = `[4.0, 6.0]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Group 1</span></div>
+
+    Head 2 -> `[1.0*2.0, 1.0*3.0]` = `[2.0, 3.0]`
+
+    Head 3 -> `[3.0*2.0, 3.0*3.0]` = `[9.0, 6.0]`
+
+    </div>
+    </div>
+
+2. Scale the attention scores of each head by dividing by the square root of 2 (the vector dimension).
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Group 0</span></div>
+
+    Head 0 -> `[2.0/1.414, 3.0/1.414]` = `[1.414, 2.121]`
+
+    Head 1 -> `[4.0/1.414, 6.0/1.414]` = `[2.828, 4.243]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Group 1</span></div>
+
+    Head 2 -> `[2.0/1.414, 3.0/1.414]` = `[1.414, 2.121]`
+
+    Head 3 -> `[9.0/1.414, 6.0/1.414]` = `[6.364, 4.243]`
+
+    </div>
+    </div>
+
+3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Group 0</span></div>
+
+    Head 0 -> `[e^1.414 / (e^1.414 + e^2.121), e^2.121 / (e^1.414 + e^2.121)]` = `[0.33, 0.67]`
+
+    Head 1 -> `[e^2.828 / (e^2.828 + e^4.243), e^4.243 / (e^2.828 + e^4.243)]` = `[0.195, 0.805]`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Group 1</span></div>
+
+    Head 2 -> `[e^1.414 / (e^1.414 + e^2.121), e^2.121 / (e^1.414 + e^2.121)]` = `[0.33, 0.67]`
+
+    Head 3 -> `[e^6.364 / (e^6.364 + e^4.243), e^4.243 / (e^6.364 + e^4.243)]` = `[0.892, 0.107]`
+
+    </div>
+    </div>
+
+4. Weight V by the attention scores.
+
+    <div className="flex gap-8 items-start">
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Group 0</span></div>
+
+    Head 0 -> `[0.33*2.0 + 0.67*3.0]` = `2.67`
+
+    Head 1 -> `[0.195*2.0 + 0.805*3.0]` = `2.81`
+
+    </div>
+
+    <div className="flex-1">
+    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Group 1</span></div>
+
+    Head 2 -> `[0.33*4.0 + 0.67*6.0]` = `5.34`
+
+    Head 3 -> `[0.892*4.0 + 0.107*6.0]` = `4.21`
+
+    </div>
+    </div>
+
+5. Concatenate the heads of each group and multiply by a weight matrix to combine the information.
+
+    `[2.67, 2.81. 5.34, 4.21] * [[1.0, 0.0], [0.5, 0.5], [1.0, 2.0], [0.1, 1.0]]` = `[9.836, 16.295]`
+
+This is the final grouped-query attention output for `Fear`.
+
+</Collapsible>
+
+## resources [#resources]
 
 - [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html) and [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) blog posts
