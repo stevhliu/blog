@@ -12,6 +12,7 @@ interface FloatingTOCProps {
   title?: string;
 }
 
+// Color system
 const COLORS = ['green', 'blue', 'purple', 'pink', 'orange', 'teal', 'indigo', 'rose'] as const;
 type Color = typeof COLORS[number];
 
@@ -50,6 +51,52 @@ const COLOR_CLASSES: Record<Color, { active: string; hover: string }> = {
   }
 };
 
+// Constants
+const SCROLL_THRESHOLD = 100;
+const SCROLL_OFFSET = 150;
+const EXPANDED_WIDTH = '240px';
+
+// Hamburger Icon Component
+function HamburgerIcon() {
+  return (
+    <svg
+      className="h-5 w-5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer transition-colors"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 6h16" />
+      <path d="M4 12h16" />
+      <path d="M4 18h16" />
+    </svg>
+  );
+}
+
+// TOC Item Component
+function TOCItem({ item, isActive, colorClasses }: { 
+  item: TOCItem; 
+  isActive: boolean; 
+  colorClasses: { active: string; hover: string } 
+}) {
+  return (
+    <li>
+      <a
+        href={item.href}
+        className={`block py-1 px-2 rounded text-sm transition-all duration-200 ${
+          isActive
+            ? `${colorClasses.active} font-medium`
+            : `text-gray-600 dark:text-gray-300 ${colorClasses.hover}`
+        }`}
+      >
+        {item.text}
+      </a>
+    </li>
+  );
+}
+
 export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -59,34 +106,42 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   const getRandomColor = (): Color => 
     COLORS[Math.floor(Math.random() * COLORS.length)];
 
-  // Show TOC after scrolling down a bit
-  useEffect(() => {
-    const handleScroll = () => setIsVisible(window.scrollY > 100);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const findActiveSection = (scrollPosition: number) => {
+    const sections = items.map(item => item.href.substring(1));
+    
+    return sections.find(sectionId => {
+      const element = document.getElementById(sectionId);
+      if (!element) return false;
+      
+      const elementTop = element.offsetTop;
+      const elementBottom = elementTop + element.offsetHeight;
+      return scrollPosition >= elementTop && scrollPosition < elementBottom;
+    }) || '';
+  };
 
-  // Track active section based on scroll position
+  // Combined scroll handler
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 150;
-      const sections = items.map(item => item.href.substring(1));
+      const scrollY = window.scrollY;
       
-      const activeSectionFound = sections.find(sectionId => {
-        const element = document.getElementById(sectionId);
-        if (!element) return false;
-        
-        const elementTop = element.offsetTop;
-        const elementBottom = elementTop + element.offsetHeight;
-        return scrollPosition >= elementTop && scrollPosition < elementBottom;
-      }) || '';
+      // Update visibility
+      setIsVisible(scrollY > SCROLL_THRESHOLD);
       
-      setActiveSection(activeSectionFound);
+      // Update active section
+      const scrollPosition = scrollY + SCROLL_OFFSET;
+      setActiveSection(findActiveSection(scrollPosition));
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [items]);
+
+  const handleMouseEnter = () => {
+    setIsExpanded(true);
+    setCurrentColor(getRandomColor());
+  };
+
+  const handleMouseLeave = () => setIsExpanded(false);
 
   if (!isVisible) return null;
 
@@ -96,30 +151,15 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
     <div className="fixed top-20 left-4 md:left-8 z-50">
       <div
         className={`transition-all duration-300 ease-in-out ${isExpanded ? 'sm:w-60 md:w-72' : ''}`}
-        onMouseEnter={() => {
-          setIsExpanded(true);
-          setCurrentColor(getRandomColor());
-        }}
-        onMouseLeave={() => setIsExpanded(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         style={{
-          width: isExpanded ? '240px' : 'auto',
+          width: isExpanded ? EXPANDED_WIDTH : 'auto',
           overflow: 'hidden'
         }}
       >
         <div className="p-2">
-          <svg
-            className="h-5 w-5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer transition-colors"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 6h16" />
-            <path d="M4 12h16" />
-            <path d="M4 18h16" />
-          </svg>
+          <HamburgerIcon />
         </div>
         
         {isExpanded && (
@@ -132,18 +172,12 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
                     const isActive = activeSection === sectionId;
                     
                     return (
-                      <li key={index}>
-                        <a
-                          href={item.href}
-                          className={`block py-1 px-2 rounded text-sm transition-all duration-200 ${
-                            isActive
-                              ? `${colorClasses.active} font-medium`
-                              : `text-gray-600 dark:text-gray-300 ${colorClasses.hover}`
-                          }`}
-                        >
-                          {item.text}
-                        </a>
-                      </li>
+                      <TOCItem
+                        key={index}
+                        item={item}
+                        isActive={isActive}
+                        colorClasses={colorClasses}
+                      />
                     );
                   })}
                 </ul>

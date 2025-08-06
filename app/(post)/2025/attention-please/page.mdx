@@ -19,16 +19,18 @@ export const metadata = {
   ]}
 />
 
-It's interesting that **attention** is something that can be quantified. Like, I don't have a way of measuring how I personally pay attention, but I imagine it's very caveman-like.
+I think it's interesting that **attention** is a quantifiable concept. Like, I don't have a way of measuring how I personally pay attention, but I imagine it's very caveman-like.
 
-If you told me to take out the trash on Monday night, my brain would probably compile it to something like "trash, Monday night". Just the essential keywords.
+If you told me to take out the trash on Monday night because it's really full and pickup day is Tuesday, my brain would probably compile it to something like "trash, Monday night". Just the essential keywords.
 
 But for transformer models, attention is calculable.
 
 > An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.
 > - [Attention Is All You Need](https://huggingface.co/papers/1706.03762)
 
-This post tries to very simply and very plainly explain how the original self-attention works while eschewing as much jargon as possible.
+This post tries to very simply and very plainly explain how the original self-attention (and several variants of it) works while eschewing as much jargon and fancy language as possible.
+
+<Tip text="If you're interested in calculating attention by hand, click on 'Show calculations'. This really helped solidify my understanding of how attention works!" />
 
 ## self-attention [#self-attention]
 
@@ -44,17 +46,22 @@ You need 3 matrices to compute self-attention. These matrices are created by mul
 (W<sub>k</sub>, W<sub>q</sub>, W<sub>v</sub>).
 
 - Query (Q) is compared to all the Ks (including itself) to calculate how much attention to pay to each word. Q is the information you're looking for.
-- Key (K) is multiplied by Q to produce the attention scores for each word. When you multiply two matrices, this is also known as a dot product. A dot product compares how similar two vectors are. In self-attention, this compares how similar two tokens are and thus how much attention to pay. K is the information a word contains.
+- Key (K) is multiplied by Q (<HoverWord
+  word="dot product"
+  description="A mathematical operation that compares how similar two vectors are. In the context of transformers, it compares how similar two tokens are."
+/>) to produce the attention scores for each word. K is the information a word contains.
 - Value (V) weights each word with their attention scores to determine what information every other word offers. V is the information you get from each word.
 
-Before multiplying V by the attention scores, you need to *scale* the attention scores by dividing by the square root of the dimension of the matrix. For example, if the matrix dimension is 64, divide the attention scores by 8. Scaling prevents the attention scores from becoming too large or too small.
+Before multiplying V by the attention scores, you need to *scale* the attention scores by dividing by the square root of the dimension. For example, if the dimension is 64, divide the attention scores by 8.
 
-It also prevents the <HoverWord
+Scaling prevents the attention scores from becoming too large or too small. This helps the <HoverWord
   word="softmax"
   description="A function that exponentiates a value and divides by the sum of all the exponentiated values."
 /> from being overwhelmed by any one word. The softmax converts the attention scores into probabilities that add up to 1.
 
 Try calculating the self-attention score for the word `Fear` by hand for the following sequence to really get a feel for how it works.
+
+<Collapsible trigger="Show calculations">
 
 <Table 
   headers={["Word", "Q", "K", "V"]}
@@ -65,32 +72,31 @@ Try calculating the self-attention score for the word `Fear` by hand for the fol
   className="my-8"
 />
 
-<Collapsible trigger="Show calculations">
-  1. Multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
+1. Multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
 
-     `[0.2, 0.1, 0.8]*[0.3, 0.5, 0.2]` = `0.2*0.3 + 0.1*0.5 + 0.8*0.2` = `0.31`
+    `[0.2, 0.1, 0.8]*[0.3, 0.5, 0.2]` = `0.2*0.3 + 0.1*0.5 + 0.8*0.2` = `0.31`
 
-     `[0.2, 0.1, 0.8]*[0.1, 0.4, 0.6]` = `0.2*0.1 + 0.1*0.4 + 0.8*0.6` = `0.54`
+    `[0.2, 0.1, 0.8]*[0.1, 0.4, 0.6]` = `0.2*0.1 + 0.1*0.4 + 0.8*0.6` = `0.54`
 
-  2. Scale the attention scores by dividing by the square root of 3 (the vector dimension).
+2. Scale the attention scores by dividing by the square root of 3 (the vector dimension).
 
-     `[0.31/1.732, 0.54/1.732]` = `[0.179, 0.311]`
+    `[0.31/1.732, 0.54/1.732]` = `[0.179, 0.311]`
 
-  3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
+3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
 
-     `[e^0.179 / (e^0.179 + e^0.311), e^0.311 / (e^0.179 + e^0.311)]` = `[0.467, 0.532]`
+    `[e^0.179 / (e^0.179 + e^0.311), e^0.311 / (e^0.179 + e^0.311)]` = `[0.467, 0.532]`
 
-  4. Weight V by the attention scores.
+4. Weight V by the attention scores.
 
-      `0.467*[0.1, 0.7, 0.4]` = `[0.0467, 0.3269, 0.1868]`
+    `0.467*[0.1, 0.7, 0.4]` = `[0.0467, 0.3269, 0.1868]`
 
-      `0.532*[0.8, 0.1, 0.2]` = `[0.4256, 0.0532, 0.1064]`
+    `0.532*[0.8, 0.1, 0.2]` = `[0.4256, 0.0532, 0.1064]`
 
-  5. Add the weighted values together.
+5. Add the weighted values together.
 
-      `[0.0467+0.4256, 0.3269+0.0532, 0.1868+0.1064]` = `[0.4723, 0.3801, 0.2932]`
+    `[0.0467+0.4256, 0.3269+0.0532, 0.1868+0.1064]` = `[0.4723, 0.3801, 0.2932]`
 
-  This is the final self-attention output for `Fear`.
+This is the final self-attention output for `Fear`.
 </Collapsible>
 
 ## causal self-attention [#causal-self-attention]
@@ -99,9 +105,11 @@ Causal self-attention is used in decoder models like GPT and other modern large 
 
 In contrast, bidirectional attention models like BERT has full visibility of the entire sequence.
 
-A mask blocks attention to future words. The mask is implemented as `-inf` for words that should be blocked. This way, when softmax is applied, the `-inf` scores becomes ~0.
+A mask is used to block attention to future words. The mask is implemented as `-inf` for words that should be blocked. This way, when softmax is applied, the `-inf` scores becomes ~0.
 
 Try calculating the causal self-attention score for the word `is` by hand for the following sequence.
+
+<Collapsible trigger="Show calculations">
 
 <Table 
   headers={["Word", "Q", "K", "V"]}
@@ -113,7 +121,6 @@ Try calculating the causal self-attention score for the word `is` by hand for th
   className="my-8"
 />
 
-<Collapsible trigger="Show calculations">
 1. Multiply Q<sub>is</sub> by K for every word in the sequence to get the attention score.
 
     `[0.5, 0.2, 0.3]*[0.3, 0.5, 0.2]` = `0.5*0.3+0.2*0.5+0.3*0.2` = `0.31`
@@ -137,13 +144,18 @@ Try calculating the causal self-attention score for the word `is` by hand for th
 
 ## multi-head attention [#multi-head-attention]
 
-The original self-attention can be considered single-head attention. Multi-head attention (MHA) adds more heads to increase model capacity and learn other patterns (grammar, repeated words, track long-distance dependencies, etc.).
+The original self-attention is a single head of attention. Multi-head attention (MHA) adds more heads to increase model capacity and learn other patterns (grammar, repeated words, etc.).
 
-The calculations are the same as self-attention, but you split the embedding size by the number of heads. Each head independently computes scaled dot-product attention, the outputs are concatenated, and multipled by a weight matrix to combine all the information.
+The calculations are the same as self-attention, but the <HoverWord
+  word="embedding size"
+  description="The size of the vector used to represent a word. For example, Gemma 2B has an embedding size of 2048."
+/> is split by the number of heads. Each head independently computes scaled dot-product attention, the outputs are concatenated, and multipled by a weight matrix to combine all the information.
 
-Models like [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) use MHA.
+[DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) use MHA.
 
 Try calculating the multi-head attention score for the word `Fear` by hand for the following sequence.
+
+<Collapsible trigger="Show calculations">
 
 <Table 
   title="Head 1"
@@ -164,8 +176,6 @@ Try calculating the multi-head attention score for the word `Fear` by hand for t
   ]}
   className="my-8"
 />
-
-<Collapsible trigger="Show calculations">
 
 1. For both heads, multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
 
@@ -239,7 +249,10 @@ Try calculating the multi-head attention score for the word `Fear` by hand for t
     </div>
     </div>
 
-4. Concatenate the outputs of each head and multiply by a transposed weight matrix (Wᵀ) to combine the information.
+4. Concatenate the outputs of each head and multiply by a <HoverWord
+  word="transposed"
+  description="The transpose of a matrix switches the rows and columns. A m x n matrix becomes a n x m matrix."
+/> weight matrix (Wᵀ) to combine the information.
 
     `[2.802, 4.203]*[1.0, 1.0]ᵀ` = `4.203`
 
@@ -251,9 +264,13 @@ This is the final multi-head attention output for `Fear`.
 
 [Multi-query attention](https://huggingface.co/papers/1911.02150) (MQA) is the same as MHA except all Qs share the same K and V.
 
-MQA has the advantage of being more memory efficient and faster at decoding. Each head doesn't need to store its own K and V. This makes an especially big difference for really long sequences. Models like [Gemma](https://huggingface.co/google/gemma-2b) use MQA.
+MQA has the advantage of being more memory efficient and faster at decoding. Each head doesn't need to store a separate K and V. This makes an especially big difference for really long sequences.
+
+[Gemma 2B](https://huggingface.co/google/gemma-2b) use MQA.
 
 Try calculating the multi-query attention score for the word `Fear` by hand for the following sequence.
+
+<Collapsible trigger="Show calculations">
 
 <Table 
   title="Head 1"
@@ -274,8 +291,6 @@ Try calculating the multi-query attention score for the word `Fear` by hand for 
   ]}
   className="my-8"
 />
-
-<Collapsible trigger="Show calculations">
 
 1. For both heads, multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
   
@@ -358,13 +373,15 @@ This is the final multi-query attention output for `Fear`.
 
 ## grouped-query attention [#grouped-query-attention]
 
-[Grouped-query attention](https://huggingface.co/papers/2305.13245) (GQA) is similar to MHA and MQA except each *group* of Qs share the same K and V. A different group of Qs share a different set of K and V.
+[Grouped-query attention](https://huggingface.co/papers/2305.13245) (GQA) is similar to MHA and MQA except each *group* of Qs share the same K and V. K and V are different for each group.
 
-GQA takes the best of both MHA and MQA. It's faster than MHA because it still has fewer Ks and Vs and it's more expressive than MQA because it has more Qs.
+GQA combines the best of MHA and MQA. It's faster than MHA because it still has fewer Ks and Vs and it's more expressive than MQA because it has more Qs.
 
-Models like [Llama 3](https://huggingface.co/meta-llama/Meta-Llama-3-8B) and [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) use GQA.
+[Llama 3](https://huggingface.co/meta-llama/Meta-Llama-3-8B) and [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) use GQA.
 
 Try calculating the grouped-query attention score for the word `Fear` by hand for the following sequence. Head 0 and 1 make up Group 0 and Head 2 and 3 make up Group 1.
+
+<Collapsible trigger="Show calculations">
 
 <Table
   title="Group 0, Head 0"
@@ -405,8 +422,6 @@ Try calculating the grouped-query attention score for the word `Fear` by hand fo
   ]}
   className="my-8"
 />
-
-<Collapsible trigger="Show calculations">
 
 1. For each head in group 0, multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
 
@@ -506,4 +521,7 @@ This is the final grouped-query attention output for `Fear`.
 
 ## resources [#resources]
 
-- [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html) and [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) blog posts
+- [Attention Is All You Need](https://huggingface.co/papers/1706.03762)
+- [Fast Transformer Decoding: One Write-Head is All You Need](https://huggingface.co/papers/1911.02150)
+- [GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints](https://huggingface.co/papers/2305.13245)
+- Youtube videos by [3Blue1Brown](https://www.youtube.com/watch?v=eMlx5fFNoYc) and [Andrej Karpathy](https://www.youtube.com/watch?v=kCc8FmEb1nY&t=2533s)
