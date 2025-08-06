@@ -29,13 +29,13 @@ type HoverColor = typeof HOVER_COLORS[number];
 // Constants
 const TABLE_CLASSES = {
   container: "w-full overflow-auto",
-  table: "w-full caption-bottom text-sm",
+  table: "w-full caption-bottom text-sm border-separate border-spacing-0",
   thead: "[&_tr]:border-b",
   tbody: "[&_tr:last-child]:border-0",
   headerRow: "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-  headerCell: "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+  headerCell: "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 transition-colors",
   dataRow: "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-  dataCell: "p-4 align-middle [&:has([role=checkbox])]:pr-0",
+  dataCell: "p-4 align-middle [&:has([role=checkbox])]:pr-0 transition-colors cursor-pointer",
   title: "mb-4 text-lg font-semibold text-center",
   caption: "mt-4 text-sm text-muted-foreground"
 } as const;
@@ -55,32 +55,78 @@ function TableHeader({ headers }: { headers: string[] }) {
   );
 }
 
-// Table Row Component
-function TableRow({ 
-  row, 
+// Table Cell Component
+function TableCell({ 
+  cell, 
+  cellIndex, 
   rowIndex, 
   isHovered, 
   hoverColor, 
   onMouseEnter, 
   onMouseLeave 
 }: {
-  row: string[];
+  cell: string;
+  cellIndex: number;
   rowIndex: number;
   isHovered: boolean;
   hoverColor: string;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }) {
+  // Extract the color from the hoverColor class for the border
+  const getBorderColor = (hoverColor: string) => {
+    if (hoverColor.includes('green')) return 'border-green-500';
+    if (hoverColor.includes('blue')) return 'border-blue-500';
+    if (hoverColor.includes('purple')) return 'border-purple-500';
+    if (hoverColor.includes('pink')) return 'border-pink-500';
+    if (hoverColor.includes('orange')) return 'border-orange-500';
+    if (hoverColor.includes('teal')) return 'border-teal-500';
+    if (hoverColor.includes('indigo')) return 'border-indigo-500';
+    if (hoverColor.includes('rose')) return 'border-rose-500';
+    return 'border-gray-500';
+  };
+
   return (
-    <tr 
-      className={`${TABLE_CLASSES.dataRow} ${isHovered ? hoverColor : ''}`}
+    <td 
+      key={cellIndex} 
+      className={`${TABLE_CLASSES.dataCell} ${isHovered ? hoverColor : ''} ${isHovered ? `border ${getBorderColor(hoverColor)}` : 'border border-transparent'} relative`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
+      {cell}
+    </td>
+  );
+}
+
+// Table Row Component
+function TableRow({ 
+  row, 
+  rowIndex, 
+  hoveredCell, 
+  hoverColor, 
+  onCellMouseEnter, 
+  onCellMouseLeave 
+}: {
+  row: string[];
+  rowIndex: number;
+  hoveredCell: { row: number; cell: number } | null;
+  hoverColor: string;
+  onCellMouseEnter: (rowIndex: number, cellIndex: number) => void;
+  onCellMouseLeave: () => void;
+}) {
+  return (
+    <tr className={TABLE_CLASSES.dataRow}>
       {row.map((cell, cellIndex) => (
-        <td key={cellIndex} className={TABLE_CLASSES.dataCell}>
-          {cell}
-        </td>
+        <TableCell
+          key={cellIndex}
+          cell={cell}
+          cellIndex={cellIndex}
+          rowIndex={rowIndex}
+          isHovered={hoveredCell?.row === rowIndex && hoveredCell?.cell === cellIndex}
+          hoverColor={hoverColor}
+          onMouseEnter={() => onCellMouseEnter(rowIndex, cellIndex)}
+          onMouseLeave={onCellMouseLeave}
+        />
       ))}
     </tr>
   );
@@ -89,16 +135,16 @@ function TableRow({
 // Table Body Component
 function TableBody({ 
   data, 
-  hoveredRow, 
+  hoveredCell, 
   hoverColor, 
-  onRowMouseEnter, 
-  onRowMouseLeave 
+  onCellMouseEnter, 
+  onCellMouseLeave 
 }: {
   data: string[][];
-  hoveredRow: number | null;
+  hoveredCell: { row: number; cell: number } | null;
   hoverColor: string;
-  onRowMouseEnter: (rowIndex: number) => void;
-  onRowMouseLeave: () => void;
+  onCellMouseEnter: (rowIndex: number, cellIndex: number) => void;
+  onCellMouseLeave: () => void;
 }) {
   return (
     <tbody className={TABLE_CLASSES.tbody}>
@@ -107,10 +153,10 @@ function TableBody({
           key={rowIndex}
           row={row}
           rowIndex={rowIndex}
-          isHovered={hoveredRow === rowIndex}
+          hoveredCell={hoveredCell}
           hoverColor={hoverColor}
-          onMouseEnter={() => onRowMouseEnter(rowIndex)}
-          onMouseLeave={onRowMouseLeave}
+          onCellMouseEnter={onCellMouseEnter}
+          onCellMouseLeave={onCellMouseLeave}
         />
       ))}
     </tbody>
@@ -118,18 +164,18 @@ function TableBody({
 }
 
 export function Table({ headers, data, className = "", caption, title }: TableProps) {
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [hoveredCell, setHoveredCell] = useState<{ row: number; cell: number } | null>(null);
   const [hoverColor, setHoverColor] = useState<HoverColor>(HOVER_COLORS[0]);
 
   const getRandomHoverColor = (): HoverColor => 
     HOVER_COLORS[Math.floor(Math.random() * HOVER_COLORS.length)];
 
-  const handleRowMouseEnter = (rowIndex: number) => {
-    setHoveredRow(rowIndex);
+  const handleCellMouseEnter = (rowIndex: number, cellIndex: number) => {
+    setHoveredCell({ row: rowIndex, cell: cellIndex });
     setHoverColor(getRandomHoverColor());
   };
 
-  const handleRowMouseLeave = () => setHoveredRow(null);
+  const handleCellMouseLeave = () => setHoveredCell(null);
 
   return (
     <div className={`${TABLE_CLASSES.container} ${className}`}>
@@ -145,10 +191,10 @@ export function Table({ headers, data, className = "", caption, title }: TablePr
         <TableHeader headers={headers} />
         <TableBody
           data={data}
-          hoveredRow={hoveredRow}
+          hoveredCell={hoveredCell}
           hoverColor={hoverColor}
-          onRowMouseEnter={handleRowMouseEnter}
-          onRowMouseLeave={handleRowMouseLeave}
+          onCellMouseEnter={handleCellMouseEnter}
+          onCellMouseLeave={handleCellMouseLeave}
         />
       </table>
     </div>
