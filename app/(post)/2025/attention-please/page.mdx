@@ -144,6 +144,51 @@ Try calculating the causal self-attention score for the word `is` by hand for th
 
 ## multi-head attention [#multi-head-attention]
 
+<div style={{width: '100%', height: '300px', position: 'relative', borderRadius: 16}}>
+    <div style={{width: 91.47, height: 47.58, left: 407.79, top: 23.50, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 580.53, top: 73.91, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 580.53, top: 128, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 580.53, top: 182.09, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
+    <div style={{width: 79, height: 14, left: 124, top: 29, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>scale + softmax</div>
+    <div style={{width: 79, height: 14, left: 124, top: 133, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>scale + softmax</div>
+    <div style={{width: 79, height: 14, left: 124, top: 242, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>scale + softmax</div>
+    <div style={{width: 91.47, height: 47.58, left: 233.91, top: 0, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 206.73, top: 35.68, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
+    <div style={{width: 54.37, height: 23.50, left: 225.13, top: 47.58, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
+    <div style={{width: 11.04, height: 23.50, left: 272.14, top: 11.89, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
+    <div style={{width: 71.65, height: 0, left: 124.32, top: 47.58, position: 'absolute', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 71.65, height: 0, left: 333.31, top: 47.58, position: 'absolute', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 125.12, height: 0, left: 501.82, top: 47.47, position: 'absolute', transform: 'rotate(56deg)', transformOrigin: 'top left', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 72.74, height: 0, left: 499.26, top: 151.86, position: 'absolute', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 129.82, height: 0, left: 500, top: 260.03, position: 'absolute', transform: 'rotate(-56deg)', transformOrigin: 'top left', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 91.47, height: 47.58, left: 23.22, top: 0, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 0, top: 35.68, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
+    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 47.58, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
+    <div style={{width: 32.85, height: 23.50, left: 52.39, top: 11.89, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
+    <div style={{width: 91.47, height: 47.58, left: 407.79, top: 237.03, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 233.91, top: 213.52, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 206.73, top: 249.20, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
+    <div style={{width: 54.37, height: 23.50, left: 225.13, top: 261.10, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
+    <div style={{width: 11.04, height: 23.50, left: 272.14, top: 225.42, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
+    <div style={{width: 71.65, height: 0, left: 124.32, top: 261.10, position: 'absolute', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 71.65, height: 0, left: 333.31, top: 261.10, position: 'absolute', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 91.47, height: 47.58, left: 23.22, top: 213.52, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 0, top: 249.20, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
+    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 261.10, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
+    <div style={{width: 32.85, height: 23.50, left: 52.39, top: 225.42, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
+    <div style={{width: 91.47, height: 47.58, left: 407.79, top: 128, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 233.91, top: 104.50, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 206.73, top: 140.18, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
+    <div style={{width: 54.37, height: 23.50, left: 225.13, top: 152.07, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
+    <div style={{width: 11.04, height: 23.50, left: 272.14, top: 116.39, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
+    <div style={{width: 71.65, height: 0, left: 124.32, top: 152.07, position: 'absolute', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 71.65, height: 0, left: 333.31, top: 152.07, position: 'absolute', background: '#D9D9D9', outline: '1px #FBBF24 dashed', outlineOffset: '-0.50px'}}></div>
+    <div style={{width: 91.47, height: 47.58, left: 23.22, top: 104.50, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
+    <div style={{width: 91.47, height: 47.58, left: 0, top: 140.18, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
+    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 152.07, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
+    <div style={{width: 32.85, height: 23.50, left: 52.39, top: 116.39, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
+</div>
+
 The original self-attention is a single head of attention. Multi-head attention (MHA) adds more heads to increase model capacity and learn other patterns (grammar, repeated words, etc.).
 
 The calculations are the same as self-attention, but the <HoverWord
@@ -377,7 +422,7 @@ This is the final multi-query attention output for `Fear`.
 
 GQA combines the best of MHA and MQA. It's faster than MHA because it still has fewer Ks and Vs and it's more expressive than MQA because it has more Qs.
 
-[Llama 3](https://huggingface.co/meta-llama/Meta-Llama-3-8B) and [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) use GQA.
+Most modern models like [Llama 3](https://huggingface.co/meta-llama/Meta-Llama-3-8B) and [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) use GQA.
 
 Try calculating the grouped-query attention score for the word `Fear` by hand for the following sequence. Head 0 and 1 make up Group 0 and Head 2 and 3 make up Group 1.
 
