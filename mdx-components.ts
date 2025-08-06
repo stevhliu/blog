@@ -22,6 +22,7 @@ import { FloatingTOC } from "app/(post)/components/floating-toc";
 import { HoverWord } from "app/(post)/components/hover-word";
 import { Table } from "app/(post)/components/table";
 import { Collapsible } from "app/(post)/components/collapsible";
+import { AnimatedDashedLine } from "app/(post)/components/animated-dashed-line";
 
 export function useMDXComponents(components: {
   [component: string]: React.ComponentType;
@@ -58,5 +59,6 @@ export function useMDXComponents(components: {
     HoverWord,
     Table,
     Collapsible,
+    AnimatedDashedLine,
   };
 }

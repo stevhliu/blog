@@ -11,7 +11,7 @@ const CALLOUT_STYLES = {
   },
   tip: {
     container: 'bg-green-50 dark:bg-green-900/20 dark:text-gray-300',
-    text: 'text-green-600 dark:text-green-400'
+    text: 'text-green-400 dark:text-green-400'
   },
   warning: {
     container: 'bg-rose-50 dark:bg-rose-900/20 dark:text-gray-300',
@@ -23,7 +23,7 @@ export const Callout = ({ text = null, children, type = 'default' }: CalloutProp
   const styles = CALLOUT_STYLES[type];
   
   return (
-    <div className={`${styles.container} flex items-start p-3 my-6 text-base ${styles.text}`}>
+    <div className={`${styles.container} flex items-start p-3 my-6 text-base ${styles.text} border border-transparent rounded-lg`}>
       {children}
       {text && <span className="block grow">{text}</span>}
     </div>
