@@ -11,11 +11,11 @@ const CALLOUT_STYLES = {
   },
   tip: {
     container: 'bg-green-50 dark:bg-green-900/20 dark:text-gray-300',
-    text: 'text-green-400 dark:text-green-400'
+    text: 'text-green-500 dark:text-green-500'
   },
   warning: {
     container: 'bg-rose-50 dark:bg-rose-900/20 dark:text-gray-300',
-    text: 'text-rose-600 dark:text-rose-400'
+    text: 'text-rose-500 dark:text-rose-500'
   }
 } as const;
 

@@ -6,7 +6,7 @@ export const metadata = {
     description: 'An overview of different attention variants',
     images: [{ url: '/og/attention-please' }]
   }
-}
+};
 
 <FloatingTOC
   items={[
@@ -15,12 +15,12 @@ export const metadata = {
     { text: "multi-head attention", href: "#multi-head-attention" },
     { text: "multi-query attention", href: "#multi-query-attention" },
     { text: "grouped-query attention", href: "#grouped-query-attention" },
-    { text: "why?", href: "#why" },
+    { text: "summary", href: "#summary" },
     { text: "resources", href: "#resources" }
   ]}
 />
 
-It's kind of wild that **attention** is a quantifiable concept. I don't have a way of measuring how I personally pay attention, but I imagine it's very caveman-like.
+It's kind of wild that *attention* is a quantifiable concept. I don't have a way of measuring how I personally pay attention, but I imagine it's very troglodyte process.
 
 If you told me to take out the trash on Monday night because it's really full and pickup day is Tuesday, my brain would probably compile it to something like "trash, Monday night". Just the essential keywords.
 
@@ -31,18 +31,18 @@ But for transformer models, attention is calculable.
 
 This post tries to very simply and very plainly explain how the original self-attention (and several variants of it, but not all) works while eschewing as much jargon and fancy language as possible.
 
-<Tip text="If you're interested in calculating attention by hand, click on 'Show calculations'. This really helped solidify my understanding of how attention works!" />
+<Tip text="If you're interested in calculating attention by hand, click 'Show calculations'. This really helped solidify my understanding of how attention works!" />
 
 ## self-attention [#self-attention]
 
 Self-attention (scaled dot-product attention) computes how much each word in a sequence should "pay attention" to every other word in that same sequence. It's what makes transformers contextually aware.
 
-You need 3 matrices to compute self-attention. These matrices are created by multiplying the <HoverWord 
+You need 3 matrices to compute self-attention. These matrices are created by multiplying <HoverWord 
   word="word embeddings"
   description="Vectors of numbers that represent words in a way that captures meaning and relationships."
-/> (x) by 3 <HoverWord
+/> by 3 <HoverWord
   word="weight matrices"
-  description="Learnable parameters that are optimized during training."
+  description="Learnable parameters optimized during training."
 />
 (W<sub>k</sub>, W<sub>q</sub>, W<sub>v</sub>).
 
@@ -52,16 +52,16 @@ You need 3 matrices to compute self-attention. These matrices are created by mul
   description="A mathematical operation that compares how similar two vectors are. In the context of transformers, it compares how similar two tokens are."
 />) to produce the attention scores for each word. K is the information a word contains.
 
-  *Scale* the attention scores by dividing by the square root of the vector dimension. For example, if the dimension is 64, divide the attention scores by 8. Scaling prevents the attention scores from becoming too large or too small.
+  The attention scores are *scaled* by dividing by the square root of the vector dimension. For example, if the dimension is 64, divide the attention scores by 8. Scaling prevents the attention scores from becoming too large or too small.
 
   Apply a <HoverWord
     word="softmax"
     description="A function that exponentiates a value and divides by the sum of all the exponentiated values."
   /> function to the scores to convert them into probabilities that add up to 1. Scaling also smooths out the softmax function by preventing any one value from dominating the rest.
 
-- Value (V) weights each word with their attention scores to determine what information every other word offers. V is the information you get from each word.
+- Value (V) weights each word with an attention score to determine what information every other word offers. V is the information you get from each word.
 
-Try calculating the self-attention score for the word `Fear` by hand for the following sequence to really get a feel for how it works.
+Try calculating the self-attention score for the word `Fear` by hand in the following sequence to really get a feel for how it works.
 
 <Collapsible trigger="Show calculations">
 
@@ -103,11 +103,11 @@ This is the final self-attention score for `Fear`.
 
 ## causal self-attention [#causal-self-attention]
 
-Causal self-attention is used in decoder models like [GPT-2](https://huggingface.co/openai-community/gpt2). These models predict the next word in a sequence, so it is important to prevent it from cheating by looking ahead.
+Causal self-attention is used in decoder models like [GPT](https://huggingface.co/openai-community/gpt2). These models predict the next word in a sequence, so it is important to mask future words to prevent it from cheating.
 
-A mask is used to block attention to future words. Words that should be blocked are set to -∞. The softmax of -∞ becomes ~0.
+In the mask, words that should be blocked are set to -∞, and the softmax of -∞ becomes ~0.
 
-Try calculating the causal self-attention score for the word `is` by hand for the following sequence.
+Try calculating the causal self-attention score for the word `is` by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
 
@@ -144,61 +144,66 @@ Try calculating the causal self-attention score for the word `is` by hand for th
 
 ## multi-head attention [#multi-head-attention]
 
-<div style={{width: '100%', height: '300px', position: 'relative', borderRadius: 16}}>
-    <div style={{width: 91.47, height: 47.58, left: 407.79, top: 23.50, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 580.53, top: 73.91, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 580.53, top: 128, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 580.53, top: 182.09, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 79, height: 14, left: 130, top: 29, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>scale + softmax</div>
-    <div style={{width: 79, height: 14, left: 130, top: 133, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>scale + softmax</div>
-    <div style={{width: 79, height: 14, left: 130, top: 242, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>scale + softmax</div>
-    <div style={{width: 91.47, height: 47.58, left: 233.91, top: 0, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 206.73, top: 35.68, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 225.13, top: 47.58, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
-    <div style={{width: 11.04, height: 23.50, left: 272.14, top: 11.89, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
+<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ width: '1000px', height: '300px', position: 'relative', borderRadius: 16, left: '50px' }}>
+    {/* Blue boxes */}
+    <div style={{ width: 91.47, height: 47.58, left: 382, top: 74, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+    <div style={{ width: 91.47, height: 47.58, left: 382, top: 128.09, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+    <div style={{ width: 91.47, height: 47.58, left: 382, top: 182.18, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+    
+    {/* Scale + softmax labels */}
+    <div style={{ width: 79, height: 14, left: 124, top: 29, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>scale + softmax</div>
+    <div style={{ width: 79, height: 14, left: 124, top: 133, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>scale + softmax</div>
+    <div style={{ width: 79, height: 14, left: 124, top: 242, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>scale + softmax</div>
+    
+    {/* Purple Value boxes */}
+    <div style={{ width: 91.47, height: 47.58, left: 206, top: 16, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 224.41, top: 27.89, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
+    
+    {/* Animated dashed lines */}
     <AnimatedDashedLine x1={124.32} y1={47.58} x2={195.97} y2={47.58} />
-    <AnimatedDashedLine x1={333.31} y1={47.58} x2={404.96} y2={47.58} />
-    <AnimatedDashedLine x1={501.82} y1={47.47} x2={580} y2={151.86} />
-    <AnimatedDashedLine x1={499.26} y1={151.86} x2={572} y2={151.86} />
-    <AnimatedDashedLine x1={500} y1={260.03} x2={580} y2={151.86} />
-    <div style={{width: 91.47, height: 47.58, left: 23.22, top: 0, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 35.68, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 47.58, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 32.85, height: 23.50, left: 52.39, top: 11.89, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
-    <div style={{width: 91.47, height: 47.58, left: 407.79, top: 237.03, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 233.91, top: 213.52, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 206.73, top: 249.20, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 225.13, top: 261.10, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
-    <div style={{width: 11.04, height: 23.50, left: 272.14, top: 225.42, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
+    <AnimatedDashedLine x1={302.56} y1={48} x2={382} y2={152.39} />
+    <AnimatedDashedLine x1={300} y1={152.39} x2={382} y2={152.39} />
+    <AnimatedDashedLine x1={300.74} y1={260.56} x2={380} y2={152.39} />
+    
+    {/* Orange Key boxes */}
+    <div style={{ width: 91.47, height: 47.58, left: 23.22, top: 0, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
+    <div style={{ width: 32.85, height: 23.50, left: 52.39, top: 11.89, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
+    
+    {/* Green Query boxes */}
+    <div style={{ width: 91.47, height: 47.58, left: 0, top: 35.68, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 47.58, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+    
+    {/* Bottom row elements */}
+    <div style={{ width: 91.47, height: 47.58, left: 206, top: 229.52, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 224.41, top: 241.42, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
     <AnimatedDashedLine x1={124.32} y1={261.10} x2={195.97} y2={261.10} />
-    <AnimatedDashedLine x1={333.31} y1={261.10} x2={404.96} y2={261.10} />
-    <div style={{width: 91.47, height: 47.58, left: 23.22, top: 213.52, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 249.20, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 261.10, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 32.85, height: 23.50, left: 52.39, top: 225.42, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
-    <div style={{width: 91.47, height: 47.58, left: 407.79, top: 128, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 233.91, top: 104.50, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 206.73, top: 140.18, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 225.13, top: 152.07, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
-    <div style={{width: 11.04, height: 23.50, left: 272.14, top: 116.39, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
+    <div style={{ width: 91.47, height: 47.58, left: 23.22, top: 213.52, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
+    <div style={{ width: 91.47, height: 47.58, left: 0, top: 249.20, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 261.10, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+    <div style={{ width: 32.85, height: 23.50, left: 52.39, top: 225.42, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
+    
+    {/* Middle row elements */}
+    <div style={{ width: 91.47, height: 47.58, left: 206, top: 120.50, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 224.41, top: 132.39, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
     <AnimatedDashedLine x1={124.32} y1={152.07} x2={195.97} y2={152.07} />
-    <AnimatedDashedLine x1={333.31} y1={152.07} x2={404.96} y2={152.07} />
-    <div style={{width: 91.47, height: 47.58, left: 23.22, top: 104.50, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 140.18, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 152.07, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 32.85, height: 23.50, left: 52.39, top: 116.39, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
+    <div style={{ width: 91.47, height: 47.58, left: 23.22, top: 104.50, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
+    <div style={{ width: 91.47, height: 47.58, left: 0, top: 140.18, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 152.07, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+    <div style={{ width: 32.85, height: 23.50, left: 52.39, top: 116.39, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
+  </div>
 </div>
 
-Self-attention is a single *head* of attention. Multi-head attention (MHA) adds more heads to learn other things about the sentence from different perspectives.
+Self-attention is a single *head* of attention. Multi-head attention (MHA) adds more heads to learn other things about a sentence from different perspectives.
 
 The calculations are the same as self-attention, but the <HoverWord
   word="embedding size"
   description="The size of the vector used to represent a word. A larger size includes more information, but it also increases the computational cost."
-/> is split by the number of heads. Each head independently computes scaled dot-product attention on their slice of data. At the end, the outputs are combined and multiplied by a weight matrix to blend all the information together.
+/> is split by the number of heads. Each head independently computes the scaled dot-product attention on their slice of data. At the end, the outputs are combined and multiplied by a weight matrix to blend all the information together.
 
 MHA is still used by models today such as [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1).
 
-Try calculating the multi-head attention score for the word `Fear` by hand for the following sequence.
+Try calculating the multi-head attention score for the word `Fear` by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
 
@@ -225,73 +230,73 @@ Try calculating the multi-head attention score for the word `Fear` by hand for t
 1. For both heads, multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
 
     <div className="flex gap-8 items-start">
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-green-500">Head 1</span>
+        </div>
+        `[2.0*2.0, 2.0*3.0]` = `[4.0, 6.0]`
+      </div>
 
-    `[2.0*2.0, 2.0*3.0]` = `[4.0, 6.0]`
-
-    </div>
-
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
-
-    `[4.0*1.0, 4.0*1.5]` = `[4.0, 6.0]`
-
-    </div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-orange-500">Head 2</span>
+        </div>
+        `[4.0*1.0, 4.0*1.5]` = `[4.0, 6.0]`
+      </div>
     </div>
 
 2. Scale the attention scores of each head by dividing by the square root of 2 (the vector dimension).
 
     <div className="flex gap-8 items-start">
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-green-500">Head 1</span>
+        </div>
+        `[4.0/1.414, 6.0/1.414]` = `[2.828, 4.243]`
+      </div>
 
-    `[4.0/1.414, 6.0/1.414]` = `[2.828, 4.243]`
-
-    </div>
-
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
-
-    `[4.0/1.414, 6.0/1.414]` = `[2.828, 4.243]`
-
-    </div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-orange-500">Head 2</span>
+        </div>
+        `[4.0/1.414, 6.0/1.414]` = `[2.828, 4.243]`
+      </div>
     </div>
 
 3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
 
     <div className="flex gap-8 items-start">
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-green-500">Head 1</span>
+        </div>
+        `[e^2.828 / (e^2.828 + e^4.243), e^4.243 / (e^2.828 + e^4.243)]` = `[0.195, 0.804]`
+      </div>
 
-    `[e^2.828 / (e^2.828 + e^4.243), e^4.243 / (e^2.828 + e^4.243)]` = `[0.195, 0.804]`
-
-    </div>
-
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
-
-    `[e^2.828 / (e^2.828 + e^4.243), e^4.243 / (e^2.828 + e^4.243)]` = `[0.195, 0.804]`
-
-    </div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-orange-500">Head 2</span>
+        </div>
+        `[e^2.828 / (e^2.828 + e^4.243), e^4.243 / (e^2.828 + e^4.243)]` = `[0.195, 0.804]`
+      </div>
     </div>
 
 3. Weight V by the attention scores.
 
     <div className="flex gap-8 items-start">
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-green-500">Head 1</span>
+        </div>
+        `0.195*2.0`+`0.804*3.0` = `2.802`
+      </div>
 
-    `0.195*2.0`+`0.804*3.0` = `2.802`
-
-    </div>
-
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
-
-    `0.195*3.0`+`0.804*4.5` = `4.203`
-
-    </div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-orange-500">Head 2</span>
+        </div>
+        `0.195*3.0`+`0.804*4.5` = `4.203`
+      </div>
     </div>
 
 4. Concatenate the outputs of each head and multiply by a <HoverWord
@@ -307,34 +312,35 @@ This is the final multi-head attention score for `Fear`.
 
 ## multi-query attention [#multi-query-attention]
 
-<div style={{width: '100%', height: '300px', position: 'relative', borderRadius: 16}}>
-    <div style={{width: 91.47, height: 47.58, left: 262, top: 38, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
-    <div style={{width: 11.04, height: 23.50, left: 300.23, top: 49.89, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
-    <div style={{width: 91.47, height: 47.58, left: 242, top: 72, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 260.41, top: 83.89, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
-    <div style={{width: 91.47, height: 47.58, left: 400, top: 0, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 577.27, top: 48.44, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 577.27, top: 102.53, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 577.27, top: 156.62, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <AnimatedDashedLine x1={111} y1={131} x2={210} y2={131} />
-    <AnimatedDashedLine x1={323} y1={127} x2={400} y2={127} />
-    <AnimatedDashedLine x1={323} y1={127} x2={397} y2={23.79} />
-    <AnimatedDashedLine x1={109} y1={26} x2={208} y2={131} />
-    <AnimatedDashedLine x1={111} y1={240} x2={208} y2={131} />
-    <AnimatedDashedLine x1={397} y1={240} x2={323} y2={127} reverse={true} />
-    <AnimatedDashedLine x1={494.47} y1={23.79} x2={577.27} y2={126.32} />
-    <AnimatedDashedLine x1={496} y1={126.39} x2={577.27} y2={126.32} />
-    <AnimatedDashedLine x1={491.47} y1={237.31} x2={577.27} y2={126.32} />
-    <div style={{width: 91.47, height: 47.58, left: 216, top: 107.32, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 2.68, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 14.58, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 32.85, height: 23.50, left: 245.17, top: 119.21, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
-    <div style={{width: 91.47, height: 47.58, left: 400, top: 213.52, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 216.20, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 228.10, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 91.47, height: 47.58, left: 400, top: 104.50, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 107.18, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 119.07, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
+<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ width: '1000px', height: '300px', position: 'relative', borderRadius: 16, left: '50px' }}>
+    {/* Purple Value box */}
+    <div style={{ width: 91.47, height: 47.58, left: 242, top: 69.32, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 260.41, top: 81.21, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
+    
+    {/* Blue boxes */}
+    <div style={{ width: 91.47, height: 47.58, left: 416, top: 46.32, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+    <div style={{ width: 91.47, height: 47.58, left: 416, top: 100.41, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+    <div style={{ width: 91.47, height: 47.58, left: 416, top: 154.50, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+    
+    {/* Animated dashed lines */}
+    <AnimatedDashedLine x1={111} y1={128.32} x2={210} y2={128.32} />
+    <AnimatedDashedLine x1={323} y1={128.32} x2={400} y2={128.32} />
+    <AnimatedDashedLine x1={111} y1={23.32} x2={210} y2={128.32} />
+    <AnimatedDashedLine x1={111} y1={237.32} x2={210} y2={128.32} />
+    
+    {/* Orange Key box */}
+    <div style={{ width: 91.47, height: 47.58, left: 216, top: 104.64, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
+    <div style={{ width: 32.85, height: 23.50, left: 245.17, top: 116.53, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
+    
+    {/* Green Query boxes */}
+    <div style={{ width: 91.47, height: 47.58, left: 0, top: 0, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 11.89, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+    <div style={{ width: 91.47, height: 47.58, left: 0, top: 213.52, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 225.42, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+    <div style={{ width: 91.47, height: 47.58, left: 0, top: 104.50, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 116.39, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+  </div>
 </div>
 
 [Multi-query attention](https://huggingface.co/papers/1911.02150) (MQA) is the same as MHA except all Qs share the same K and V.
@@ -343,7 +349,7 @@ MQA has the advantage of being more memory efficient and faster at decoding. Eac
 
 [Gemma 2B](https://huggingface.co/google/gemma-2b) uses MQA.
 
-Try calculating the multi-query attention score for the word `Fear` by hand for the following sequence.
+Try calculating the multi-query attention score for the word `Fear` by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
 
@@ -370,72 +376,73 @@ Try calculating the multi-query attention score for the word `Fear` by hand for 
 1. For both heads, multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
   
     <div className="flex gap-8 items-start">
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-green-500">Head 1</span>
+        </div>
+        `[2.0*1.0, 2.0*1.5]` = `[2.0, 3.0]`
+      </div>
 
-    `[2.0*1.0, 2.0*1.5]` = `[2.0, 3.0]`
-
-    </div>
-
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
-
-    `[4.0*1.0, 6.0*1.5]` = `[4.0, 9.0]`
-    </div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-orange-500">Head 2</span>
+        </div>
+        `[4.0*1.0, 6.0*1.5]` = `[4.0, 9.0]`
+      </div>
     </div>
 
 2. Scale the attention scores of each head by dividing by the square root of 2 (the vector dimension).
 
     <div className="flex gap-8 items-start">
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-green-500">Head 1</span>
+        </div>
+        `[2.0/1.414, 3.0/1.414]` = `[1.414, 2.121]`
+      </div>
 
-    `[2.0/1.414, 3.0/1.414]` = `[1.414, 2.121]`
-
-    </div>
-
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
-
-    `[4.0/1.414, 9.0/1.414]` = `[2.828, 6.364]`
-
-    </div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-orange-500">Head 2</span>
+        </div>
+        `[4.0/1.414, 9.0/1.414]` = `[2.828, 6.364]`
+      </div>
     </div>
 
 3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
 
     <div className="flex gap-8 items-start">
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-green-500">Head 1</span>
+        </div>
+        `[e^1.414 / (e^1.414 + e^2.121), e^2.121 / (e^1.414 + e^2.121)]` = `[0.33, 0.67]`
+      </div>
 
-    `[e^1.414 / (e^1.414 + e^2.121), e^2.121 / (e^1.414 + e^2.121)]` = `[0.33, 0.67]`
-
-    </div>
-
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
-
-    `[e^2.828 / (e^2.828 + e^6.364), e^6.364 / (e^2.828 + e^6.364)]` = `[0.195, 0.971]`
-
-    </div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-orange-500">Head 2</span>
+        </div>
+        `[e^2.828 / (e^2.828 + e^6.364), e^6.364 / (e^2.828 + e^6.364)]` = `[0.195, 0.971]`
+      </div>
     </div>
 
 4. Weight V by the attention scores.
 
     <div className="flex gap-8 items-start">
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-green-500">Head 1</span></div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-green-500">Head 1</span>
+        </div>
+        `0.33*3.0`+`0.67*4.5` = `4.01`
+      </div>
 
-    `0.33*3.0`+`0.67*4.5` = `4.01`
-
-    </div>
-
-    <div className="flex-1">
-    <div className="pb-1 mb-2"><span className="border-b-2 border-dotted border-orange-500">Head 2</span></div>
-
-    `0.195*3.0`+`0.971*4.5` = `4.95`
-
-    </div>
+      <div className="flex-1">
+        <div className="pb-1 mb-2">
+          <span className="border-b-2 border-dotted border-orange-500">Head 2</span>
+        </div>
+        `0.195*3.0`+`0.971*4.5` = `4.95`
+      </div>
     </div>
 
 5. Concatenate the outputs of each head and multiply by a weight matrix to combine the information.
@@ -448,49 +455,50 @@ This is the final multi-query attention score for `Fear`.
 
 ## grouped-query attention [#grouped-query-attention]
 
-<div style={{width: '100%', height: '350px', position: 'relative', borderRadius: 16}}>
-    <div style={{width: 91.47, height: 47.58, left: 215, top: 5.32, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
-    <div style={{width: 11.04, height: 23.50, left: 248.23, top: 45.21, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
-    <div style={{width: 91.47, height: 47.58, left: 195, top: 39.32, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 213.41, top: 51.21, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
-    <div style={{width: 91.47, height: 47.58, left: 578, top: 57.32, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 578, top: 111.41, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 578, top: 165.50, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 578.73, top: 219.88, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <AnimatedDashedLine x1={93.03} y1={128.38} x2={173.68} y2={64.32} />
-    <AnimatedDashedLine x1={474} y1={130.32} x2={581.18} y2={160.32} />
-    <AnimatedDashedLine x1={474} y1={213.32} x2={581.18} y2={160.32} />
-    <AnimatedDashedLine x1={476} y1={318.32} x2={581.18} y2={160.32} />
-    <AnimatedDashedLine x1={306} y1={64.32} x2={406.12} y2={145.32} />
-    <AnimatedDashedLine x1={306} y1={64.32} x2={393.24} y2={23.32} />
-    <AnimatedDashedLine x1={91} y1={23.32} x2={173.68} y2={64.32} />
-    <AnimatedDashedLine x1={476} y1={23.32} x2={581.18} y2={160.32} />
-    <div style={{width: 91.47, height: 47.58, left: 169, top: 74.64, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 0, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 11.89, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 32.85, height: 23.50, left: 198.17, top: 86.53, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
-    <div style={{width: 91.47, height: 47.58, left: 383, top: 0.32, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 383, top: 104.32, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 104.50, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 116.39, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 11.04, height: 23.50, left: 255, top: 17.32, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
-    <div style={{width: 91.47, height: 47.58, left: 215, top: 195.64, position: 'absolute', background: '#FEE2E2', borderRadius: 16, border: '3px #FDA4AF solid'}} />
-    <div style={{width: 11.04, height: 23.50, left: 248.23, top: 235.53, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
-    <div style={{width: 91.47, height: 47.58, left: 195, top: 229.64, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 213.41, top: 241.53, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Value</div>
-    <AnimatedDashedLine x1={93.03} y1={318.70} x2={173.68} y2={254.64} />
-    <AnimatedDashedLine x1={306} y1={254.64} x2={393.24} y2={318.32} />
-    <AnimatedDashedLine x1={306} y1={254.64} x2={393.24} y2={213.32} />
-    <AnimatedDashedLine x1={91} y1={213.64} x2={173.68} y2={256.64} />
-    <div style={{width: 91.47, height: 47.58, left: 169, top: 264.96, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 190.32, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 202.21, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 32.85, height: 23.50, left: 198.17, top: 276.85, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Key</div>
-    <div style={{width: 91.47, height: 47.58, left: 383, top: 190.64, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 383, top: 294.64, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid'}} />
-    <div style={{width: 91.47, height: 47.58, left: 0, top: 294.81, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid'}} />
-    <div style={{width: 54.37, height: 23.50, left: 18.41, top: 306.71, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>Query</div>
-    <div style={{width: 11.04, height: 23.50, left: 255, top: 207.64, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word'}}>W</div>
+<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ width: '1000px', height: '350px', position: 'relative', borderRadius: 16, left: '50px' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative', borderRadius: 16 }}>
+      {/* Weight labels */}
+      <div style={{ width: 11.04, height: 23.50, left: 248.23, top: 45.21, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>W</div>
+      <div style={{ width: 11.04, height: 23.50, left: 248.23, top: 224.21, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>W</div>
+      
+      {/* Purple Value boxes */}
+      <div style={{ width: 91.47, height: 47.58, left: 195, top: 23.32, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
+      <div style={{ width: 54.37, height: 23.50, left: 213.41, top: 35.21, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
+      <div style={{ width: 91.47, height: 47.58, left: 195, top: 218.32, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
+      <div style={{ width: 54.37, height: 23.50, left: 213.41, top: 230.21, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
+      
+      {/* Blue boxes */}
+      <div style={{ width: 91.47, height: 47.58, left: 408, top: 61.32, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+      <div style={{ width: 91.47, height: 47.58, left: 408, top: 115.41, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+      <div style={{ width: 91.47, height: 47.58, left: 408, top: 169.50, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+      <div style={{ width: 91.47, height: 47.58, left: 408.73, top: 223.88, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
+      
+      {/* Animated dashed lines */}
+      <AnimatedDashedLine x1={93.03} y1={128.38} x2={169} y2={75.85} />
+      <AnimatedDashedLine x1={288} y1={253.32} x2={408} y2={158.32} />
+      <AnimatedDashedLine x1={91} y1={23.32} x2={169} y2={75.85} />
+      <AnimatedDashedLine x1={288} y1={63.32} x2={408} y2={158.32} />
+      <AnimatedDashedLine x1={93.03} y1={318.70} x2={169} y2={266.17} />
+      <AnimatedDashedLine x1={91} y1={213.64} x2={169} y2={266.17} />
+      
+      {/* Orange Key boxes */}
+      <div style={{ width: 91.47, height: 47.58, left: 169, top: 58.64, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
+      <div style={{ width: 32.85, height: 23.50, left: 198.17, top: 70.53, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
+      <div style={{ width: 91.47, height: 47.58, left: 169, top: 253.64, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
+      <div style={{ width: 32.85, height: 23.50, left: 198.17, top: 265.53, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
+      
+      {/* Green Query boxes */}
+      <div style={{ width: 91.47, height: 47.58, left: 0, top: 0, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+      <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 11.89, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+      <div style={{ width: 91.47, height: 47.58, left: 0, top: 104.50, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+      <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 116.39, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+      <div style={{ width: 91.47, height: 47.58, left: 0, top: 190.32, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+      <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 202.21, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+      <div style={{ width: 91.47, height: 47.58, left: 0, top: 294.81, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
+      <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 306.71, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
+    </div>
+  </div>
 </div>
 
 [Grouped-query attention](https://huggingface.co/papers/2305.13245) (GQA) is similar to MHA and MQA except each *group* of Qs share the same K and V. The Ks and Vs are different for each group.
@@ -499,7 +507,7 @@ GQA combines the best of MHA and MQA. It's faster than MHA because it still has 
 
 Many modern large language models like [Llama 3](https://huggingface.co/meta-llama/Meta-Llama-3-8B) and [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) use GQA.
 
-Try calculating the grouped-query attention score for the word `Fear` by hand for the following sequence.
+Try calculating the grouped-query attention score for the word `Fear` by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
 
@@ -639,11 +647,9 @@ This is the final grouped-query attention score for `Fear`.
 
 </Collapsible>
 
-## why? [#why]
+## summary [#summary]
 
-Attention is a double-edged sword. It's powerful, but it's also computationally expensive when sequences start getting longer.
-
-That's why there's a lot of interest in optimizing attention with methods like [FlashAttention](https://github.com/Dao-AILab/flash-attention) and [PagedAttention](https://blog.vllm.ai/2023/06/20/vllm.html).
+Attention is powerful, but it's also computationally expensive when sequences start getting longer. Newer attention algorithms, like [FlashAttention](https://github.com/Dao-AILab/flash-attention) and [PagedAttention](https://blog.vllm.ai/2023/06/20/vllm.html), handle longer sequences more memory efficiently.
 
 ## resources [#resources]
 
