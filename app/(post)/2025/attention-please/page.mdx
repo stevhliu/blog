@@ -20,7 +20,7 @@ export const metadata = {
   ]}
 />
 
-It's kind of wild that *attention* is a quantifiable concept. I don't have a way of measuring how I personally pay attention, but I imagine it's very troglodyte process.
+It's kind of wild that *attention* is a quantifiable concept. I don't have a way of measuring how I personally pay attention, but I imagine it's very primitive.
 
 If you told me to take out the trash on Monday night because it's really full and pickup day is Tuesday, my brain would probably compile it to something like "trash, Monday night". Just the essential keywords.
 
@@ -59,7 +59,7 @@ You need 3 matrices to compute self-attention. These matrices are created by mul
     description="A function that exponentiates a value and divides by the sum of all the exponentiated values."
   /> function to the scores to convert them into probabilities that add up to 1. Scaling also smooths out the softmax function by preventing any one value from dominating the rest.
 
-- Value (V) weights each word with an attention score to determine what information every other word offers. V is the information you get from each word.
+- Value (V) weights each word with an attention score to determine what information every other word offers. V is the information each word contributes.
 
 Try calculating the self-attention score for the word `Fear` by hand in the following sequence to really get a feel for how it works.
 
@@ -649,7 +649,9 @@ This is the final grouped-query attention score for `Fear`.
 
 ## summary [#summary]
 
-Attention is powerful, but it's also computationally expensive when sequences start getting longer. Newer attention algorithms, like [FlashAttention](https://github.com/Dao-AILab/flash-attention) and [PagedAttention](https://blog.vllm.ai/2023/06/20/vllm.html), handle longer sequences more memory efficiently.
+Self-attention is powerful, but it's also computationally expensive when sequences start getting longer. Newer attention algorithms, like [FlashAttention](https://github.com/Dao-AILab/flash-attention) and [PagedAttention](https://blog.vllm.ai/2023/06/20/vllm.html), handle longer sequences more memory efficiently.
+
+**The key takeaway is that self-attention is a weighted sum of contextual information of all words. The weights reflect each surrounding word's relevance to the current word.**
 
 ## resources [#resources]
 
