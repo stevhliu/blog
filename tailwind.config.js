@@ -2,12 +2,12 @@ const plugin = require("tailwindcss/plugin");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: "class",
+  darkMode: "media",
   content: ["./app/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       fontFamily: {
-        mono: ["Geist Mono", "monospace"],
+        mono: ["var(--font-geist-mono)"],
       },
     },
   },
@@ -18,6 +18,7 @@ module.exports = {
       addVariant("theme-system", ".theme-system &");
     }),
   ],
+  plugins: [],
   future: {
     hoverOnlyWhenSupported: true,
   },

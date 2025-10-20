@@ -4,33 +4,22 @@
 
 @layer base {
   :root {
-    font-family: "Geist Sans", sans-serif;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     -webkit-tap-highlight-color: transparent;
     color-scheme: light;
-    /* note: must keep in sync with `theme-color` in `theme-effect.ts` */
     @apply bg-[#fcfcfc];
   }
 
-  :root.dark {
-    color-scheme: dark;
-    /* note: must keep in sync with `theme-color` in `theme-effect.ts` */
-    @apply bg-[#1C1C1C];
-  }
-
-  :root.pause-transitions * {
-    transition-duration: 0ms !important;
-  }
-
-  @supports (font-variation-settings: normal) {
+  @media (prefers-color-scheme: dark) {
     :root {
-      font-family: "Geist Sans", sans-serif;
+      color-scheme: dark;
+      @apply bg-[#1C1C1C];
     }
   }
 
-  /* Only apply Geist Mono to specific monospace contexts */
-  .font-mono, pre, pre code {
-    font-family: "Geist Mono", monospace;
+  /* Disable ligatures globally */
+  * {
+    font-feature-settings: "liga" 0;
   }
 }
 

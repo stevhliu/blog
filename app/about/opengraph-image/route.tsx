@@ -14,16 +14,16 @@ const stevhliuPhoto = toArrayBuffer(
 // Fonts
 const fontsDir = join(process.cwd(), "fonts");
 
-const inter300 = readFileSync(
-  join(fontsDir, "inter-latin-300-normal.woff")
+const geistSans = readFileSync(
+  join(fontsDir, "geist-light.tff")
 );
 
-const inter500 = readFileSync(
-  join(fontsDir, "inter-latin-500-normal.woff")
+const geistSansMedium = readFileSync(
+  join(fontsDir, "geist-medium.tff")
 );
 
-const robotoMono400 = readFileSync(
-  join(fontsDir, "roboto-mono-latin-400-normal.woff")
+const geistMono = readFileSync(
+  join(fontsDir, "geist-mono-regular.tff")
 );
 
 export async function GET() {
@@ -34,7 +34,7 @@ export async function GET() {
     (
       <div
         tw="flex p-10 h-full w-full bg-white flex-col"
-        style={font("Inter 300")}
+        style={font("Geist")}
       >
         <main tw="flex grow pt-4 w-full justify-center items-center">
           <div tw="flex flex-row">
@@ -49,16 +49,16 @@ export async function GET() {
             </div>
 
             <div tw="flex flex-col px-10 grow text-[28px] h-70 justify-center">
-              <div tw="text-[64px] mb-7" style={font("Inter 500")}>
+              <div tw="text-[64px] mb-7" style={font("Geist Medium")}>
                 Steven Liu
               </div>
-              <div tw="flex mb-5" style={font("Roboto Mono 400")}>
+              <div tw="flex mb-5" style={font("Geist Mono")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Technical writer at Hugging Face
               </div>
-              <div tw="flex mb-5" style={font("Roboto Mono 400")}>
+              <div tw="flex mb-5" style={font("Geist Mono")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Transformers, Diffuseres
               </div>
-              <div tw="flex" style={font("Roboto Mono 400")}>
+              <div tw="flex" style={font("Geist Mono")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Lives in Sebastopol, CA
               </div>
             </div>
@@ -67,7 +67,7 @@ export async function GET() {
 
         <footer
           tw="flex w-full justify-center text-2xl text-gray-500"
-          style={font("Roboto Mono 400")}
+          style={font("Geist Mono")}
         >
           {posts.length} posts / {commaNumber(viewsSum)} views
         </footer>
@@ -78,16 +78,19 @@ export async function GET() {
       height: 630,
       fonts: [
         {
-          name: "Inter 300",
-          data: inter300,
+          name: "Geist",
+          data: geistSans,
+          weight: 300,
         },
         {
-          name: "Inter 500",
-          data: inter500,
+          name: "Geist Medium",
+          data: geistSansMedium,
+          weight: 500,
         },
         {
-          name: "Roboto Mono 400",
-          data: robotoMono400,
+          name: "Geist Mono",
+          data: geistMono,
+          weight: 400,
         },
       ],
     }

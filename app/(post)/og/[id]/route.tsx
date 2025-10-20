@@ -13,20 +13,20 @@ export async function generateStaticParams() {
 // fonts
 const fontsDir = join(process.cwd(), "fonts");
 
-const inter300 = readFileSync(
-  join(fontsDir, "inter-latin-300-normal.woff")
+const geistSans = readFileSync(
+  join(fontsDir, "geist-regular.ttf")
 );
 
-const inter500 = readFileSync(
-  join(fontsDir, "inter-latin-500-normal.woff")
+const geistSansMedium = readFileSync(
+  join(fontsDir, "geist-medium.ttf")
 );
 
-const inter600 = readFileSync(
-  join(fontsDir, "inter-latin-600-normal.woff")
+const geistSansBold = readFileSync(
+  join(fontsDir, "geist-bold.ttf")
 );
 
-const robotoMono400 = readFileSync(
-  join(fontsDir, "roboto-mono-latin-400-normal.woff")
+const geistMono = readFileSync(
+  join(fontsDir, "geist-mono.ttf")
 );
 
 export async function GET(_req: Request, props) {
@@ -44,10 +44,10 @@ export async function GET(_req: Request, props) {
     (
       <div
         tw="flex p-10 h-full w-full bg-white flex-col"
-        style={font("Inter 300")}
+        style={font("Geist")}
       >
         <header tw="flex text-[36px] w-full">
-          <div tw="font-bold" style={font("Inter 600")}>
+          <div tw="font-bold" style={font("Geist Medium")}>
             Steven Liu
           </div>
           <div tw="grow" />
@@ -57,8 +57,8 @@ export async function GET(_req: Request, props) {
         <main tw="flex grow pb-3 flex-col items-center justify-center">
           <div tw="flex">
             <div
-              tw="bg-gray-100 p-8 text-7xl font-medium rounded-md text-center"
-              style={font("Inter 500")}
+              tw="p-8 text-7xl font-medium rounded-md text-center"
+              style={font("Geist Medium")}
             >
               {post.title}
             </div>
@@ -66,7 +66,7 @@ export async function GET(_req: Request, props) {
 
           <div
             tw="mt-5 flex text-3xl text-gray-500"
-            style={font("Roboto Mono 400")}
+            style={font("Geist Mono")}
           >
             {post.date} – {post.viewsFormatted} views
           </div>
@@ -78,20 +78,20 @@ export async function GET(_req: Request, props) {
       height: 630,
       fonts: [
         {
-          name: "Inter 300",
-          data: inter300,
+          name: "Geist",
+          data: geistSans,
         },
         {
-          name: "Inter 500",
-          data: inter500,
+          name: "Geist Medium",
+          data: geistSansMedium,
         },
         {
-          name: "Inter 600",
-          data: inter600,
+          name: "Geist Bold",
+          data: geistSansBold,
         },
         {
-          name: "Roboto Mono 400",
-          data: robotoMono400,
+          name: "Geist Mono",
+          data: geistMono,
         },
       ],
     }

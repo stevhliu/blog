@@ -10,6 +10,7 @@ export const metadata = {
 
 <FloatingTOC
   items={[
+    { text: "transformers", href: "#transformers" },
     { text: "single-input", href: "#single-input" },
     { text: "multi-inputs", href: "#multi-inputs" },
     { text: "mixed inputs", href: "#mixed-inputs" },
@@ -19,7 +20,32 @@ export const metadata = {
   ]}
 />
 
-Large language models (LLMs) 
+Chat models rely on *chat templates* to convert structured chat data into a single tokenizable string a model can process.
+
+The chat template below is from [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b). When you send a message to ChatGPT, this is what it looks like on the backend.
+  
+<Snippet language="yaml">
+{`<|start|>developer<|message|># Instructions
+  You are a professional pitmaster.
+  <|end|>
+  <|start|>user<|message|>
+  Give me a step-by-step recipe for smoking a 12 lb brisket.
+  <|end|>
+  <|start|>assistant
+`}
+</Snippet>
+
+- `<|start|>` and `<|end|>` tokens indicate the start and end of a message
+- conversational roles like `developer`, `user` and `assistant` are labeled
+- `<|message|>` token indicates the message content
+
+The template ensures a model knows who's speaking and maintains conversation order to make it feel natural and aligned.
+
+Models may be trained with different chat templates that use different tokens. For example, [Llama 4](https://www.llama.com/docs/model-cards-and-prompt-formats/llama4/#-llama-4---prompt-formats-) uses the `<|begin_of_text|>` token instead of `<|start|>`. This is important because if you use a chat template that doesn't match the one a model was trained with, you may end up with poor responses.
+
+## Transformers
+
+[Transformers](https://huggingface.co/docs/transformers/index) 
 
 ## single-input [#single-input]
 
@@ -33,4 +59,4 @@ Large language models (LLMs)
 
 ## resources [#resources]
 
-- The Transformers [Chat templates](https://huggingface.co/docs/transformers/chat_templating) docs.
+- The Transformers [Chat templates](https://huggingface.co/docs/transformers/chat_templating) guide and the chat docs in that section.

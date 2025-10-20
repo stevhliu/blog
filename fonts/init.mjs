@@ -1,13 +1,34 @@
 // this script is run by the npm postinstall hook to copy the font
-// files from the node_modules directory to the public directory
+// files from the geist package to the fonts directory
+
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 // Define the source paths
 const fontPaths = [
-  "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff",
-  "node_modules/@fontsource/inter/files/inter-latin-500-normal.woff",
-  "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff",
-  "node_modules/@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff",
+  {
+    src: "node_modules/geist/dist/fonts/geist-sans/Geist-Light.ttf",
+    dest: "geist-light.ttf"
+  },
+  {
+    src: "node_modules/geist/dist/fonts/geist-sans/Geist-Regular.ttf",
+    dest: "geist-regular.ttf"
+  },
+  {
+    src: "node_modules/geist/dist/fonts/geist-sans/Geist-Medium.ttf",
+    dest: "geist-medium.ttf"
+  },
+  {
+    src: "node_modules/geist/dist/fonts/geist-sans/Geist-Bold.ttf",
+    dest: "geist-bold.ttf"
+  },
+  {
+    src: "node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.ttf",
+    dest: "geist-mono-regular.ttf"
+  }
 ];
 // Ensure the destination directory exists
 const ensureDirectoryExistence = filePath => {
@@ -19,13 +40,12 @@ const ensureDirectoryExistence = filePath => {
   fs.mkdirSync(dirname, { recursive: true });
 };
 // Copy each font file
-fontPaths.forEach(src => {
-  const fileName = path.basename(src);
-  const dest = path.join("fonts", fileName);
-  ensureDirectoryExistence(dest);
-  const exists = fs.existsSync(dest);
-  if (!exists) {
-    fs.copyFileSync(src, dest);
-    console.log(`Copied ${src} to ${dest}`);
+fontPaths.forEach(({ src, dest }) => {
+  const destPath = path.join("fonts", dest);
+  ensureDirectoryExistence(destPath);
+  const exists = fs.existsSync(destPath);
+  if (!exists && fs.existsSync(src)) {
+    fs.copyFileSync(src, destPath);
+    console.log(`Copied ${path.basename(src)} to ${destPath}`);
   }
 });

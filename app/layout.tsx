@@ -1,15 +1,10 @@
 import "./globals.css";
 
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
-import { themeEffect } from "./theme-effect";
+import { GeistSans, GeistMono } from "geist/font";
 import { Analytics } from "./analytics";
 import { Header } from "./header";
 import { Footer } from "./footer";
 import { doge } from "./doge";
-
-const geistSans = GeistSans;
-const geistMono = GeistMono;
 
 export const metadata = {
   title: "Steven Liu's blog",
@@ -43,13 +38,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.className} antialiased`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSans.className} antialiased`}
       suppressHydrationWarning={true}
     >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(${themeEffect.toString()})();(${doge.toString()})();`,
+            __html: `(${doge.toString()})();`,
           }}
         />
       </head>

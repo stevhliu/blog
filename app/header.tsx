@@ -7,22 +7,25 @@ export function Header() {
     <header className="flex mb-5 md:mb-10 items-center">
       <Logo />
 
-      <nav className="font-mono text-xs grow justify-end items-center flex gap-1 md:gap-3">
-        <ThemeToggle />
+      <nav className="text-xs grow justify-end items-center flex">
 
         <Link
           href="/about"
-          className="inline-flex hover:bg-gray-200 dark:hover:bg-[#313131] active:bg-gray-300 dark:active:bg-[#242424] rounded-sm p-2 transition-[background-color]"
+          className="p-2"
         >
-          About
+      <span className="[a:hover_&]:bg-neutral-200 dark:[a:hover_&]:bg-neutral-700 rounded-xl py-0.5 px-1.5 inline-flex">
+        About
+      </span>
         </Link>
         <a
-          href="https://twitter.com/stevhliu"
+          href="https://x.com/stevhliu"
           target="_blank"
-          className="inline-flex hover:bg-gray-200 dark:hover:bg-[#313131] active:bg-gray-300 dark:active:bg-[#242424] items-center p-2 rounded-sm transition-[background-color] whitespace-nowrap -mr-2"
+          className="inline-flex items-center p-2 rounded-sm transition-[background-color] whitespace-nowrap -mr-2"
         >
-          <TweetIcon style={{ marginRight: 4 }} /> Follow{" "}
-          <span className="hidden md:inline">&nbsp;me</span>
+      <span className="[a:hover_&]:bg-neutral-200 dark:[a:hover_&]:bg-neutral-700 rounded-xl py-0.5 px-1.5 inline-flex items-center gap-1">
+        <TweetIcon style={{ marginRight: 4 }} />
+        <span>Follow me</span>
+      </span>
         </a>
       </nav>
     </header>
