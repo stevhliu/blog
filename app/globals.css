@@ -29,4 +29,7 @@ pre.shiki {
   border-radius: 0.75rem;
   margin: 0;
   font-family: "Geist Mono", monospace;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
 }

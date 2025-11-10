@@ -23,6 +23,7 @@ import { HoverWord } from "app/(post)/components/hover-word";
 import { Table } from "app/(post)/components/table";
 import { Collapsible } from "app/(post)/components/collapsible";
 import { AnimatedDashedLine } from "app/(post)/components/animated-dashed-line";
+import { BlogCarousel as Carousel } from "app/(post)/components/carousel";
 
 export function useMDXComponents(components: {
   [component: string]: React.ComponentType;
@@ -60,5 +61,6 @@ export function useMDXComponents(components: {
     Table,
     Collapsible,
     AnimatedDashedLine,
+    Carousel,
   };
 }

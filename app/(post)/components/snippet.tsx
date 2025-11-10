@@ -14,12 +14,14 @@ type SnippetProps = {
   children: string;
   language?: SupportedLanguage;
   theme?: string;
+  maxHeight?: string;
 };
 
 export async function Snippet({
   children,
   language = "python",
   theme = "catppuccin-mocha",
+  maxHeight = "400px",
 }: SnippetProps) {
   // Pre-process the code to ensure < and > characters are preserved
   let code = typeof children === "string" ? children.trim() : "";
@@ -38,19 +40,11 @@ export async function Snippet({
 
   return (
     <div className="my-6">
-      <div className="bg-white dark:bg-[#232334] rounded-lg overflow-hidden">
+      <div className="bg-[#232334] rounded-lg overflow-x-auto overflow-y-auto p-4" style={{ maxHeight }}>
         <div
-          className="text-xs md:text-sm overflow-x-auto"
-          style={{ 
-            fontFeatureSettings: '"liga" 0',
-            minWidth: '100%'
-          }}
-          dangerouslySetInnerHTML={{ 
-            __html: processedHtml.replace(
-              /<pre[^>]*>/g, 
-              '<pre style="margin: 0; padding: 1rem; overflow-x: auto; white-space: pre; background-color: #232334;">'
-            )
-          }}
+          className="text-xs md:text-sm min-w-full [&_pre]:!bg-[#232334] [&_pre]:!m-0 [&_pre]:!p-0"
+          style={{ fontFeatureSettings: '"liga" 0' }}
+          dangerouslySetInnerHTML={{ __html: processedHtml }}
         />
       </div>
     </div>
