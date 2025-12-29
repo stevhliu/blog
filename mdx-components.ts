@@ -1,32 +1,47 @@
-import { A as a } from "app/components/a";
-import { P as p } from "app/components/p";
-import { H1 as h1 } from "app/components/h1";
-import { H2 as h2 } from "app/components/h2";
-import { H3 as h3 } from "app/components/h3";
-import { OL as ol } from "app/components/ol";
-import { UL as ul } from "app/components/ul";
-import { LI as li } from "app/components/li";
-import { HR as hr } from "app/components/hr";
-import { Code as code } from "app/components/code";
-import { Tweet } from "app/components/tweet";
-import { Image } from "app/components/image";
-import { Figure } from "app/components/figure";
-import { Snippet } from "app/components/snippet";
-import { Caption } from "app/components/caption";
-import { Callout, Tip, Warning } from "app/components/callout";
-import { YouTube } from "app/components/youtube";
-import { Ref, FootNotes, FootNote } from "app/components/footnotes";
-import { Blockquote as blockquote } from "app/components/blockquote";
-import { TOC } from "app/components/toc";
-import { FloatingTOC } from "app/components/floating-toc";
-import { HoverWord } from "app/components/hover-word";
-import { Table } from "app/components/table";
-import { Collapsible } from "app/components/collapsible";
-import { AnimatedDashedLine } from "app/components/animated-dashed-line";
-import { BlogCarousel as Carousel } from "app/components/carousel";
+import type { ComponentType } from "react";
+import dynamic from "next/dynamic";
+
+import { A as a } from "./app/components/a";
+import { P as p } from "./app/components/p";
+import { H1 as h1 } from "./app/components/h1";
+import { H2 as h2 } from "./app/components/h2";
+import { H3 as h3 } from "./app/components/h3";
+import { OL as ol } from "./app/components/ol";
+import { UL as ul } from "./app/components/ul";
+import { LI as li } from "./app/components/li";
+import { HR as hr } from "./app/components/hr";
+import { Code as code } from "./app/components/code";
+import { Tweet } from "./app/components/tweet";
+import { Image } from "./app/components/image";
+import { Figure } from "./app/components/figure";
+import { Snippet } from "./app/components/snippet";
+import { Caption } from "./app/components/caption";
+import { Callout, Tip, Warning } from "./app/components/callout";
+import { Blockquote as blockquote } from "./app/components/blockquote";
+
+// Lazy-load client components to reduce initial bundle size
+const FloatingTOC = dynamic(
+  () => import("./app/components/floating-toc").then(mod => mod.FloatingTOC),
+  { ssr: true }
+);
+
+const HoverWord = dynamic(
+  () => import("./app/components/hover-word").then(mod => mod.HoverWord),
+  { ssr: true }
+);
+
+const Table = dynamic(
+  () => import("./app/components/table").then(mod => mod.Table),
+  { ssr: true }
+);
+
+const Collapsible = dynamic(
+  () => import("./app/components/collapsible").then(mod => mod.Collapsible),
+  { ssr: true }
+);
 
 export function useMDXComponents(components: {
-  [component: string]: React.ComponentType;
+  [component: string]: ComponentType;
 }) {
   return {
     ...components,
@@ -51,16 +66,9 @@ export function useMDXComponents(components: {
     Callout,
     Tip,
     Warning,
-    YouTube,
-    Ref,
-    FootNotes,
-    FootNote,
-    TOC,
     FloatingTOC,
     HoverWord,
     Table,
     Collapsible,
-    AnimatedDashedLine,
-    Carousel,
   };
 }

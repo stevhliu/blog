@@ -144,56 +144,6 @@ Try calculating the causal self-attention score for the word `is` by hand in the
 
 ## multi-head attention [#multi-head-attention]
 
-<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ width: '1000px', height: '300px', position: 'relative', borderRadius: 16, left: '50px' }}>
-    {/* Blue boxes */}
-    <div style={{ width: 91.47, height: 47.58, left: 382, top: 74, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-    <div style={{ width: 91.47, height: 47.58, left: 382, top: 128.09, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-    <div style={{ width: 91.47, height: 47.58, left: 382, top: 182.18, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-    
-    {/* Scale + softmax labels */}
-    <div style={{ width: 79, height: 14, left: 124, top: 29, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>scale + softmax</div>
-    <div style={{ width: 79, height: 14, left: 124, top: 133, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>scale + softmax</div>
-    <div style={{ width: 79, height: 14, left: 124, top: 242, position: 'absolute', color: '#64748B', fontSize: 8, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>scale + softmax</div>
-    
-    {/* Purple Value boxes */}
-    <div style={{ width: 91.47, height: 47.58, left: 206, top: 16, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 224.41, top: 27.89, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
-    
-    {/* Animated dashed lines */}
-    <AnimatedDashedLine x1={124.32} y1={47.58} x2={195.97} y2={47.58} />
-    <AnimatedDashedLine x1={302.56} y1={48} x2={382} y2={152.39} />
-    <AnimatedDashedLine x1={300} y1={152.39} x2={382} y2={152.39} />
-    <AnimatedDashedLine x1={300.74} y1={260.56} x2={380} y2={152.39} />
-    
-    {/* Orange Key boxes */}
-    <div style={{ width: 91.47, height: 47.58, left: 23.22, top: 0, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
-    <div style={{ width: 32.85, height: 23.50, left: 52.39, top: 11.89, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
-    
-    {/* Green Query boxes */}
-    <div style={{ width: 91.47, height: 47.58, left: 0, top: 35.68, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 47.58, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-    
-    {/* Bottom row elements */}
-    <div style={{ width: 91.47, height: 47.58, left: 206, top: 229.52, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 224.41, top: 241.42, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
-    <AnimatedDashedLine x1={124.32} y1={261.10} x2={195.97} y2={261.10} />
-    <div style={{ width: 91.47, height: 47.58, left: 23.22, top: 213.52, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
-    <div style={{ width: 91.47, height: 47.58, left: 0, top: 249.20, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 261.10, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-    <div style={{ width: 32.85, height: 23.50, left: 52.39, top: 225.42, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
-    
-    {/* Middle row elements */}
-    <div style={{ width: 91.47, height: 47.58, left: 206, top: 120.50, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 224.41, top: 132.39, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
-    <AnimatedDashedLine x1={124.32} y1={152.07} x2={195.97} y2={152.07} />
-    <div style={{ width: 91.47, height: 47.58, left: 23.22, top: 104.50, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
-    <div style={{ width: 91.47, height: 47.58, left: 0, top: 140.18, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 152.07, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-    <div style={{ width: 32.85, height: 23.50, left: 52.39, top: 116.39, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
-  </div>
-</div>
-
 Self-attention is a single *head* of attention. Multi-head attention (MHA) adds more heads to learn other things about a sentence from different perspectives.
 
 The calculations are the same as self-attention, but the <HoverWord
@@ -312,37 +262,6 @@ This is the final multi-head attention score for `Fear`.
 
 ## multi-query attention [#multi-query-attention]
 
-<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ width: '1000px', height: '300px', position: 'relative', borderRadius: 16, left: '50px' }}>
-    {/* Purple Value box */}
-    <div style={{ width: 91.47, height: 47.58, left: 242, top: 69.32, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 260.41, top: 81.21, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
-    
-    {/* Blue boxes */}
-    <div style={{ width: 91.47, height: 47.58, left: 416, top: 46.32, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-    <div style={{ width: 91.47, height: 47.58, left: 416, top: 100.41, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-    <div style={{ width: 91.47, height: 47.58, left: 416, top: 154.50, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-    
-    {/* Animated dashed lines */}
-    <AnimatedDashedLine x1={111} y1={128.32} x2={210} y2={128.32} />
-    <AnimatedDashedLine x1={323} y1={128.32} x2={400} y2={128.32} />
-    <AnimatedDashedLine x1={111} y1={23.32} x2={210} y2={128.32} />
-    <AnimatedDashedLine x1={111} y1={237.32} x2={210} y2={128.32} />
-    
-    {/* Orange Key box */}
-    <div style={{ width: 91.47, height: 47.58, left: 216, top: 104.64, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
-    <div style={{ width: 32.85, height: 23.50, left: 245.17, top: 116.53, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
-    
-    {/* Green Query boxes */}
-    <div style={{ width: 91.47, height: 47.58, left: 0, top: 0, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 11.89, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-    <div style={{ width: 91.47, height: 47.58, left: 0, top: 213.52, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 225.42, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-    <div style={{ width: 91.47, height: 47.58, left: 0, top: 104.50, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-    <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 116.39, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-  </div>
-</div>
-
 [Multi-query attention](https://huggingface.co/papers/1911.02150) (MQA) is the same as MHA except all Qs share the same K and V.
 
 MQA has the advantage of being more memory efficient and faster at decoding. Each head doesn't need to store a separate K and V. This makes an especially big difference for really long sequences.
@@ -454,52 +373,6 @@ This is the final multi-query attention score for `Fear`.
 </Collapsible>
 
 ## grouped-query attention [#grouped-query-attention]
-
-<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ width: '1000px', height: '350px', position: 'relative', borderRadius: 16, left: '50px' }}>
-    <div style={{ width: '100%', height: '100%', position: 'relative', borderRadius: 16 }}>
-      {/* Weight labels */}
-      <div style={{ width: 11.04, height: 23.50, left: 248.23, top: 45.21, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>W</div>
-      <div style={{ width: 11.04, height: 23.50, left: 248.23, top: 224.21, position: 'absolute', color: '#FDA4AF', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>W</div>
-      
-      {/* Purple Value boxes */}
-      <div style={{ width: 91.47, height: 47.58, left: 195, top: 23.32, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
-      <div style={{ width: 54.37, height: 23.50, left: 213.41, top: 35.21, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
-      <div style={{ width: 91.47, height: 47.58, left: 195, top: 218.32, position: 'absolute', background: '#EDE9FE', borderRadius: 16, border: '3px #A78BFA solid' }} />
-      <div style={{ width: 54.37, height: 23.50, left: 213.41, top: 230.21, position: 'absolute', color: '#A78BFA', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Value</div>
-      
-      {/* Blue boxes */}
-      <div style={{ width: 91.47, height: 47.58, left: 408, top: 61.32, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-      <div style={{ width: 91.47, height: 47.58, left: 408, top: 115.41, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-      <div style={{ width: 91.47, height: 47.58, left: 408, top: 169.50, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-      <div style={{ width: 91.47, height: 47.58, left: 408.73, top: 223.88, position: 'absolute', background: '#DBEAFE', borderRadius: 16, border: '3px #93C5FD solid' }} />
-      
-      {/* Animated dashed lines */}
-      <AnimatedDashedLine x1={93.03} y1={128.38} x2={169} y2={75.85} />
-      <AnimatedDashedLine x1={288} y1={253.32} x2={408} y2={158.32} />
-      <AnimatedDashedLine x1={91} y1={23.32} x2={169} y2={75.85} />
-      <AnimatedDashedLine x1={288} y1={63.32} x2={408} y2={158.32} />
-      <AnimatedDashedLine x1={93.03} y1={318.70} x2={169} y2={266.17} />
-      <AnimatedDashedLine x1={91} y1={213.64} x2={169} y2={266.17} />
-      
-      {/* Orange Key boxes */}
-      <div style={{ width: 91.47, height: 47.58, left: 169, top: 58.64, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
-      <div style={{ width: 32.85, height: 23.50, left: 198.17, top: 70.53, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
-      <div style={{ width: 91.47, height: 47.58, left: 169, top: 253.64, position: 'absolute', background: '#FFEDD5', borderRadius: 16, border: '3px #FB923C solid' }} />
-      <div style={{ width: 32.85, height: 23.50, left: 198.17, top: 265.53, position: 'absolute', color: '#FB923C', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Key</div>
-      
-      {/* Green Query boxes */}
-      <div style={{ width: 91.47, height: 47.58, left: 0, top: 0, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-      <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 11.89, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-      <div style={{ width: 91.47, height: 47.58, left: 0, top: 104.50, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-      <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 116.39, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-      <div style={{ width: 91.47, height: 47.58, left: 0, top: 190.32, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-      <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 202.21, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-      <div style={{ width: 91.47, height: 47.58, left: 0, top: 294.81, position: 'absolute', background: '#BBF7D0', borderRadius: 16, border: '3px #4ADE80 solid' }} />
-      <div style={{ width: 54.37, height: 23.50, left: 18.41, top: 306.71, position: 'absolute', color: '#4ADE80', fontSize: 16, fontFamily: 'Geist Mono', fontWeight: '700', wordWrap: 'break-word' }}>Query</div>
-    </div>
-  </div>
-</div>
 
 [Grouped-query attention](https://huggingface.co/papers/2305.13245) (GQA) is similar to MHA and MQA except each *group* of Qs share the same K and V. The Ks and Vs are different for each group.
 

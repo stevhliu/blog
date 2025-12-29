@@ -1,31 +1,36 @@
-"use client";
-
-import { useSelectedLayoutSegments } from "next/navigation";
-import { useEffect, useRef } from "react";
-import { ago } from "time-ago";
-import useSWR from "swr";
 import type { Post } from "@/app/get-posts";
+import { ViewCounter } from "./view-counter";
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+function getRelativeTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-export function Header({ posts }: { posts: Post[] }) {
-  const segments = useSelectedLayoutSegments();
-  // segments can be:
-  // date/post
-  // lang/date/post
-  const initialPost = posts.find(
-    post => post.id === segments[segments.length - 1]
-  );
-  const { data: post, mutate } = useSWR(
-    `/api/view?id=${initialPost?.id ?? ""}`,
-    fetcher,
-    {
-      fallbackData: initialPost,
-      refreshInterval: 5000,
+  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+  if (diffDays < 1) {
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffHours < 1) {
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      return rtf.format(-diffMinutes, "minute");
     }
-  );
+    return rtf.format(-diffHours, "hour");
+  } else if (diffDays < 30) {
+    return rtf.format(-diffDays, "day");
+  } else if (diffDays < 365) {
+    const diffMonths = Math.floor(diffDays / 30);
+    return rtf.format(-diffMonths, "month");
+  } else {
+    const diffYears = Math.floor(diffDays / 365);
+    return rtf.format(-diffYears, "year");
+  }
+}
 
-  if (initialPost == null) return <></>;
+export function Header({ post }: { post: Post | null }) {
+  if (post == null) return null;
+
+  const relativeTime = getRelativeTime(post.date);
 
   return (
     <>
@@ -49,44 +54,15 @@ export function Header({ posts }: { posts: Post[] }) {
             <span className="mx-2">|</span>
           </span>
 
-          {/* since we will pre-render the relative time, over time it
-           * will diverge with what the user relative time is, so we suppress the warning.
-           * In practice this is not an issue because we revalidate the entire page over time
-           * and because we will move this to a server component with template.tsx at some point */}
-          <span suppressHydrationWarning={true}>
-            {post.date} ({ago(post.date, true)} ago)
+          <span>
+            {post.date} ({relativeTime})
           </span>
         </span>
 
         <span className="pr-1.5">
-          <Views
-            id={post.id}
-            mutate={mutate}
-            defaultValue={post.viewsFormatted}
-          />
+          <ViewCounter id={post.id} initialViews={post.viewsFormatted} />
         </span>
       </p>
     </>
   );
-}
-
-function Views({ id, mutate, defaultValue }) {
-  const views = defaultValue;
-  const didLogViewRef = useRef(false);
-
-  useEffect(() => {
-    if ("development" === process.env.NODE_ENV) return;
-    if (!didLogViewRef.current) {
-      const url = "/api/view?incr=1&id=" + encodeURIComponent(id);
-      fetch(url)
-        .then(res => res.json())
-        .then(obj => {
-          mutate(obj);
-        })
-        .catch(console.error);
-      didLogViewRef.current = true;
-    }
-  });
-
-  return <>{views != null ? <span>{views} views</span> : null}</>;
 }

@@ -18,7 +18,6 @@ module.exports = {
       addVariant("theme-system", ".theme-system &");
     }),
   ],
-  plugins: [],
   future: {
     hoverOnlyWhenSupported: true,
   },

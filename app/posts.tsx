@@ -1,30 +1,15 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Suspense } from "react";
-import useSWR from "swr";
+import type { Post } from "./get-posts";
 
-type SortSetting = ["date" | "views", "desc" | "asc"];
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
-export function Posts({ posts: initialPosts }) {
-  const { data: posts } = useSWR("/api/posts", fetcher, {
-    fallbackData: initialPosts,
-    refreshInterval: 5000,
-  });
-
+export function Posts({ posts }: { posts: Post[] }) {
   return (
-    <Suspense fallback={null}>
-      <main className="max-w-2xl m-auto mb-10 text-sm">
-        <List posts={posts} />
-      </main>
-    </Suspense>
+    <main className="max-w-2xl m-auto mb-10 text-sm">
+      <List posts={posts} />
+    </main>
   );
 }
 
-function List({ posts }) {
+function List({ posts }: { posts: Post[] }) {
   return (
     <ul>
       {posts.map((post, i: number) => {
