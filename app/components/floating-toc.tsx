@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface TOCItem {
   text: string;
@@ -106,7 +106,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   const getRandomColor = (): Color => 
     COLORS[Math.floor(Math.random() * COLORS.length)];
 
-  const findActiveSection = (scrollPosition: number) => {
+  const findActiveSection = useCallback((scrollPosition: number) => {
     const sections = items.map(item => item.href.substring(1));
     
     return sections.find(sectionId => {
@@ -117,7 +117,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
       const elementBottom = elementTop + element.offsetHeight;
       return scrollPosition >= elementTop && scrollPosition < elementBottom;
     }) || '';
-  };
+  }, [items]);
 
   // Combined scroll handler
   useEffect(() => {
@@ -134,7 +134,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [items]);
+  }, [findActiveSection]);
 
   const handleMouseEnter = () => {
     setIsExpanded(true);

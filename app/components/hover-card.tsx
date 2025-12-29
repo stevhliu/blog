@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 interface HoverCardProps {
   children: React.ReactNode;
@@ -159,7 +159,7 @@ export function HoverCard({
   const contentRef = useRef<HTMLSpanElement>(null);
   const { setTimeout, clearTimeout } = useTimeout();
 
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (!triggerRef.current || !contentRef.current) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
@@ -182,7 +182,7 @@ export function HoverCard({
     const finalPosition = constrainToViewport(combinedPosition, contentRect);
     
     setPosition(finalPosition);
-  };
+  }, [side, align]);
 
   const handleMouseEnter = () => {
     clearTimeout();
@@ -205,7 +205,7 @@ export function HoverCard({
     if (isOpen) {
       updatePosition();
     }
-  }, [isOpen]);
+  }, [isOpen, updatePosition]);
 
   return (
     <span
