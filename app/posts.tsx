@@ -42,21 +42,23 @@ function List({ posts }) {
               `}
               >
                 <span
-                  className={`py-2 flex grow items-center ${
+                  className={`py-2 flex grow items-baseline ${
                     !firstOfYear ? "ml-14" : ""
                   }`}
                 >
                   {firstOfYear && (
-                    <span className="w-14 inline-block self-start shrink-0 text-neutral-500 text-xs dark:text-neutral-500 mt-0.5">
+                    <span className="w-14 inline-block shrink-0 text-neutral-500 text-xs dark:text-neutral-500">
                       {year}
                     </span>
                   )}
 
                   <span className="grow dark:text-gray-100">
-            <span className="[li:hover_&]:bg-neutral-200 dark:[li:hover_&]:bg-neutral-700 transition-all rounded-xl py-0.5 px-1.5">{post.title}</span>
-          </span>
+                    <span className="text-base [li:hover_&]:bg-neutral-200 dark:[li:hover_&]:bg-neutral-700 transition-all rounded-xl py-0.5 px-1.5">
+                      {post.title}
+                    </span>
+                  </span>
 
-                  <span className="text-neutral-500 dark:text-neutral-500 text-xs mt-0.5">
+                  <span className="text-neutral-500 dark:text-neutral-500 text-xs">
                     {post.viewsFormatted}
                   </span>
                 </span>

@@ -41,7 +41,7 @@ export async function Image({
         } else {
           imageBuffer = await readFile(
             new URL(
-              join(import.meta.url, "..", "..", "..", "..", "public", src)
+              join(import.meta.url, "..", "..", "..", "public", src)
             ).pathname
           );
         }
