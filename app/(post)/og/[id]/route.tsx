@@ -25,9 +25,7 @@ const geistSansBold = readFileSync(
   join(fontsDir, "geist-bold.ttf")
 );
 
-const geistMono = readFileSync(
-  join(fontsDir, "geist-mono.ttf")
-);
+const geistMono = readFileSync(join(fontsDir, "geist-mono-regular.ttf"));
 
 export async function GET(_req: Request, props) {
   const params = await props.params;
