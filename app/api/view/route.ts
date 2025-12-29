@@ -1,8 +1,8 @@
-import redis from "@/app/redis";
 import postsData from "@/app/posts.json";
 import commaNumber from "comma-number";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { supabase } from "@/app/supabase";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -35,18 +35,40 @@ export async function GET(req: NextRequest) {
   }
 
   if (url.searchParams.get("incr") != null) {
-    const views = await redis.hincrby("views", id, 1);
-    return NextResponse.json({
-      ...post,
-      views,
-      viewsFormatted: commaNumber(views),
-    });
+    const { data, error } = await supabase.rpc("increment_view", { p_id: id });
+    const views = Number(data ?? 0);
+
+    if (error) {
+      console.error("increment_view error", error);
+    }
+
+    return NextResponse.json(
+      {
+        ...post,
+        views,
+        viewsFormatted: commaNumber(views),
+      },
+      { status: error ? 500 : 200 }
+    );
   } else {
-    const views = (await redis.hget("views", id)) ?? 0;
-    return NextResponse.json({
-      ...post,
-      views,
-      viewsFormatted: commaNumber(Number(views)),
-    });
+    const { data, error } = await supabase
+      .from("views")
+      .select("count")
+      .eq("post_id", id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("view fetch error", error);
+    }
+
+    const views = Number(data?.count ?? 0);
+    return NextResponse.json(
+      {
+        ...post,
+        views,
+        viewsFormatted: commaNumber(views),
+      },
+      { status: error ? 500 : 200 }
+    );
   }
 }

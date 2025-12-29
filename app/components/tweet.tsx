@@ -6,7 +6,7 @@ import {
   TweetSkeleton,
   type TweetProps,
 } from "react-tweet";
-import redis from "@/app/redis";
+import { supabase } from "@/app/supabase";
 import { Caption } from "./caption";
 import "./tweet.css";
 
@@ -23,14 +23,29 @@ async function getAndCacheTweet(id: string): Promise<Tweet | undefined> {
     // @ts-ignore
     if (tweet && !tweet.tombstone) {
       // we populate the cache if we have a fresh tweet
-      await redis.set(`tweet:${id}`, tweet);
+      await supabase.from("tweet_cache").upsert({
+        tweet_id: id,
+        data: tweet,
+        cached_at: new Date().toISOString(),
+      });
       return tweet;
     }
   } catch (error) {
     console.error("tweet fetch error", error);
   }
 
-  const cachedTweet: Tweet | null = await redis.get(`tweet:${id}`);
+  const { data, error } = await supabase
+    .from("tweet_cache")
+    .select("data")
+    .eq("tweet_id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("tweet cache fetch error", error);
+  }
+
+  const cachedTweet: Tweet | null =
+    (data?.data as unknown as Tweet | null) ?? null;
 
   // @ts-ignore
   if (!cachedTweet || cachedTweet.tombstone) return undefined;
