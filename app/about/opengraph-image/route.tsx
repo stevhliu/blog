@@ -14,17 +14,11 @@ const stevhliuPhoto = toArrayBuffer(
 // Fonts
 const fontsDir = join(process.cwd(), "fonts");
 
-const geistSans = readFileSync(
-  join(fontsDir, "geist-light.tff")
-);
+const geistSans = readFileSync(join(fontsDir, "geist-light.ttf"));
 
-const geistSansMedium = readFileSync(
-  join(fontsDir, "geist-medium.tff")
-);
+const geistSansMedium = readFileSync(join(fontsDir, "geist-medium.ttf"));
 
-const geistMono = readFileSync(
-  join(fontsDir, "geist-mono-regular.tff")
-);
+const geistMono = readFileSync(join(fontsDir, "geist-mono-regular.ttf"));
 
 export async function GET() {
   const posts = await getPosts();
