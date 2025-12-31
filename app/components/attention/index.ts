@@ -8,4 +8,6 @@ export { FAParallelismDiagram } from "./fa-parallelism-diagram";
 export { FAWarpDiagram } from "./fa-warp-diagram";
 export { FA3PipelineDiagram } from "./fa3-pipeline-diagram";
 export { FA3WGMMADiagram } from "./fa3-wgmma-diagram";
+export { FP8OutlierDiagram } from "./fp8-outlier-diagram";
+export { IncoherentDiagram } from "./incoherent-diagram";
 

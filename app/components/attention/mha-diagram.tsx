@@ -6,7 +6,7 @@ export function MHADiagram() {
       <svg viewBox="0 0 360 90" className="w-full max-w-md mx-auto">
         {/* Head 1 */}
         <g transform="translate(20, 30)">
-          <text x="45" y="-8" textAnchor="middle" className="fill-slate-400 text-[9px]">head 1</text>
+          <text x="50" y="-8" textAnchor="middle" className="fill-slate-400 text-[9px]">head 1</text>
           <rect x="0" y="0" width="30" height="40" rx="6" className="fill-sky-100 stroke-sky-400" strokeWidth="1.5"/>
           <text x="15" y="25" textAnchor="middle" className="fill-sky-600 text-[12px] font-medium">Q₁</text>
           <rect x="35" y="0" width="30" height="40" rx="6" className="fill-amber-100 stroke-amber-400" strokeWidth="1.5"/>
@@ -17,7 +17,7 @@ export function MHADiagram() {
         
         {/* Head 2 */}
         <g transform="translate(130, 30)">
-          <text x="45" y="-8" textAnchor="middle" className="fill-slate-400 text-[9px]">head 2</text>
+          <text x="50" y="-8" textAnchor="middle" className="fill-slate-400 text-[9px]">head 2</text>
           <rect x="0" y="0" width="30" height="40" rx="6" className="fill-sky-100 stroke-sky-400" strokeWidth="1.5"/>
           <text x="15" y="25" textAnchor="middle" className="fill-sky-600 text-[12px] font-medium">Q₂</text>
           <rect x="35" y="0" width="30" height="40" rx="6" className="fill-amber-100 stroke-amber-400" strokeWidth="1.5"/>
@@ -28,7 +28,7 @@ export function MHADiagram() {
         
         {/* Head 3 */}
         <g transform="translate(240, 30)">
-          <text x="45" y="-8" textAnchor="middle" className="fill-slate-400 text-[9px]">head 3</text>
+          <text x="50" y="-8" textAnchor="middle" className="fill-slate-400 text-[9px]">head 3</text>
           <rect x="0" y="0" width="30" height="40" rx="6" className="fill-sky-100 stroke-sky-400" strokeWidth="1.5"/>
           <text x="15" y="25" textAnchor="middle" className="fill-sky-600 text-[12px] font-medium">Q₃</text>
           <rect x="35" y="0" width="30" height="40" rx="6" className="fill-amber-100 stroke-amber-400" strokeWidth="1.5"/>

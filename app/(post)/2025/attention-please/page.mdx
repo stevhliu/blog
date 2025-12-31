@@ -26,9 +26,9 @@ export const metadata = {
 > An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.
 > - [Attention Is All You Need](https://huggingface.co/papers/1706.03762)
 
-This post tries to very simply and very plainly explain how self-attention, and variants of it, work while eschewing as much jargon as possible.
+It's amazing that an idea so simple has such a tremendous and lasting impact. This idea is described in only two sentences, but it is consumed by millions of people using large language models daily.
 
-I'll update this post periodically as I learn more about different attention variants.
+This post tries to very simply and very plainly explain how attention, and variants of it, work.
 
 ## self-attention [#self-attention]
 
@@ -45,22 +45,22 @@ You need 3 matrices to compute self-attention. These matrices are created by mul
 />
 (W<sub>k</sub>, W<sub>q</sub>, W<sub>v</sub>).
 
-- Query (Q) is compared to all the Ks (including itself) to calculate how much attention to pay to each word. Q is the information you're looking for.
-- Key (K) is multiplied by Q (<HoverWord
+- Query (Q) is the information you're looking for. It is compared to every K (including itself) to calculate how much attention to pay to each word.
+- Key (K) is the information a word contains. It is multiplied (<HoverWord
   word="dot product"
   description="A mathematical operation that compares how similar two vectors are. In the context of transformers, it compares how similar two tokens are."
-/>) to produce the attention scores for each word. K is the information a word contains.
+/>) by Q to get the attention scores for each word.
 
-  The attention scores are *scaled* by dividing by the square root of the vector dimension. For example, if the dimension is 64, divide the attention scores by 8. Scaling prevents the attention scores from becoming too large or too small.
+  The scores are *scaled* by dividing by the square root of the vector dimension. For example, if the dimension is 64, divide the attention scores by 8. Scaling prevents the attention scores from becoming too large or too small.
 
-  A <HoverWord
+  Scores are converted into probabilities that add up to 1 with the <HoverWord
     word="softmax"
     description="A function that exponentiates a value and divides by the sum of all the exponentiated values."
-  /> function converts the scores into probabilities that add up to 1. Scaling also smooths out the softmax function by preventing any one value from dominating the rest.
+  /> function. Scaling also smooths out the softmax function by preventing any one value from getting too large and overwhelming the rest.
 
-- Value (V) weights each word with an attention score to determine what information every other word offers. V is the information each word contributes.
+- Value (V) is the information each word contributes. It weights each word with the attention score to determine what information every other word offers.
 
-Try calculating the self-attention score for the word `Fear` by hand in the following sequence to really get a feel for how it works.
+Try calculating the self-attention score by hand in the following sequence to really get a feel for how it works.
 
 <Collapsible trigger="Show calculations">
 
@@ -75,40 +75,40 @@ Try calculating the self-attention score for the word `Fear` by hand in the foll
 
 1. Multiply Q<sub>Fear</sub> by K for every word in the sequence to get the attention score.
 
-    `[0.2, 0.1, 0.8]*[0.3, 0.5, 0.2]` = `0.2*0.3 + 0.1*0.5 + 0.8*0.2` = `0.31`
+    `[0.2, 0.1, 0.8]*[0.3, 0.5, 0.2]` = `0.2*0.3 + 0.1*0.5 + 0.8*0.2` = `0.27`
 
     `[0.2, 0.1, 0.8]*[0.1, 0.4, 0.6]` = `0.2*0.1 + 0.1*0.4 + 0.8*0.6` = `0.54`
 
 2. Scale the attention scores by dividing by the square root of 3 (the vector dimension).
 
-    `[0.31/1.732, 0.54/1.732]` = `[0.179, 0.311]`
+    `[0.27/1.732, 0.54/1.732]` = `[0.156, 0.312]`
 
 3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
 
-    `[e^0.179 / (e^0.179 + e^0.311), e^0.311 / (e^0.179 + e^0.311)]` = `[0.467, 0.532]`
+    `[e^0.179 / (e^0.179 + e^0.311), e^0.311 / (e^0.179 + e^0.311)]` = `[0.46, 0.54]`
 
 4. Weight V by the attention scores.
 
-    `0.467*[0.1, 0.7, 0.4]` = `[0.0467, 0.3269, 0.1868]`
+    `0.46*[0.1, 0.7, 0.4]` = `[0.046, 0.322, 0.184]`
 
-    `0.532*[0.8, 0.1, 0.2]` = `[0.4256, 0.0532, 0.1064]`
+    `0.54*[0.8, 0.1, 0.2]` = `[0.432, 0.054, 0.108]`
 
 5. Add the weighted values together.
 
-    `[0.0467+0.4256, 0.3269+0.0532, 0.1868+0.1064]` = `[0.4723, 0.3801, 0.2932]`
+    `[0.046+0.432, 0.322+0.054, 0.184+0.108]` = `[0.478, 0.376, 0.292]`
 
 This is the final self-attention score for `Fear`.
 </Collapsible>
 
 ## causal self-attention [#causal-self-attention]
 
-Causal self-attention is used in decoder models like [GPT](https://huggingface.co/openai-community/gpt2). Decoder models predict the next word in a sequence, so it is important to mask future words to prevent it from cheating.
+Causal self-attention is used in decoder models like [GPT](https://huggingface.co/openai-community/gpt2). Decoder models predict the next word in a sequence, so it is important to mask the next words to prevent the model from seeing them.
 
 <CausalDiagram />
 
-The mask sets words that should be blocked to -∞ and the softmax of -∞ is ~0.
+The mask sets words that should be blocked to -∞, which is converted to ~0 by the softmax.
 
-Try calculating the causal self-attention score for the word `is` by hand in the following sequence.
+Try calculating the causal self-attention score by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
 
@@ -145,7 +145,7 @@ Try calculating the causal self-attention score for the word `is` by hand in the
 
 ## multi-head attention [#multi-head-attention]
 
-Self-attention is a single *head* of attention. Multi-head attention (MHA) adds more heads to learn from different perspectives.
+Multi-head attention (MHA) adds more heads to learn from different perspectives.
 
 <MHADiagram />
 
@@ -154,9 +154,9 @@ The calculations are the same as self-attention, but the <HoverWord
   description="The size of the vector used to represent a word. A larger size includes more information, but it also increases the computational cost."
 /> is split by the number of heads. Each head independently computes the scaled dot-product attention on their slice of data. At the end, the outputs are combined and multiplied by a weight matrix to blend all the information together.
 
-[DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) uses MHA.
+[BERT](https://huggingface.co/google-bert/bert-base-uncased) uses MHA.
 
-Try calculating the multi-head attention score for the word `Fear` by hand in the following sequence.
+Try calculating the multi-head attention score by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
 
@@ -265,15 +265,15 @@ This is the final multi-head attention score for `Fear`.
 
 ## multi-query attention [#multi-query-attention]
 
-[Multi-query attention](https://huggingface.co/papers/1911.02150) (MQA) is the same as MHA except all Qs share the same K and V.
+[Multi-query attention](https://huggingface.co/papers/1911.02150) (MQA) is the same as MHA except every Q shares the same K, V.
 
 <MQADiagram />
 
-MQA is more memory efficient and faster at decoding because each head doesn't need to store a separate K and V. This makes an especially big difference for really long sequences.
+MQA is more memory-efficient and faster at decoding because each head doesn't need to store a separate K, V. This makes an especially big difference for really long sequences.
 
 [Gemma 2B](https://huggingface.co/google/gemma-2b) uses MQA.
 
-Try calculating the multi-query attention score for the word `Fear` by hand in the following sequence.
+Try calculating the multi-query attention score by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
 
@@ -379,15 +379,15 @@ This is the final multi-query attention score for `Fear`.
 
 ## grouped-query attention [#grouped-query-attention]
 
-[Grouped-query attention](https://huggingface.co/papers/2305.13245) (GQA) is similar to MHA and MQA except *groups* of Qs share the same K and V. Ks and Vs are different for each group.
+[Grouped-query attention](https://huggingface.co/papers/2305.13245) (GQA) is similar to MHA and MQA except *groups* of Q share the same K, V. K, V is different for each group.
 
 <GQADiagram />
 
-GQA combines the best of MHA and MQA. It's faster than MHA because it still has fewer Ks and Vs and it's more expressive than MQA because it has more Qs.
+GQA is the middle ground between MHA and MQA. It's faster than MHA and more expressive than MQA.
 
 [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) uses GQA.
 
-Try calculating the grouped-query attention score for the word `Fear` by hand in the following sequence.
+Try calculating the grouped-query attention score by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
 
@@ -533,8 +533,8 @@ This is the final grouped-query attention score for `Fear`.
 
 <FlashAttentionDiagram />
 
-- Q, K, and V are tiled into blocks that fit in SRAM. Tiling lets the calculation be performed in one CUDA kernel.
-- In the first block, calculate a local max *m<sub>1</sub>* and a sum *l<sub>1</sub>* for the first Q and K block.
+- Q, K, and V are tiled into blocks that fit in SRAM. Tiling lets the calculation be performed in a CUDA kernel.
+- In the first block, calculate a local max *m<sub>1</sub>* and a sum *l<sub>1</sub>* for Q, K.
 - After processing the second block, update the local max to *m<sub>2</sub>*. Rescale *l<sub>1</sub>* and the partial output before adding the new updates.
 - Repeat for each calculation.
 
@@ -542,7 +542,7 @@ Attention scores are streamed over blocks to avoid storing the entire attention 
 
 The backward pass uses the same idea to avoid storing the attention probabilities P in memory. P is required for computing gradients with respect to Q, K, and V. FlashAttention recomputes P block-by-block, uses the same softmax statistics from the forward pass (*m*, *l*), and accumulates the gradients.
 
-Speed ups grow with sequence length. For short sequences, attention is less memory-bound and there's less benefit.
+Speed ups increase with sequence length. But for short sequences, attention is less memory-bound and there's less benefit.
 
 ## flashattention-2 [#flashattention-2]
 
@@ -550,7 +550,7 @@ Speed ups grow with sequence length. For short sequences, attention is less memo
 
 - GPUs use specialized compute units, Tensor Cores on Nvidia GPUs, for fast matmuls. In FlashAttention, every block rescales the output with the sum *l*. 
   
-  FlashAttention-2 delays rescaling after every block until the end to avoid many scalar divisions and multiplications. This reduces the number of non-matmul operations.
+  FlashAttention-2 delays rescaling to the end to avoid many scalar divisions. This reduces the number of non-matmul operations.
 
 <FAParallelismDiagram />
 
@@ -560,13 +560,13 @@ Speed ups grow with sequence length. For short sequences, attention is less memo
 
 <FAWarpDiagram />
 
-- Warps are groups of threads in a thread block. FlashAttention split the work on K, V and kept Q accessible by all warps. After computing attention, warps write the partial results to shared memory, synchronize, and reduce.
+- Warps are groups of threads in a thread block. FlashAttention split the work on K, V and Q is accessible by all warps. After computing attention, warps write the partial results to shared memory, synchronize, and reduce.
 
-   FlashAttention-2 splits the work on Q and kept K, V accessible by all warps. Each warp computes a partial result that doesn't require synchronization until the end. Assigning different Q blocks to different warps minimizes shared memory traffic.
+   FlashAttention-2 splits the work on Q and K, V is accessible by all warps. Each warp computes a partial result that doesn't require synchronization until the end. Assigning different Q blocks to different warps minimizes shared memory traffic.
 
 ## flashattention-3 [#flashattention-3]
 
-[FlashAttention-3](https://huggingface.co/papers/2407.08608) optimizes for newer hardware like H100 GPUs. H100 supports asynchrony. Tensor cores can do fast matmuls, Tensor Memory Accelerator (TMA) loads data from HBM, and CUDA cores can perform computations like softmax.
+[FlashAttention-3](https://huggingface.co/papers/2407.08608) optimizes for newer hardware, like H100 GPUs, that support asynchrony. Specialized compute units run in parallel. Tensor cores can do fast matmuls, Tensor Memory Accelerator (TMA) loads data from HBM, and CUDA cores can perform slower computations like softmax.
 
 <FA3PipelineDiagram />
 
@@ -576,21 +576,25 @@ Speed ups grow with sequence length. For short sequences, attention is less memo
 
 <FA3WGMMADiagram />
 
-- The output O depends on P, the softmax(S), which depends on the attention score calculation (S).
+- The output O depends on P. P is calculated from the softmax(S), and S depends on the attention score calculation.
 
   FlashAttention-3 uses Warp Group Matrix Multiply-Accumulate (WGMMA) to asynchronously perform the computation. It pipelines blocks so while softmax executes on one block of the scores matrix, WGMMA executes to compute the next block. There are two pipelines running in parallel, WGMMA executions and non-WGMMA executions.
 
-- FP8 quantization is sensitive to outlier features in large language models (LLMs). A few dimensions in hidden states can have very large values. When quantized to FP8, this causes precision loss.
+- FP8 quantization is sensitive to outlier features in large language models (LLMs). A few dimensions in hidden states can have very large values. When quantized to FP8, the issue manifests as precision loss.
 
-   FlashAttention-3 uses a different scale for each quantized block. Each block can use the full FP8 range for *its* values. The outlier block gets a big scale and the normal blocks get a tiny scale. This way, precision is preserved locally.
+<FP8OutlierDiagram />
+
+   FlashAttention-3 uses a different scale per block. Each block can use the full FP8 range for *its* values. The outlier block gets a big scale and the normal blocks get a tiny scale. This way, precision is preserved locally.
+
+<IncoherentDiagram />
 
    If an outlier is in a normal block, FlashAttention-3 fixes this by spreading the outlier across all dimensions before quantization. It multiplies Q, K by a random orthogonal matrix to redistribute the outlier. This way, no single dimension dominates a block.
 
 ## summary [#summary]
 
-Self-attention is powerful, but it's also computationally expensive when sequences start getting longer. Newer attention algorithms, like [FlashAttention](https://github.com/Dao-AILab/flash-attention) and [PagedAttention](https://blog.vllm.ai/2023/06/20/vllm.html), handle longer sequences more memory efficiently.
+Self-attention is a weighted sum of contextual information of all words. The weights reflect each surrounding word's relevance to the current word.
 
-**The key takeaway is that self-attention is a weighted sum of contextual information of all words. The weights reflect each surrounding word's relevance to the current word.**
+But attention is memory-bound. New attention algorithms optimize *how* the attention calculation is executed, whether it's sharing the same K, V or streaming the attention function.
 
 ## resources [#resources]
 

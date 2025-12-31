@@ -1,10 +1,26 @@
 import Link from "next/link";
+import { TreePine } from "lucide-react";
 import type { Post } from "./get-posts";
 
+function EvergreenIcon() {
+  return (
+    <TreePine className="inline-block w-4 h-4 ml-1.5 mb-0.5 text-green-600 dark:text-green-500" />
+  );
+}
+
 export function Posts({ posts }: { posts: Post[] }) {
+  const hasEvergreen = posts.some((post) => post.evergreen);
   return (
     <main className="max-w-2xl m-auto mb-10 text-sm">
       <List posts={posts} />
+      {hasEvergreen && (
+        <div className="mt-8">
+          <span className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+            <EvergreenIcon />
+            <span>Evergreen posts are updated with new content.</span>
+          </span>
+        </div>
+      )}
     </main>
   );
 }
@@ -40,6 +56,7 @@ function List({ posts }: { posts: Post[] }) {
                   <span className="grow dark:text-gray-100">
                     <span className="text-base [li:hover_&]:bg-neutral-200 dark:[li:hover_&]:bg-neutral-700 transition-all rounded-xl py-0.5 px-1.5">
                       {post.title}
+                      {post.evergreen && <EvergreenIcon />}
                     </span>
                   </span>
 

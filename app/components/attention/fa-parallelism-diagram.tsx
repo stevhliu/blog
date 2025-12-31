@@ -46,30 +46,30 @@ export function FAParallelismDiagram() {
             <text x="144" y="55" textAnchor="middle" className="fill-violet-600 text-[6px]">head 3</text>
             
             {/* Row 3 - inactive */}
-            <rect x="0" y="68" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-            <text x="18" y="85" textAnchor="middle" className="fill-slate-300 text-[7px]">idle</text>
+            <rect x="0" y="68" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+            <text x="18" y="85" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[7px]">idle</text>
             
-            <rect x="42" y="68" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-            <text x="60" y="85" textAnchor="middle" className="fill-slate-300 text-[7px]">idle</text>
+            <rect x="42" y="68" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+            <text x="60" y="85" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[7px]">idle</text>
             
-            <rect x="84" y="68" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-            <text x="102" y="85" textAnchor="middle" className="fill-slate-300 text-[7px]">idle</text>
+            <rect x="84" y="68" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+            <text x="102" y="85" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[7px]">idle</text>
             
-            <rect x="126" y="68" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-            <text x="144" y="85" textAnchor="middle" className="fill-slate-300 text-[7px]">idle</text>
+            <rect x="126" y="68" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+            <text x="144" y="85" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[7px]">idle</text>
             
             {/* Row 4 - inactive */}
-            <rect x="0" y="102" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-            <text x="18" y="119" textAnchor="middle" className="fill-slate-300 text-[7px]">idle</text>
+            <rect x="0" y="102" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+            <text x="18" y="119" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[7px]">idle</text>
             
-            <rect x="42" y="102" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-            <text x="60" y="119" textAnchor="middle" className="fill-slate-300 text-[7px]">idle</text>
+            <rect x="42" y="102" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+            <text x="60" y="119" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[7px]">idle</text>
             
-            <rect x="84" y="102" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-            <text x="102" y="119" textAnchor="middle" className="fill-slate-300 text-[7px]">idle</text>
+            <rect x="84" y="102" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+            <text x="102" y="119" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[7px]">idle</text>
             
-            <rect x="126" y="102" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-            <text x="144" y="119" textAnchor="middle" className="fill-slate-300 text-[7px]">idle</text>
+            <rect x="126" y="102" width="36" height="28" rx="3" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+            <text x="144" y="119" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[7px]">idle</text>
           </g>
           
           <text x="90" y="170" textAnchor="middle" className="fill-slate-400 text-[8px]">8 of 16 SMs used</text>

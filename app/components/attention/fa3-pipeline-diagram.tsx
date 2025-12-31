@@ -77,8 +77,8 @@ export function FA3PipelineDiagram() {
             {/* Consumer warps */}
             <g transform="translate(0, 55)">
               <text x="0" y="12" className="fill-teal-600 text-[7px] font-medium">consumer</text>
-              <rect x="46" y="0" width="44" height="18" rx="2" className="fill-slate-100 stroke-slate-200" strokeWidth="1" strokeDasharray="2,2"/>
-              <text x="68" y="12" textAnchor="middle" className="fill-slate-300 text-[6px]">wait</text>
+              <rect x="46" y="0" width="44" height="18" rx="2" className="fill-slate-100 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="2,2"/>
+              <text x="68" y="12" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[6px]">wait</text>
               <rect x="92" y="0" width="44" height="18" rx="2" className="fill-teal-200 stroke-teal-300" strokeWidth="1"/>
               <text x="114" y="12" textAnchor="middle" className="fill-teal-700 text-[6px]">attn K₁V₁</text>
               <rect x="138" y="0" width="44" height="18" rx="2" className="fill-teal-200 stroke-teal-300" strokeWidth="1"/>

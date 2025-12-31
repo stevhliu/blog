@@ -8,23 +8,19 @@ export const metadata = {
   }
 }
 
-I recently gave my first talk at a local AI meetup, [Sonoma AI](https://lu.ma/taf3lmvj?tk=GNK8JQ). The talk was about how [Transformers](https://github.com/huggingface/transformers) and [Diffusers](https://github.com/huggingface/diffusers) reduce the memory required to load large models on consumer GPUs.
+I recently gave my first talk at [Sonoma AI](https://lu.ma/taf3lmvj?tk=GNK8JQ), a local AI meetup. The talk was about how [Transformers](https://github.com/huggingface/transformers) and [Diffusers](https://github.com/huggingface/diffusers) reduce the memory required to load large models on consumer GPUs.
 
-This post recaps and summarizes the talk with some additional details and code examples.
-
-<Figure>
-  <img className="rounded-xl" src="https://chunte-hfba.static.hf.space/images/Outlined%20Huggies/GPU%20Huggy.png" alt="Hugging Face GPU" />
-</Figure>
+This post recaps and summarizes the talk with some additional details.
 
 <FloatingTOC
   items={[
     { text: "memory maths", href: "#memory-maths" },
     { text: "Big Model Inference", href: "#big-model-inference" },
-    { text: "torch_dtype", href: "#torch_dtype" },
+    { text: "device_map", href: "#device_map" },
+    { text: "dtype", href: "#dtype" },
     { text: "quantization", href: "#quantization" },
     { text: "offloading", href: "#offloading" },
     { text: "tensor parallelism", href: "#tensor-parallelism" },
-    { text: "device_map", href: "#device_map" },
     { text: "kv cache", href: "#kv-cache" },
     { text: "resources", href: "#resources" }
   ]}
@@ -32,91 +28,111 @@ This post recaps and summarizes the talk with some additional details and code e
 
 ## memory maths [#memory-maths]
 
-[Llama 3.1 8B Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) has been downloaded over 5.5M times in the past month. How much GPU memory does it require for inference?
+[Llama 3.1 8B Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) was downloaded over 5.5M times in the past month, making it the most downloaded text generation model on Hugging Face. But how much GPU memory is required to load this popular model for inference?
 
-You can get a pretty good estimate by multiplying the number of parameters by the number of bytes per parameter (plus a little extra extra for the forward pass).
+You can get a pretty good estimate by multiplying the number of parameters by the number of bytes per parameter (plus a little extra for the forward pass).
 
-Llama 3.1 8B Instruct has 8B parameters and is stored in bfloat16 (half-precision), which takes up 2 bytes (16 bits) per parameter.
+Llama 3.1 8B Instruct has 8B parameters and is stored in bfloat16 (half-precision), which is 2 bytes per parameter.
 
 <div className="text-center text-emerald-400 font-bold">8B parameters * 2 bytes/parameter = 16GB</div>
 
-The problem is that many free-tier or consumer GPUs don't have that much memory. A free T4 GPU instance on Colaboratory has 16GB of GPU memory, but only 15GB of it is actually available. And buying a sufficiently powerful GPU is expensive.
+The problem is, many free-tier or consumer GPUs don't have that much memory. A free T4 GPU instance on Colaboratory has 16GB of GPU memory. But only 15GB of it is actually available. And buying a sufficiently powerful GPU can be expensive.
 
 This is not very accessible.
 
-But with Transformers and Diffusers, it *is* possible to load these large models into memory even on consumer GPUs and run them for inference.
-
-This talk focuses on how this is possible.
+Transformers and Diffusers lowers the barrier to fitting large models into GPU memory.
 
 ## Big Model Inference [#big-model-inference]
 
-A model is typically loaded in the following steps.
+A model is typically loaded like this.
 
 1. Create the model with randomly initialized weights (16GB).
-2. Load the model weights in memory (16GB).
-3. Load the weights in the model.
-4. Move the model on device for inference.
+2. Load the weights in memory (16GB).
+3. Load the weights in the empty model.
+4. Move the model to the device for inference.
 
-[Big Model Inference (BMI)](https://huggingface.co/docs/accelerate/en/concept_guides/big_model_inference) loads a model like this. You avoid loading a model into memory **twice**.
+[Big Model Inference (BMI)](https://huggingface.co/docs/accelerate/en/concept_guides/big_model_inference) loads a model like this.
 
+<BMIDiagram />
 
-1. <a className=" text-emerald-400 font-medium">Create an empty model without weights.</a>
+1. Create an *empty* model with the PyTorch [meta](https://docs.pytorch.org/docs/stable/meta.html) device. This creates tensors without any data attached. Tensors can be any size without worrying about memory constraints. It only creates tensors with the expected shape.
 
-    The first step creates an **empty** model with the PyTorch [meta](https://docs.pytorch.org/docs/stable/meta.html) device. This creates tensors without any data attached. It only creates tensors with the expected shape.
+    Transformers instantiates a model directly on the meta device. This avoids loading a model into memory *twice*.
 
-    You can create tensors of any size without worrying about memory, because the tensors don't actually hold any data.
-
-    Transformers instantiates a model directly on the meta device.
-
-2. <a className=" text-emerald-400 font-medium">Plan where each model layer goes.</a>
-
-    The second step uses the `device_map` to optimally distribute model weights. From the shape and dtype of each tensor on the meta device, you can figure out how much memory the actual weights require.
+2. The `device_map` optimally distributes model weights. This is automatic, but you can design your own `device_map` by assigning each module/layer to a device. From the shape and dtype of each tensor on the meta device, you can figure out how much memory the actual weights require.
 
     Transformers tries to fit as many weights as possible on your fastest device (GPU) first. If they don't all fit, it places the remaining weights on the CPU. And if that still doesn't fit, the rest of the weights are offloaded to disk.
 
-    It even accounts for certain layers that shouldn't be split like layers with residual connections. This is done automatically but you can also design your own `device_map` by assigning each module/layer to a device.
+    It even accounts for certain layers that shouldn't be split, like layers with residual connections.
 
-3. <a className=" text-emerald-400 font-medium">Load part of the weights in memory.</a>
+3. Load model shards into memory instead of loading the entire model. Once a shard is loaded, the weights are placed in the model and moved to the appropriate device. The shard is discarded, and the next shard is loaded.
 
-    The third step starts loading model shards into memory instead of loading the entire model into memory. Once a shard is loaded, the weights are placed in the model and moved to the appropriate device. The loaded shard is discarded, and the next shard is loaded.
+    You only need enough CPU memory to load the biggest shard rather than the entire model.
 
-    Instead of requiring enough memory to fit the entire model into memory, you only need enough CPU memory to load the biggest shard.
+4. Load the weights in the empty model.
 
-    Disk offload is an additional option if you don't have enough GPU and CPU memory.
+5. Move the model to the device for inference.
 
-4. <a>Load the weights in the empty model.</a>
+6. Repeat step 3 until all weights are loaded.
 
-5. <a>Move the model on device for inference.</a>
+## device_map [#device_map]
 
-6. <a className=" text-emerald-400 font-medium">Repeat step 3 for the shard until all the weights are loaded.</a>
+For multiple GPUs, `device_map` can split the model weights using different strategies.
 
-## torch_dtype [#torch_dtype]
+- `auto` splits weights so each GPU is used equally.
+- `balanced_low_0` splits weights so each GPU is used equally except the first one. This reserves space for working with the outputs of the model, such as the [generate](https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationMixin.generate) function.
+- `sequential` fills the GPUs in order so the last one may not be used at all if not necessary.
 
-The [dtype](https://docs.pytorch.org/docs/stable/tensor_attributes.html) indicates the type of elements stored in a tensor. It affects how much memory is required and what kind of numerical values a tensor can represent.
+Set the `device_map` argument in `from_pretrained` to distribute model weights across GPUs.
 
-The tensor values are calculated from the sign, exponent, and significand (mantissa).
+<Snippet>
+{`import torch
+from transformers import AutoModelForCausalLM
 
-- The sign determines whether a value is positive or negative.
+model = AutoModelForCausalLM.from_pretrained(
+        "meta-llama/Meta-Llama-3-8B-Instruct",
+        dtype=torch.bfloat16,
+        device_map="auto"
+)`}
+</Snippet>
+
+Transformers uses [hooks](https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.register_forward_hook) to make sure weights are correctly moved and placed,.
+
+- Make sure all the inputs of a module are on the same device as the weights.
+- If the weights are offloaded to the CPU, move them to the GPU before the `forward` pass and back to the CPU after.
+- If the weights are offloaded to disk, they are loaded onto the CPU, then the GPU before the `forward` pass, and then their memory is freed afterwards.
+
+This is slower than tensor parallelism because GPUs are used sequentially causing some to idle.
+
+<DeviceMapDiagram />
+
+## dtype [#dtype]
+
+The [dtype](https://docs.pytorch.org/docs/stable/tensor_attributes.html) is the data type of the elements in a tensor. It affects how much memory is required and what kind of numerical values a tensor can represent.
+
+Tensor values are calculated from the sign, exponent, and significand (mantissa).
+
+- The sign determines if a value is positive or negative.
 - The exponent determines the scale or magnitude of the value and the range of values a number can represent.
 - The significand determines the precision and or number of significant digits.
 
+<FP32Diagram />
+
 fp32 is considered full precision and takes up 32 bits in memory. 1 bit for the sign, 8 bits for the exponent, and 23 bits for the significand.
 
-<div className="text-center text-emerald-400 font-bold">3.1415927410125732</div>
+Lower precision dtype has fewer bits and requires less memory to store.
+
+<FP16Diagram />
 
 fp16 is half-precision and takes up 16 bits in memory. 1 bit for the sign, 5 bits for the exponent, and 10 bits for the significand.
 
-bf16 is also half-precision but can represent a wider range of values. 1 bit for the sign, 8 bits for the exponent, and 7 bits for the significand.
-
-<div className="text-center text-emerald-400 font-bold">3.140625</div>
-
-A lower precision dtype has fewer bits and requires less memory to store.
+bf16 is also half-precision but represents a wider range of values. 1 bit for the sign, 8 bits for the exponent, and 7 bits for the significand.
 
 PyTorch loads a model in fp32 by default even if the model weights are in fp16 because you can't access the model until after you've loaded it with [from_pretrained()](https://huggingface.co/docs/transformers/model_doc/auto#transformers.AutoModel.from_pretrained).
 
-It is a waste of memory to load a model in fp32 and then again in fp16. To avoid this, use the `torch_dtype` argument in `from_pretrained` to explicitly set the dtype.
+Loading a model in fp32 and again in fp16 wastes memory. Use the `dtype` argument in `from_pretrained` to explicitly set the dtype to avoid this.
 
-I recommend using the `"auto"` option to let Transformers automatically get the dtype from the model weights.
+I recommend using the `"auto"` option to let Transformers automatically get the most optimal dtype from the model weights.
 
 <Snippet>
 {`import torch
@@ -124,30 +140,28 @@ from transformers import AutoModelForCausalLM
 
 model = AutoModelForCausalLM.from_pretrained(
         "meta-llama/Llama-3.1-8B-Instruct",
-        torch_dtype="auto"
+        dtype="auto"
 )`}
 </Snippet>
 
 ## quantization [#quantization]
 
-Quantization takes the idea of dtypes to an even lower level. Usually from floating points to integers.
+Quantization takes the idea of dtypes to an even lower level, usually from floating points to integers.
+
+<Int8Diagram />
 
 int8 takes up 8 bits in memory. 1 bit for the sign and 7 bits for the significand.
 
-<div className="text-center text-emerald-400 font-bold">3</div>
+The original range of values are quantized to a lower range.
 
-Quantization maps the original range of values to a lower range. Consider a basic example of linear quantization below.
-
-<Figure>
-  <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/quantization.png"/>
-</Figure>
+<AsymmetricQuantizationDiagram />
 
 1. Map the min/max values from fp32 to int8.
-2. The min/max values have different distances to 0 (0 in fp32 doesn't equal 0 in int8).
-3. Calculate a **scaling** factor to obtain a linear mapping for the remaining values and adjust them with the **zero-point** value to account for the different distances to 0.
-4. Dequantize the weights with the scaling factor and zero-point to perform computations with your inputs (presumably in fp16/bf16).
+2. The min/max values have different distances to 0. 0 in fp32 doesn't equal 0 in int8.
+3. Calculate a *scaling* factor to get a linear mapping for the remaining values and adjust them with the *zero-point* value to account for the different distances to 0.
+4. Dequantize weights with scaling factor and zero-point so you can perform computations with your inputs (presumably in fp16/bf16).
 
-The quantization and dequantization steps may decrease inference speed, and it can also be lossy, especially for lower quantization levels like int4.
+The quantization and dequantization steps may decrease inference speed and be lossy, especially for lower quantization levels like int4.
 
 With Transformers, choose and configure a [quantization backend](https://huggingface.co/docs/transformers/quantization/overview). Then plug the `quantization_config` into `from_pretrained` to quantize a model.
 
@@ -167,13 +181,13 @@ model = AutoModelForCausalLM.from_pretrained(
 
 ## offloading [#offloading]
 
-[Diffusers](https://github.com/huggingface/diffusers) offers various offloading options. Offloading moves weights off the GPU to another device when they're not in use. This is useful for large models like [Flux.1 [dev]](https://huggingface.co/black-forest-labs/FLUX.1-dev).
+[Diffusers](https://github.com/huggingface/diffusers) offers several offloading options. Offloading moves weights off the GPU to another device when they're not in use. This is useful for large models like [Flux.1 [dev]](https://huggingface.co/black-forest-labs/FLUX.1-dev).
 
-For Flux.1 [dev], the memory requirements are ~9GB for the two text encoders and ~22GB for the transformer model. Loading and generating an image takes ~33GB in bf16.
+Flux.1 [dev] requires ~9GB of memory for the two text encoders and ~22GB for the transformer model. Loading and generating an image uses ~33GB in bf16.
 
 Diffusers offers 3 offloading options.
 
-- Model offloading moves a component (for example, the transformer) to the GPU only when it is needed and the other components are offloaded to the CPU.
+- Model offloading moves a component (for example, the transformer) to the GPU only when it is needed. Other components are offloaded to the CPU.
 
 <Snippet>
 {`import torch
@@ -187,7 +201,7 @@ pipeline.enable_model_cpu_offload()`}
 </Snippet>
 <Caption>Flux.1 [dev] uses 22.6GB with model offloading</Caption>
 
-- CPU offloading moves the weights for a given layer on the GPU for computation and offloads them back to the CPU when they're not used. It is **extremely slow** because of all the transfers between the CPU and GPU.
+- CPU offloading moves the weights for a given layer on the GPU for computation and offloads them back to the CPU when they're not used. It is **extremely slow** because of the many transfers between CPU and GPU.
 
 <Snippet>
 {`import torch
@@ -201,7 +215,7 @@ pipeline.enable_sequential_cpu_offload()`}
 </Snippet>
 <Caption>Flux.1 [dev] uses 2.4GB with CPU offloading</Caption>
 
-- Group offloading moves n-layers at a time from the GPU to the CPU for computation. Unlike CPU offloading, it uses [CUDA streams](https://docs.pytorch.org/docs/stable/notes/cuda.html#cuda-streams) to prefetch the next layers parameters during computation. Overlapping computation and data transfer makes it much faster. You can even offload to disk if you need more memory.
+- Group offloading moves n-layers at a time from the GPU to the CPU for computation. Unlike CPU offloading, it uses [CUDA streams](https://docs.pytorch.org/docs/stable/notes/cuda.html#cuda-streams) to prefetch the next layer's parameters during computation. Overlapping computation and data transfer makes it much faster. You can even offload to disk if you need more memory.
 
 <Snippet>
 {`import torch
@@ -226,11 +240,9 @@ apply_group_offloading(
 
 Tensor parallelism distributes model weights (tensors) across multiple GPUs. This helps you fit large models into memory that wouldn't otherwise fit on a single GPU.
 
-<Figure>
-  <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/tensor-parallelism.png"/>
-</Figure>
+<TensorParallelismDiagram />
 
-It is also faster because each GPU can perform computations in parallel. Each GPU performs its calculations on its tensor slice and the results are synced at the end to return the final result.
+It is faster because each GPU can perform computations in parallel and sync the results at the end to return the final output.
 
 There is a bit of communication overhead between GPUs, so it is best for single machines with multiple GPUs that communicate with faster intra-node communications.
 
@@ -242,55 +254,24 @@ from transformers import AutoModelForCausalLM
 
 model = AutoModelForCausalLM.from_pretrained(
         "meta-llama/Meta-Llama-3-8",
-        torch_dtype=torch.bfloat16,
+        dtype=torch.bfloat16,
         tp_plan="auto"
 )`}
 </Snippet>
 
-## device_map [#device_map]
-
-For multiple GPUs, `device_map` can split the model weights using different strategies.
-
-- `auto` splits weights so each GPU is used equally.
-- `balanced_low_0` splits weights so each GPU is used equally except the first one. This reserves space for working with the outputs of the model, such as the [generate](https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationMixin.generate) function.
-- `sequential` fills the GPUs in order so the last one may not be used at all if not necessary.
-
-Set the `device_map` argument in `from_pretrained` to distribute model weights across GPUs.
-
-<Snippet>
-{`import torch
-from transformers import AutoModelForCausalLM
-
-model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Meta-Llama-3-8B-Instruct",
-        torch_dtype=torch.bfloat16,
-        device_map="auto"
-)`}
-</Snippet>
-
-To make sure weights are correctly moved and placed, Transformers uses [hooks](https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.register_forward_hook) to:
-
-- Make sure all the inputs of a module are on the same device as the weights.
-- If the weights are offloaded to the CPU, move them to the GPU before the `forward` pass and back to the CPU after.
-- If the weights are offloaded to disk, they are loaded onto the CPU, then the GPU before the `forward` pass, and then their memory is freed afterwards.
-
-This is slower than tensor parallelism because GPUs are used sequentially. Some GPUs are idling.
-
-<Figure>
-  <img className="rounded-xl" src="https://huggingface.co/datasets/stevhliu/personal-blog/resolve/main/device_map.png"/>
-</Figure>
-
 ## kv cache [#kv-cache]
 
-Autoregressive or decoder models predict one token at a time. The predicted token is dependent on all of the previous context. Every time the model predicts a new token, it ends up performing some of the same calculations again.
+Decoder models predict one token at a time. The predicted token is dependent on all of the previous context. Every time the model predicts a new token, it ends up performing some of the same calculations again.
 
-Performing the same calculations repeatedly is wasteful and slows down inference.
+Performing the same calculations every time is wasteful and slows down inference.
 
 A key-value (kv) cache stores the previously calculated kv values and reuses them to avoid recomputation. At each step, you're only calculating the kv value for the current token rather than all the previous ones.
 
+<KVCacheDiagram />
+
 However, storing the kv values requires memory that grows linearly with sequence length.
 
-Transformers provides two memory optimized cache types.
+Transformers provides two memory-optimized cache types.
 
 - [OffloadedCache](https://huggingface.co/docs/transformers/kv_cache#offloaded-cache) moves the cache to the CPU. Only the current layer cache is kept on the GPU so the model's `forward` method can use it. The next layer cache is prefetched and the previous layer cache is sent back to the CPU.
 - [QuantizedCache](https://huggingface.co/docs/transformers/kv_cache#quantized-cache) quantizes the cache.
@@ -303,7 +284,7 @@ from transformers import AutoModelForCausalLM
 
 model = AutoModelForCausalLM.from_pretrained(
         "meta-llama/Meta-Llama-3-8B-Instruct",
-        torch_dtype=torch.bfloat16,
+        dtype=torch.bfloat16,
         device_map="auto"
 )
 model.generate(

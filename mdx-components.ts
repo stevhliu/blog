@@ -18,7 +18,8 @@ import { Snippet } from "./app/components/snippet";
 import { Caption } from "./app/components/caption";
 import { Callout, Tip, Warning } from "./app/components/callout";
 import { Blockquote as blockquote } from "./app/components/blockquote";
-import { CausalDiagram, MHADiagram, MQADiagram, GQADiagram, SelfAttentionDiagram, FlashAttentionDiagram, FAParallelismDiagram, FAWarpDiagram, FA3PipelineDiagram, FA3WGMMADiagram } from "./app/components/attention";
+import { CausalDiagram, MHADiagram, MQADiagram, GQADiagram, SelfAttentionDiagram, FlashAttentionDiagram, FAParallelismDiagram, FAWarpDiagram, FA3PipelineDiagram, FA3WGMMADiagram, FP8OutlierDiagram, IncoherentDiagram } from "./app/components/attention";
+import { AsymmetricQuantizationDiagram, TensorParallelismDiagram, DeviceMapDiagram, BMIDiagram, FP32Diagram, FP16Diagram, Int8Diagram, KVCacheDiagram } from "./app/components/quantization";
 
 // Lazy-load client components to reduce initial bundle size
 const FloatingTOC = dynamic(
@@ -81,5 +82,15 @@ export function useMDXComponents(components: {
     FAWarpDiagram,
     FA3PipelineDiagram,
     FA3WGMMADiagram,
+    FP8OutlierDiagram,
+    IncoherentDiagram,
+    AsymmetricQuantizationDiagram,
+    TensorParallelismDiagram,
+    DeviceMapDiagram,
+    BMIDiagram,
+    FP32Diagram,
+    FP16Diagram,
+    Int8Diagram,
+    KVCacheDiagram,
   };
 }

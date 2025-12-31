@@ -15,9 +15,9 @@ export function FAWarpDiagram() {
             <text x="90" y="18" textAnchor="middle" className="fill-sky-700 text-[9px]">Q (shared)</text>
             
             {/* Arrows down to warps */}
-            <line x1="75" y1="28" x2="40" y2="44" className="stroke-sky-400" strokeWidth="1"/>
+            <line x1="90" y1="28" x2="35" y2="44" className="stroke-sky-400" strokeWidth="1"/>
             <line x1="90" y1="28" x2="90" y2="44" className="stroke-sky-400" strokeWidth="1"/>
-            <line x1="105" y1="28" x2="140" y2="44" className="stroke-sky-400" strokeWidth="1"/>
+            <line x1="90" y1="28" x2="145" y2="44" className="stroke-sky-400" strokeWidth="1"/>
             
             {/* Warps with K,V splits */}
             <g transform="translate(0, 48)">
@@ -67,9 +67,9 @@ export function FAWarpDiagram() {
             <text x="90" y="18" textAnchor="middle" className="fill-amber-700 text-[9px]">K, V (shared)</text>
             
             {/* Arrows down to warps */}
-            <line x1="75" y1="28" x2="40" y2="44" className="stroke-amber-400" strokeWidth="1"/>
+            <line x1="90" y1="28" x2="35" y2="44" className="stroke-amber-400" strokeWidth="1"/>
             <line x1="90" y1="28" x2="90" y2="44" className="stroke-amber-400" strokeWidth="1"/>
-            <line x1="105" y1="28" x2="140" y2="44" className="stroke-amber-400" strokeWidth="1"/>
+            <line x1="90" y1="28" x2="145" y2="44" className="stroke-amber-400" strokeWidth="1"/>
             
             {/* Warps with Q splits */}
             <g transform="translate(0, 48)">

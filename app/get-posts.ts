@@ -8,6 +8,7 @@ export type Post = {
   title: string;
   views: number;
   viewsFormatted: string;
+  evergreen?: boolean;
 };
 
 // shape of the views rows in supabase

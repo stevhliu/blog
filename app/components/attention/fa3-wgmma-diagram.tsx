@@ -46,8 +46,8 @@ export function FA3WGMMADiagram() {
             <text x="0" y="20" className="fill-amber-600 text-[7px] font-medium">softmax</text>
             
             {/* Idle during S_next issue */}
-            <rect x="42" y="0" width="80" height="32" rx="3" className="fill-slate-50 stroke-slate-200" strokeWidth="1" strokeDasharray="3,2"/>
-            <text x="82" y="18" textAnchor="middle" className="fill-slate-300 text-[6px]">(S_next issuing)</text>
+            <rect x="42" y="0" width="80" height="32" rx="3" className="fill-slate-50 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="3,2"/>
+            <text x="82" y="18" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[6px]">(S_next issuing)</text>
             
             {/* Softmax on S_curr */}
             <rect x="124" y="0" width="72" height="32" rx="3" className="fill-amber-200 stroke-amber-400" strokeWidth="1"/>
@@ -55,8 +55,8 @@ export function FA3WGMMADiagram() {
             <text x="160" y="21" textAnchor="middle" className="fill-amber-700 text-[6px]">P = exp(S - m)</text>
             
             {/* Idle during O and wait */}
-            <rect x="198" y="0" width="154" height="32" rx="3" className="fill-slate-50 stroke-slate-200" strokeWidth="1" strokeDasharray="3,2"/>
-            <text x="275" y="18" textAnchor="middle" className="fill-slate-300 text-[6px]">(O accumulating + wait)</text>
+            <rect x="198" y="0" width="154" height="32" rx="3" className="fill-slate-50 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="3,2"/>
+            <text x="275" y="18" textAnchor="middle" className="fill-slate-300 dark:fill-slate-500 text-[6px]">(O accumulating + wait)</text>
           </g>
           
         </g>
