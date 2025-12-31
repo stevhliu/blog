@@ -18,6 +18,7 @@ import { Snippet } from "./app/components/snippet";
 import { Caption } from "./app/components/caption";
 import { Callout, Tip, Warning } from "./app/components/callout";
 import { Blockquote as blockquote } from "./app/components/blockquote";
+import { CausalDiagram, MHADiagram, MQADiagram, GQADiagram, SelfAttentionDiagram, FlashAttentionDiagram, FAParallelismDiagram, FAWarpDiagram, FA3PipelineDiagram, FA3WGMMADiagram } from "./app/components/attention";
 
 // Lazy-load client components to reduce initial bundle size
 const FloatingTOC = dynamic(
@@ -70,5 +71,15 @@ export function useMDXComponents(components: {
     HoverWord,
     Table,
     Collapsible,
+    CausalDiagram,
+    MHADiagram,
+    MQADiagram,
+    GQADiagram,
+    SelfAttentionDiagram,
+    FlashAttentionDiagram,
+    FAParallelismDiagram,
+    FAWarpDiagram,
+    FA3PipelineDiagram,
+    FA3WGMMADiagram,
   };
 }
