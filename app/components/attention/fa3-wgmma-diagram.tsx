@@ -61,7 +61,7 @@ export function FA3WGMMADiagram() {
           
         </g>
       </svg>
-      <Caption>WGMMA issues async matmuls, allowing softmax to run in parallel on the previous block's scores.</Caption>
+      <Caption>WGMMA issues async matmuls, allowing softmax to run in parallel on the previous block&apos;s scores.</Caption>
     </figure>
   );
 }

@@ -116,7 +116,7 @@ export function KVCacheDiagram() {
           <text x="110" y="28" textAnchor="middle" className="fill-emerald-500 dark:fill-emerald-400 text-[5px]">new</text>
         </g>
       </svg>
-      <Caption>Without caching, K and V are recomputed for all tokens at each step. With caching, only the new token's K and V are computed.</Caption>
+      <Caption>Without caching, K and V are recomputed for all tokens at each step. With caching, only the new token&apos;s K and V are computed.</Caption>
     </figure>
   );
 }
