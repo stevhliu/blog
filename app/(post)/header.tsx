@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import type { Post } from "@/app/get-posts";
 import { ViewCounter } from "./view-counter";
 
@@ -27,7 +30,14 @@ function getRelativeTime(dateString: string): string {
   }
 }
 
-export function Header({ post }: { post: Post | null }) {
+export function Header({ posts }: { posts: Post[] }) {
+  const pathname = usePathname();
+  
+  // Extract post ID from pathname (e.g., /2025/my-post -> my-post)
+  const segments = pathname.split("/").filter(Boolean);
+  const postId = segments[segments.length - 1];
+  const post = posts.find(p => p.id === postId) ?? null;
+
   if (post == null) return null;
 
   const relativeTime = getRelativeTime(post.date);
