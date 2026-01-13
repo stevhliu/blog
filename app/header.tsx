@@ -13,7 +13,7 @@ export function Header() {
           className="p-2"
         >
       <span className="[a:hover_&]:bg-neutral-200 dark:[a:hover_&]:bg-neutral-700 rounded-xl py-0.5 px-1.5 inline-flex">
-        About
+        about
       </span>
         </Link>
         <a
@@ -23,7 +23,7 @@ export function Header() {
         >
       <span className="[a:hover_&]:bg-neutral-200 dark:[a:hover_&]:bg-neutral-700 rounded-xl py-0.5 px-1.5 inline-flex items-center gap-1">
         <TweetIcon style={{ marginRight: 4 }} />
-        <span>Follow me</span>
+        <span>follow me</span>
       </span>
         </a>
       </nav>

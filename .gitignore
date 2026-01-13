@@ -1,5 +1,6 @@
 node_modules
 .next
+.pnpm-store
 dist
 .vercel
 .env
@@ -13,3 +14,4 @@ fonts/*
 # Ensure we don't commit npm lockfiles
 package-lock.json
 yarn.lock
+AGENTS.md

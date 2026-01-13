@@ -17,7 +17,7 @@ export function Posts({ posts }: { posts: Post[] }) {
         <div className="mt-8">
           <span className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
             <EvergreenIcon />
-            <span>Evergreen posts are updated with new content.</span>
+            <span>evergreen posts are updated with new content.</span>
           </span>
         </div>
       )}

@@ -8,15 +8,15 @@ import { Footer } from "./footer";
 import { doge } from "./doge";
 
 export const metadata = {
-  title: "Steven Liu's blog",
+  title: "steven liu",
   description:
     "Steven Liu is a technical writer at Hugging Face.",
   openGraph: {
-    title: "Steven Liu's blog",
+    title: "steven liu",
     description:
       "Steven Liu is a technical writer at Hugging Face.",
     url: "https://stevhliu.com",
-    siteName: "Steven Liu's blog",
+    siteName: "steven liu",
     images: ["/opengraph-image"]
   },
   twitter: {
