@@ -524,46 +524,34 @@ This is the final grouped-query attention score for `Fear`.
 
 ## multi-head latent attention [#multi-head-latent-attention]
 
+<MLADiagram />
+
 [Multi-head latent attention](https://huggingface.co/papers/2405.04434) (MLA) stores a <HoverWord 
   word="compressed"
   description="Low-rank compression is an operation that factors a large matrix into two smaller matrices. For example, a 1000x1000 matrix M has 1 million values. If it has rank 64, then the matrix can be represented by two 1000x64 matrices. This only has 128,000 values instead of a million."
-/> version of KV (*latent*) to save more space in the <HoverWord
+/> version of KV (or *latent*) to save more space in the <HoverWord
   word="cache"
   description="The KV cache stores past attention context during generation. It is more efficient than recomputing KV every time. When context length grows, it requires more memory in the cache."
-/>. At inference, the latents Q and KV are multiplied by **W<sup>combined</sup>** to compute attention.
+/>. At inference, the latent Q and cached latents KV are multiplied by **W<sup>combined</sup>** to compute attention.
 
-<MLADiagram />
+<MLAAbsorbDiagram />
 
-The usual approach expands the latent KV back to its full size by multiplying by an up-projection matrix W<sup>UK</sup>, before computing attention. This takes up more memory and defeats the purpose of compression.
+The usual approach expands the latent KV back to its full size with an up-projection matrix W<sup>UK</sup> before computing attention. This takes up more memory and negates the compression benefit.
 
-<div className="text-center text-emerald-400 font-bold">(W<sup>UQ</sup> * c<sup>Q</sup>) * (W<sup>UK</sup> * c<sup>KV</sup>)</div>
+MLA skips this step by "absorbing" or pre-multiplying W<sup>UQ</sup> and W<sup>UK</sup> into a single matrix, W<sup>combined</sup>, ahead of time. The latents don't need to be expanded during inference.
 
-MLA skips this step by "absorbing" or pre-multiplying W<sup>UQ</sup> and W<sup>UK</sup> into a single matrix, W<sup>combined</sup>, ahead of time. This means the latents never need to be expanded during inference.
-
-<div className="text-center text-emerald-400 font-bold">c<sup>Q</sup> * (W<sup>UK</sup> * W<sup>UQ</sup>) * c<sup>KV</sup></div>
-<div className="text-center text-emerald-400 font-bold">W<sup>combined</sup> = (W<sup>UQ</sup>)<sup>T</sup> * W<sup>UK</sup></div>
-<div className="text-center text-emerald-400 font-bold">score = (c<sup>Q</sup>)<sup>T</sup> * W<sup>combined</sup> * c<sup>KV</sup></div>
+<MLARoPEDiagram />
 
 Rearranging the maths like this makes it incompatible with [rotary position embeddings](https://huggingface.co/papers/2104.09864) (RoPE) though. RoPE adds a <HoverWord
   word="position-dependent rotation"
-  description="R<sub>t</sub> and R<sub>j</sub> are the token positions (R for short here). When multiplying Q and K, R encodes the *relative* position between them."
-/> (R) to K and Q.
+  description="R<sub>t</sub> and R<sub>j</sub> are the rotation matrices at token positions t and j. Their product R<sub>t</sub><sup>T</sup>R<sub>j</sub> encodes the relative position between them."
+/> (R<sub>t</sub><sup>T</sup>R<sub>j</sub>) to Q and K that rotates them by their token positions (*t,j*).
 
-<div className="text-center text-emerald-400 font-bold">score = (c<sup>Q</sup>)<sup>T</sup> * (W<sup>UQ</sup>)<sup>T</sup> * R<sub>t</sub><sup>T</sup> * R<sub>j</sub> * W<sup>UK</sup> * c<sup>KV</sup></div>
+The term, R<sub>t</sub><sup>T</sup>R<sub>j</sub>, depends on the (*t,j*) pair. There is no single fixed matrix you can precompute that works for all (*t,j*) pairs, so it can't be folded into W<sup>combined</sup>. Using RoPE this way would require recomputing the full K from the latent during generation (increases latency) or caching the full RoPE-applied keys (increases memory).
 
-RoPE rotates Q and K by their token positions (*t,j*).
-
-<div className="text-center text-emerald-400 font-bold">q<sub>t</sub> = R<sub>t</sub>q<sub>t</sub></div>
-<div className="text-center text-emerald-400 font-bold">k<sub>j</sub> = R<sub>j</sub>k<sub>j</sub></div>
-<div className="text-center text-emerald-400 font-bold">score = q<sub>t</sub>(R<sub>t</sub>R<sub>j</sub>)k<sub>j</sub></div>
-
-The term, R<sub>t</sub>R<sub>j</sub>, depend on the (*t,j*) pair. There is no single fixed matrix you can precompute that works for all (*t,j*) pairs, so it can't be folded into W<sup>combined</sup>. Using RoPE this way would require recomputing the full K from the latent during generation (increases latency) or caching the full RoPE-applied keys (increases memory).
+<MLADecoupleDiagram />
 
 Decoupling the *positional information* from the *content* solves this. The *content* calculation is the same, but the positional information is applied in a separate stream.
-
-<div className="text-center text-emerald-400 font-bold">q<sup>R</sup> = RoPE(W<sup>QR</sup> * h<sub>t</sub>)</div>
-<div className="text-center text-emerald-400 font-bold">k<sup>R</sup> = RoPE(W<sup>KR</sup> * h<sub>j</sub>)</div>
-<div className="text-center text-emerald-400 font-bold">score = q<sup>C</sup> * k<sup>C</sup> + q<sup>R</sup> * k<sup>R</sup></div>
 
 k<sup>R</sup> is cached, and the content and positional scores are summed when computing attention. This way, positional information flows through small decoupled vectors and content information can still flow through the latents.
 
@@ -641,5 +629,6 @@ But attention is memory-bound. New attention algorithms optimize *how* the atten
 - [Attention Is All You Need](https://huggingface.co/papers/1706.03762)
 - [Fast Transformer Decoding: One Write-Head is All You Need](https://huggingface.co/papers/1911.02150)
 - [GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints](https://huggingface.co/papers/2305.13245)
+- [DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://huggingface.co/papers/2405.04434)
 - [FlashAttention](https://huggingface.co/papers/2205.14135), [FlashAttention-2](https://huggingface.co/papers/2307.08691), [FlashAttention-3](https://huggingface.co/papers/2407.08608)
 - Youtube videos by [3Blue1Brown](https://www.youtube.com/watch?v=eMlx5fFNoYc) and [Andrej Karpathy](https://www.youtube.com/watch?v=kCc8FmEb1nY&t=2533s)

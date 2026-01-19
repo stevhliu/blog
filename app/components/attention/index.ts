@@ -11,3 +11,6 @@ export { FA3WGMMADiagram } from "./fa3-wgmma-diagram";
 export { FP8OutlierDiagram } from "./fp8-outlier-diagram";
 export { IncoherentDiagram } from "./incoherent-diagram";
 export { MLADiagram } from "./mla-diagram";
+export { MLAAbsorbDiagram } from "./mla-wcombined-diagram";
+export { MLARoPEDiagram } from "./mla-rope-diagram";
+export { MLADecoupleDiagram } from "./mla-decouple-diagram";
