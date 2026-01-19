@@ -34,6 +34,17 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  if (!supabase) {
+    return NextResponse.json(
+      {
+        ...post,
+        views: 0,
+        viewsFormatted: commaNumber(0),
+      },
+      { status: 200 }
+    );
+  }
+
   if (url.searchParams.get("incr") != null) {
     const { data, error } = await supabase.rpc("increment_view", { p_id: id });
     const views = Number(data ?? 0);

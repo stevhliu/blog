@@ -1,8 +1,6 @@
 import Image from "next/image";
 import { Work } from "@/app/components/work";
 
-import stevhliuPhoto from "@/public/images/stevhliu.PNG";
-
 export const metadata = {
   title: 'Steven Liu',
   description: 'A description of my role',
@@ -15,7 +13,7 @@ export const metadata = {
 
 <a href="https://twitter.com/stevhliu" target="_blank">
   <Image
-    src={stevhliuPhoto}
+    src="/images/stevhliu.PNG"
     alt="Steven Liu"
     className="rounded-full bg-gray-100 block mb-5 mx-auto sm:float-right sm:ml-5 sm:mb-5 grayscale"
     width={115}

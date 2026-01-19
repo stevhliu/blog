@@ -30,7 +30,7 @@ export function FlashAttentionDiagram() {
             <text x="153" y="20" textAnchor="middle" className="fill-teal-700 text-[8px]">m₁</text>
             <rect x="166" y="8" width="18" height="18" rx="3" className="fill-teal-200 stroke-teal-400" strokeWidth="1"/>
             <text x="175" y="20" textAnchor="middle" className="fill-teal-700 text-[8px]">l₁</text>
-            <text x="164" y="38" textAnchor="middle" className="fill-teal-500 text-[7px]">local stats</text>
+            <text x="164" y="38" textAnchor="middle" className="fill-teal-500 text-[7px]">row-wise stats</text>
           </g>
         </g>
 
@@ -66,7 +66,7 @@ export function FlashAttentionDiagram() {
             <text x="153" y="20" textAnchor="middle" className="fill-teal-700 text-[8px]">m₂</text>
             <rect x="166" y="8" width="18" height="18" rx="3" className="fill-teal-200 stroke-teal-400" strokeWidth="1"/>
             <text x="175" y="20" textAnchor="middle" className="fill-teal-700 text-[8px]">l₂</text>
-            <text x="164" y="38" textAnchor="middle" className="fill-teal-600 text-[7px]">updated</text>
+            <text x="164" y="38" textAnchor="middle" className="fill-teal-500 text-[7px]">row-wise update</text>
           </g>
         </g>
 
@@ -100,7 +100,7 @@ export function FlashAttentionDiagram() {
 
 
       </svg>
-      <Caption>Block 2 uses m₁, l₁ from block 1 to compute new stats m₂, l₂ and rescale l₁ before accumulating.</Caption>
+      <Caption>Block 2 uses m₁, l₁ from block 1 to update row-wise softmax stats and rescale before accumulating.</Caption>
     </figure>
   );
 }

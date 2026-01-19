@@ -16,6 +16,20 @@ interface TweetArgs {
 }
 
 async function getAndCacheTweet(id: string): Promise<Tweet | undefined> {
+  if (!supabase) {
+    try {
+      const tweet = await getTweet(id);
+      // @ts-ignore
+      if (tweet && !tweet.tombstone) {
+        return tweet;
+      }
+    } catch (error) {
+      console.error("tweet fetch error", error);
+    }
+
+    return undefined;
+  }
+
   // we first prioritize getting a fresh tweet
   try {
     const tweet = await getTweet(id);

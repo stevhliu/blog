@@ -17,6 +17,14 @@ type Views = {
 };
 
 export const getPosts = async () => {
+  if (!supabase) {
+    return postsData.posts.map((post): Post => ({
+      ...post,
+      views: 0,
+      viewsFormatted: commaNumber(0),
+    }));
+  }
+
   let viewsData: { post_id: string; count: number | null }[] | null = null;
 
   try {

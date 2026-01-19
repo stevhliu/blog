@@ -15,6 +15,7 @@ export const metadata = {
     { text: "multi-head attention", href: "#multi-head-attention" },
     { text: "multi-query attention", href: "#multi-query-attention" },
     { text: "grouped-query attention", href: "#grouped-query-attention" },
+    { text: "multi-head latent attention", href: "#multi-head-latent-attention" },
     { text: "flashattention", href: "#flashattention" },
     { text: "flashattention-2", href: "#flashattention-2" },
     { text: "flashattention-3", href: "#flashattention-3" },
@@ -85,7 +86,7 @@ Try calculating the self-attention score by hand in the following sequence to re
 
 3. Apply the softmax function to convert the attention scores into probabilities that add up to 1.
 
-    `[e^0.179 / (e^0.179 + e^0.311), e^0.311 / (e^0.179 + e^0.311)]` = `[0.46, 0.54]`
+    `[e^0.156 / (e^0.156 + e^0.312), e^0.312 / (e^0.156 + e^0.312)]` = `[0.46, 0.54]`
 
 4. Weight V by the attention scores.
 
@@ -153,8 +154,6 @@ The calculations are the same as self-attention, but the <HoverWord
   word="embedding size"
   description="The size of the vector used to represent a word. A larger size includes more information, but it also increases the computational cost."
 /> is split by the number of heads. Each head independently computes the scaled dot-product attention on their slice of data. At the end, the outputs are combined and multiplied by a weight matrix to blend all the information together.
-
-[BERT](https://huggingface.co/google-bert/bert-base-uncased) uses MHA.
 
 Try calculating the multi-head attention score by hand in the following sequence.
 
@@ -271,8 +270,6 @@ This is the final multi-head attention score for `Fear`.
 
 MQA is more memory-efficient and faster at decoding because each head doesn't need to store a separate K, V. This makes an especially big difference for really long sequences.
 
-[Gemma 2B](https://huggingface.co/google/gemma-2b) uses MQA.
-
 Try calculating the multi-query attention score by hand in the following sequence.
 
 <Collapsible trigger="Show calculations">
@@ -384,8 +381,6 @@ This is the final multi-query attention score for `Fear`.
 <GQADiagram />
 
 GQA is the middle ground between MHA and MQA. It's faster than MHA and more expressive than MQA.
-
-[gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) uses GQA.
 
 Try calculating the grouped-query attention score by hand in the following sequence.
 
@@ -527,6 +522,51 @@ This is the final grouped-query attention score for `Fear`.
 
 </Collapsible>
 
+## multi-head latent attention [#multi-head-latent-attention]
+
+[Multi-head latent attention](https://huggingface.co/papers/2405.04434) (MLA) stores a <HoverWord 
+  word="compressed"
+  description="Low-rank compression is an operation that factors a large matrix into two smaller matrices. For example, a 1000x1000 matrix M has 1 million values. If it has rank 64, then the matrix can be represented by two 1000x64 matrices. This only has 128,000 values instead of a million."
+/> version of KV (*latent*) to save more space in the <HoverWord
+  word="cache"
+  description="The KV cache stores past attention context during generation. It is more efficient than recomputing KV every time. When context length grows, it requires more memory in the cache."
+/>. At inference, the latents Q and KV are multiplied by **W<sup>combined</sup>** to compute attention.
+
+<MLADiagram />
+
+The usual approach expands the latent KV back to its full size by multiplying by an up-projection matrix W<sup>UK</sup>, before computing attention. This takes up more memory and defeats the purpose of compression.
+
+<div className="text-center text-emerald-400 font-bold">(W<sup>UQ</sup> * c<sup>Q</sup>) * (W<sup>UK</sup> * c<sup>KV</sup>)</div>
+
+MLA skips this step by "absorbing" or pre-multiplying W<sup>UQ</sup> and W<sup>UK</sup> into a single matrix, W<sup>combined</sup>, ahead of time. This means the latents never need to be expanded during inference.
+
+<div className="text-center text-emerald-400 font-bold">c<sup>Q</sup> * (W<sup>UK</sup> * W<sup>UQ</sup>) * c<sup>KV</sup></div>
+<div className="text-center text-emerald-400 font-bold">W<sup>combined</sup> = (W<sup>UQ</sup>)<sup>T</sup> * W<sup>UK</sup></div>
+<div className="text-center text-emerald-400 font-bold">score = (c<sup>Q</sup>)<sup>T</sup> * W<sup>combined</sup> * c<sup>KV</sup></div>
+
+Rearranging the maths like this makes it incompatible with [rotary position embeddings](https://huggingface.co/papers/2104.09864) (RoPE) though. RoPE adds a <HoverWord
+  word="position-dependent rotation"
+  description="R<sub>t</sub> and R<sub>j</sub> are the token positions (R for short here). When multiplying Q and K, R encodes the *relative* position between them."
+/> (R) to K and Q.
+
+<div className="text-center text-emerald-400 font-bold">score = (c<sup>Q</sup>)<sup>T</sup> * (W<sup>UQ</sup>)<sup>T</sup> * R<sub>t</sub><sup>T</sup> * R<sub>j</sub> * W<sup>UK</sup> * c<sup>KV</sup></div>
+
+RoPE rotates Q and K by their token positions (*t,j*).
+
+<div className="text-center text-emerald-400 font-bold">q<sub>t</sub> = R<sub>t</sub>q<sub>t</sub></div>
+<div className="text-center text-emerald-400 font-bold">k<sub>j</sub> = R<sub>j</sub>k<sub>j</sub></div>
+<div className="text-center text-emerald-400 font-bold">score = q<sub>t</sub>(R<sub>t</sub>R<sub>j</sub>)k<sub>j</sub></div>
+
+The term, R<sub>t</sub>R<sub>j</sub>, depend on the (*t,j*) pair. There is no single fixed matrix you can precompute that works for all (*t,j*) pairs, so it can't be folded into W<sup>combined</sup>. Using RoPE this way would require recomputing the full K from the latent during generation (increases latency) or caching the full RoPE-applied keys (increases memory).
+
+Decoupling the *positional information* from the *content* solves this. The *content* calculation is the same, but the positional information is applied in a separate stream.
+
+<div className="text-center text-emerald-400 font-bold">q<sup>R</sup> = RoPE(W<sup>QR</sup> * h<sub>t</sub>)</div>
+<div className="text-center text-emerald-400 font-bold">k<sup>R</sup> = RoPE(W<sup>KR</sup> * h<sub>j</sub>)</div>
+<div className="text-center text-emerald-400 font-bold">score = q<sup>C</sup> * k<sup>C</sup> + q<sup>R</sup> * k<sup>R</sup></div>
+
+k<sup>R</sup> is cached, and the content and positional scores are summed when computing attention. This way, positional information flows through small decoupled vectors and content information can still flow through the latents.
+
 ## flashattention [#flashattention]
 
 [FlashAttention](https://huggingface.co/papers/2205.14135) changes how the attention calculation is executed to minimize memory traffic to and from the GPU's slower high-bandwidth global memory (HBM). The calculation is done on the faster on-chip shared memory (SRAM) and registers, without fully materializing the entire attention score matrix in HBM.
@@ -534,8 +574,8 @@ This is the final grouped-query attention score for `Fear`.
 <FlashAttentionDiagram />
 
 - Q, K, and V are tiled into blocks that fit in SRAM. Tiling lets the calculation be performed in a CUDA kernel.
-- In the first block, calculate a local max *m<sub>1</sub>* and a sum *l<sub>1</sub>* for Q, K.
-- After processing the second block, update the local max to *m<sub>2</sub>*. Rescale *l<sub>1</sub>* and the partial output before adding the new updates.
+- In the first block, calculate a row-wise max *m<sub>1</sub>* and a sum *l<sub>1</sub>* for the attention scores.
+- After processing the second block, update the row-wise max to *m<sub>2</sub>*. Rescale *l<sub>1</sub>* and the partial output before adding the new updates.
 - Repeat for each calculation.
 
 Attention scores are streamed over blocks to avoid storing the entire attention score matrix in memory. The softmax calculation is exactly the same. Only Q, K, V, the final output, and the softmax normalization factor from the forward pass are stored in HBM.
@@ -554,9 +594,9 @@ Speed ups increase with sequence length. But for short sequences, attention is l
 
 <FAParallelismDiagram />
 
-- Each attention head is processed by a single thread block. FlashAttention parallelized by *batch size x num heads*. For long sequences, when batch sizes are small, there are fewer heads and not all the streaming multiprocessors (SM) are used.
+- FlashAttention parallelizes over *batch size x num heads x query blocks*. For long sequences with small batches, there are fewer head blocks and streaming multiprocessors (SM) occupancy drops.
 
-  FlashAttention-2 parallelizes over *batch size x num heads x seq length*. The work within a single attention head is split across more thread blocks to use more SMs.
+  FlashAttention-2 increases tiling and scheduling so more query blocks run in parallel. This boosts SM usage for long sequences.
 
 <FAWarpDiagram />
 

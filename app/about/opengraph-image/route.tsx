@@ -8,7 +8,7 @@ import commaNumber from "comma-number";
 
 // Image
 const stevhliuPhoto = toArrayBuffer(
-  readFileSync(join(process.cwd(), "public/images/stevhliu.PNG"))
+  readFileSync(join(process.cwd(), "public/images/stevhliu.png"))
 );
 
 // Fonts
