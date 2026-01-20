@@ -47,13 +47,13 @@ export async function GET() {
                 Steven Liu
               </div>
               <div tw="flex mb-5" style={font("Geist Mono")}>
-                <span tw="text-gray-400 mr-3">&mdash;</span> Technical writer at Hugging Face
+                <span tw="text-gray-400 mr-3">&mdash;</span> developer docs at Hugging Face
               </div>
               <div tw="flex mb-5" style={font("Geist Mono")}>
-                <span tw="text-gray-400 mr-3">&mdash;</span> Transformers, Diffuseres
+                <span tw="text-gray-400 mr-3">&mdash;</span> Transformers
               </div>
               <div tw="flex" style={font("Geist Mono")}>
-                <span tw="text-gray-400 mr-3">&mdash;</span> Lives in Sebastopol, CA
+                <span tw="text-gray-400 mr-3">&mdash;</span> Bay Area, CA
               </div>
             </div>
           </div>
