@@ -1,3 +1,4 @@
+import { cache } from "react";
 import postsData from "./posts.json";
 import commaNumber from "comma-number";
 import { supabase } from "./supabase";
@@ -16,7 +17,8 @@ type Views = {
   [key: string]: number;
 };
 
-export const getPosts = async () => {
+// Wrapped with React.cache() to deduplicate requests within the same render pass
+export const getPosts = cache(async () => {
   if (!supabase) {
     return postsData.posts.map((post): Post => ({
       ...post,
@@ -53,4 +55,4 @@ export const getPosts = async () => {
       viewsFormatted: commaNumber(views),
     };
   });
-};
+});
