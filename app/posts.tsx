@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TreePine } from "lucide-react";
 import type { Post } from "./get-posts";
+import { HomeDotPattern } from "./components/home-dot-pattern";
 
 function EvergreenIcon() {
   return (
@@ -11,16 +12,19 @@ function EvergreenIcon() {
 export function Posts({ posts }: { posts: Post[] }) {
   const hasEvergreen = posts.some((post) => post.evergreen);
   return (
-    <main className="max-w-2xl m-auto mb-10 text-sm">
-      <List posts={posts} />
-      {hasEvergreen && (
-        <div className="mt-8">
-          <span className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
-            <EvergreenIcon />
-            <span>evergreen posts are updated with new content</span>
-          </span>
-        </div>
-      )}
+    <main className="relative max-w-2xl m-auto mb-10 text-sm text-black dark:text-gray-100">
+      <HomeDotPattern />
+      <div className="relative z-10">
+        <List posts={posts} />
+        {hasEvergreen && (
+          <div className="mt-8">
+            <span className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+              <EvergreenIcon />
+              <span>evergreen posts are updated with new content</span>
+            </span>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
