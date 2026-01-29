@@ -10,101 +10,160 @@ export const metadata = {
 
 <FloatingTOC
   items={[
-    { text: "libraries", href: "#libraries" },
-    { text: "hub", href: "#hub" },
-    { text: "huggingchat", href: "#huggingchat" },
-    { text: "research", href: "#research" },
-    { text: "courses", href: "#courses" }
+    { text: "tldr", href: "#tldr" },
+    { text: "starting classes", href: "#starting-classes" },
+    { text: "skill tree", href: "#skill-tree", level: 3 },
+    { text: "the hub", href: "#the-hub" },
+    { text: "storage", href: "#storage", level: 3 },
+    { text: "spaces", href: "#spaces", level: 3 },
+    { text: "inference providers and endpoints", href: "#inference-providers", level: 3 },
+    { text: "jobs", href: "#jobs", level: 3},
+    { text: "data studio", href: "#data-studio", level: 3},
+    { text: "buffs", href: "#buffs" },
+    { text: "courses", href: "#courses", level: 3 },
+    { text: "papers", href: "#papers", level: 3},
+    { text: "research", href: "#research", level: 3 },
+    { text: "companions", href: "#companions"},
+    { text: "reachy", href: "#reachy", level: 3},
+    { text: "huggingchat", href: "#huggingchat", level: 3 },
   ]}
 />
 
-I often see people ask, *what is Hugging Face*? The most common answer is usually some variant of "Hugging Face is the GitHub of machine learning".
-
-It is a good one-liner considering the breadth of Hugging Face's quest to **enable collaborative machine learning (ML)**. But it also hides the depth of what we do. The Hugging Face ecosystem, or Hugging-Verse, is quite expansive and it can often feel like we're doing too much without a strong focus.
-
-But I believe the Hugging-Verse needs to be expansive precisely because we're pursuing such an ambitious quest.
+I often see people ask, *what is Hugging Face*? The answer is usually some variant of "Hugging Face is the GitHub of machine learning".
 
 <Figure>
-  <img className="rounded-xl" src="/images/hf-universe.png" alt="The Hugging-Verse" />
-  <Caption>Image generated from the <a href="https://huggingface.co/linoyts/huggy_flux_fal_lora">linoyts/huggy_flux_fal_lora</a> checkpoint.</Caption>
+  <Image src="/images/hf-universe.png" alt="The Hugging-Verse" width={672} height={378} className="rounded-xl" />
 </Figure>
 
-Think about games like Baldur's Gate 3 or Elden Ring. They're enormous games you can easily spend 100+ hours on in a single playthrough. Alongside the main quest, there are many side quests that add a ton of richness, worldbuilding, and depth.
+It's not a bad answer, but it hides a lot of depth. The Hugging Face ecosystem, or Hugging-Verse, is expansive and encompasses nearly every aspect of machine learning. For this reason, it can be overwhelming if you're just getting started.
 
-Similarly, the main Hugging Face libraries and Hub platform advance the main quest. All the other libraries, research projects, courses, tools and services are side quests that enrich the Hugging-Verse.
+This is my Hugging-Verse walkthrough, inspired by games like Baldur's Gate 3, Elden Ring, and Kingdom Come Deliverance II. These games are enormous, and you can easily spend 100+ hours on a single playthrough in each of them. Through side quests and lore, they add a ton of richness and worldbuilding that create immersive gameplay.
 
-It can be overwhelming if you're new though, so here is my high-level walkthrough.
+But I've also had to look certain things up in guides because I was overwhelmed. So if you're feeling lost, I hope this helps.
 
-<Tip>If you only take one thing away, remember, side quests are *optional*. Focus on a main library like Transformers and using the Hub at first if you aren't sure where to start.</Tip>
+<div className="relative">
+  <a id="tldr" className="absolute -top-[20px]" />
+  <Collapsible trigger="tldr" defaultOpen>
 
-## libraries [#libraries]
+  - Classes are the core libraries you build with.
+  - Skill trees are optional specialized libraries.
+  - The Hub is a hosted platform where you can get ML services like compute and storage.
+  - Buffs are learning resources.
+  - Companions are interactive products.
 
-The Hugging-Verse contains many libraries related to nearly every aspect of ML.
+  </Collapsible>
+</div>
 
-The main ones, like Transformers and Diffusers, provide access to pretrained models for inference and fine-tuning. They're able to do a little bit of everything.
+## starting classes [#starting-classes]
 
-Side libraries focus on specific ML topics such as:
+There are many libraries in the Hugging-Verse, each dedicated to a specific topic like transformer models, diffusion models, pretraining/finetuning, robotics, evaluation, and more.
 
-- distributed training (Accelerate, picotron, nanotron)
-- evaluation (Lighteval)
-- on-device (Transformers.js, Optimum)
+Choose a starter class, [Transformers](https://huggingface.co/docs/transformers) or [Diffusers](https://huggingface.co/docs/diffusers), depending on whether you're interested in large language models or image/video generation. These give you access to models and the APIs to train or run inference with them. It's important to level up these class skills first, like learning how to finetune a model with the [Trainer](https://huggingface.co/docs/transformers/main_classes/trainer#transformers.Trainer) API, because later on, you'll find that some of the more specialized libraries build on top of Transformers.
 
-Where you start in the Hugging-Verse depends on what you're trying to do. There aren't defined progression paths.
+As an example, TRL trainers extend the Transformers Trainer. If you're already familiar with Trainer, then you'll get a +x% faster learning bonus.
 
-Two general routes I think most people take are:
+### skill tree [#skill-tree]
 
-1. Start learning ML with Transformers.
-2. Adapting a side library for their own work or research.
+As you level up, you can start exploring the skill tree and decide *whether* and *where* you want to spend your points on more specialized skills.
 
-My recommendation is to pick 1 if you're a beginner. Otherwise, feel free to create your own progression path.
+For example, if you're interested in a "training" build, put some points in [Accelerate](https://huggingface.co/docs/accelerate/index) or [nanotron](https://github.com/huggingface/nanotron). If you want to do reinforcement learning, invest a point in [TRL](https://huggingface.co/docs/trl/index). Or if you want to do an "optimization" build, check out [kernels](https://huggingface.co/docs/kernels/index) to build and load faster compute operations or [bitsandbytes](https://huggingface.co/docs/bitsandbytes/index) to quantize models to use less memory.
 
-## hub [#hub]
+The reason you should consider *whether* you want to invest in these skills is that some features from these specialized libraries get added directly to Transformers over time. That's why it's such a powerful class. It can scale to the late-game, where you may need more specific abilities.
 
-The [Hub](https://hf.co/) is the most visible part of Hugging Face. This is probably what most people think of when they think of Hugging Face.
+This isn't to say you shouldn't learn a specialized library, because not *all* abilities are integrated into Transformers. You may find that you need something in TRL that isn't available in Transformers.
 
-It is a Git-based platform with to access or share models, datasets, and Spaces. Every public repository provides free storage for your ML artifacts. Storage is based on [Xet](https://huggingface.co/blog/xet-on-the-hub), a more efficient storage system. Social features like [posts](https://huggingface.co/?post=true), [articles](https://huggingface.co/new-blog), and the Community tab encourage collaboration and discussion.
+## the hub [#the-hub]
 
-[Model](https://huggingface.co/models) repositories include a widget to run inference with a model on your browser. The widget is powered by [Inference Providers](https://huggingface.co/docs/api-inference/index) like Replicate and fal.
+The [Hub](https://huggingface.co) is where you go for shops and services to get things done. Most of these services are free to use, but a <ProBadge /> subscription unlocks access to higher limits and more features.
 
-[Dataset](https://huggingface.co/datasets) repositories have a [Dataset Viewer](https://huggingface.co/docs/hub/datasets-viewer) for easily previewing a datasets contents. You can run SQL queries (or ask AI to craft a SQL query for you) on the dataset with the [Data Studio](https://huggingface.co/docs/hub/datasets-viewer) feature to explore it in more detail. Again, this all takes place in the browser.
+### storage [#storage]
+
+One of the main services the Hub offers is storage for models and datasets you create. It pairs the Git workflow with [Xet's](https://huggingface.co/docs/hub/xet/index) storage system. Xet is faster and more efficient than Git LFS because it uses content-defined chunking (CDC) to deduplicate data. Only the parts of a file that changed are uploaded, unlike Git LFS, which uploads the entire file again.
+
+The starter storage is pretty generous and comes with around 8TB of public storage and 100GB of private storage.
+
+### spaces [#spaces]
+
+[Spaces](https://huggingface.co/docs/hub/spaces) lets you turn your models into ML apps with frameworks like [Gradio](https://huggingface.co/docs/hub/spaces-sdks-gradio), [Docker](https://huggingface.co/docs/hub/spaces-sdks-docker), and [React](https://huggingface.co/docs/hub/spaces-sdks-static). You can even turn your ML app into a [callable tool](https://huggingface.co/docs/hub/spaces-mcp-servers) for agents with MCP to integrate a Space into a workflow.
+
+[Arena](https://arena.ai/blog/lmarena-is-now-arena/) (formerly LMArena) is a $1.7B startup that started off as a Gradio app comparing how models perform on different tasks. If you can imagine it, you can build it with Spaces.
+
+A free Space runs on a CPU with 16GB of RAM, and you can upgrade to bigger GPUs if you need additional compute. For a more unique and powerful hardware option, try <ZeroBadge />, a shared cluster of H200s. The H200s are dynamically allocated to a Space to complete a workload, then released for the next Space. This ensures you only use compute when you need it and aren't leaving GPUs idle.
+
+### inference providers and endpoints [#inference-providers]
+
+Serverless inference lets you run your model through an API without having to manage the infrastructure on your own. This is designed to help you deploy models to production. There are two options:
+
+- [Inference Providers](https://huggingface.co/docs/inference-providers/index) connect models on the Hub to companies like [Cerebras](https://www.cerebras.ai/) and [Hyperbolic](https://www.hyperbolic.ai/) to let you make on-demand inference calls to their hardware. Make sure you use the [comparison tool](https://huggingface.co/inference/models) to help you select a provider based on price or speed.
+
+- [Inference Endpoints](https://huggingface.co/docs/inference-endpoints/index) is Hugging Face's dedicated and managed inference infrastructure ("endpoint") that runs continuously. There are more choices to make about the deployment, such as hardware (AWS/GCP/Azure), inference engine (vLLM/SGLang), and autoscaling.
+
+### jobs [#jobs]
+
+[Jobs](https://huggingface.co/docs/hub/jobs-overview) provides access to Hugging Face's hardware (CPUs/GPUs) for *temporary* compute. It stops once the task is complete, or you can [schedule](https://huggingface.co/docs/hub/jobs-schedule) a task to run periodically.
+
+<Snippet>
+{`hf jobs uv run --flavor a100-large --timeout 6h --with trl --secrets HF_TOKEN train.py`}
+</Snippet>
+
+This is useful for one-off or scheduled workloads like finetuning and data processing.
+
+### data studio [#data-studio]
+
+[Data Studio](https://huggingface.co/docs/hub/data-studio) is available in dataset repositories for exploring data in the browser without downloading it. The built-in SQL console helps analyze a dataset in more detail.
+
+<iframe
+  src="https://huggingface.co/datasets/HuggingFaceFW/finewiki/embed/viewer/en/train"
+  width="100%"
+  height="560px"
+  loading="lazy"
+></iframe>
+
+## buffs [#buffs]
+
+Acquire these permanent buffs to increase your research and knowledge skills.
+
+### courses [#courses]
+
+Take the courses at [hf.co/learn](https://hf.co/learn), which cover topics like agents, reinforcement learning, diffusion, and more.
+
+This is a good early-game buff because you get more in-depth explanations about how things work.
+
+### papers [#papers]
+
+Browse [Papers](https://huggingface.co/papers/trending), a curated daily selection to help you stay on top of the latest research.
+
+### research [#research]
+
+Follow the [science team](https://huggingface.co/science), which produces and shares research you can learn from and build on.
+
+- [FineData](https://huggingface.co/HuggingFaceFW) has several clean and high-quality datasets for large-scale pretraining, and they've also shared their recipe for extracting and refining data.
+- [Smol Models Research](https://huggingface.co/HuggingFaceTB) releases small but competitive models, and has also written a playbook for training them.
+
+This is a good late-game buff.
+
+<iframe
+	src="https://huggingfacetb-smol-training-playbook.hf.space"
+	className="mx-auto block"
+	width="600"
+	height="450"
+	loading="lazy"
+></iframe>
+
+## companions [#companions]
+
+Add a companion to your party to help you out.
+
+### reachy [#reachy]
+
+[Reachy](https://huggingface.co/spaces/pollen-robotics/Reachy_Mini) is a desktop robot for experimenting with human-robot interactions. The robot is built on open-source software, so you can program new "behaviors" for it.
 
 <Tweet
-    id="1894432966077468955"
+    id="2008319790868201795"
 />
 
-[Spaces](https://huggingface.co/spaces) is a scaffold to create and deploy ML apps with Gradio, Docker, React, Svelte, and more. A free tier Space runs on a basic 16GB CPU, but you can upgrade to more powerful GPUs and persistent storage if your app needs it. PRO subscribers have access to [ZeroGPU](https://huggingface.co/docs/hub/spaces-zerogpu), a shared cluster of A100 GPUs that are automatically allocated to a Space to complete a workload and then released to the next Space.
+### huggingchat [#huggingchat]
 
-<Figure>
-  <img className="rounded-xl" src="https://cdn-uploads.huggingface.co/production/uploads/5f17f0a0925b9863e28ad517/naVZI-v41zNxmGlhEhGDJ.gif" alt="ZeroGPU" />
-</Figure>
+[HuggingChat](https://huggingface.co/chat/) is an open version of ChatGPT with support for many models like Kimi-K2.5 and gpt-oss-120B. If you don't know which model to use, its Omni router automatically selects the best model for your message.
 
-## huggingchat [#huggingchat]
-
-[HuggingChat](https://huggingface.co/chat/) is an open version of ChatGPT, providing access to some of the latest models like DeepSeek-R1. It uses a router, Omni, to automatically select the best route and model for a message. The system prompt of each model is modifiable.
-
-HuggingChat is powered by Inference Providers, but you can use a different provider like [OpenRouter](https://openrouter.ai/docs/quickstart).
-
-## research [#research]
-
-Hugging Face is also engaged in research projects that empower the entire ML ecosystem. The goal isn't necessarily to train the best models. Instead, we're trying to create new and interesting research that benefits everyone.
-
-Collaboration >>> competition.
-
-As an example, the [The Ultra-Scale Playbook](http://hf.co/spaces/nanotron/ultrascale-playbook) is a culmination of everything the research team has learned about distributed training. It is freely available to anyone who is interested in scaling training of large language models to thousands of GPUs.
-
-<Tweet
-    id="1892273133547078036"
-/>
-
-Some other research projects include:
-
-- [open-r1](https://huggingface.co/blog/open-r1): fully reproduce the DeepSeek-R1 model, an open and powerful reasoning model comparable to the OpenAI o-series models.
-- [SmolLM](https://huggingface.co/HuggingFaceTB): release high-quality pretraining datasets (FineWeb, Cosmopedia) and small language and vision language models.
-
-These types of projects enable other researchers to build on top of our work and push the field forward together.
-
-## courses [#courses]
-
-Educational content, such as the courses and cookbook, at [hf.co/learn](hf.co/learn) provide an accessible starting point for learning ML. A large part of our quest hinges on lowering the barrier for everyone to learn ML and convert them into active participants.
-
-There are several courses - agents, reinforcement learning, diffusion, etc. - available on hf.co/learn. You can also find more courses, such as [quantization fundamentals](https://www.deeplearning.ai/short-courses/quantization-fundamentals-with-hugging-face/), we collaborated on with other learning platforms like DeepLearning.AI.
+HuggingChat is also available in the Hugging Face docs like Transformers, as well as in Papers, so you can ask it questions directly to level up even faster.

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 interface TOCItem {
   text: string;
   href: string;
+  level?: 2 | 3;
 }
 
 interface FloatingTOCProps {
@@ -81,11 +82,15 @@ function TOCItem({ item, isActive, colorClasses }: {
   isActive: boolean; 
   colorClasses: { active: string; hover: string } 
 }) {
+  const isNested = item.level === 3;
+  
   return (
     <li>
       <a
         href={item.href}
         className={`block py-1 px-2 rounded text-sm transition-all duration-200 ${
+          isNested ? 'ml-4' : ''
+        } ${
           isActive
             ? `${colorClasses.active} font-medium`
             : `text-gray-600 dark:text-gray-300 ${colorClasses.hover}`
@@ -106,10 +111,11 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   const getRandomColor = (): Color => 
     COLORS[Math.floor(Math.random() * COLORS.length)];
 
+  // Memoize section IDs to avoid recreating array on each scroll
+  const sectionIds = useMemo(() => items.map(item => item.href.substring(1)), [items]);
+
   const findActiveSection = useCallback((scrollPosition: number) => {
-    const sections = items.map(item => item.href.substring(1));
-    
-    return sections.find(sectionId => {
+    return sectionIds.find(sectionId => {
       const element = document.getElementById(sectionId);
       if (!element) return false;
       
@@ -117,7 +123,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
       const elementBottom = elementTop + element.offsetHeight;
       return scrollPosition >= elementTop && scrollPosition < elementBottom;
     }) || '';
-  }, [items]);
+  }, [sectionIds]);
 
   // Combined scroll handler
   useEffect(() => {
@@ -132,7 +138,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
       setActiveSection(findActiveSection(scrollPosition));
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [findActiveSection]);
 
@@ -164,7 +170,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
         
         {isExpanded && (
           <div className="mt-2">
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-[32rem] overflow-y-auto">
               <nav>
                 <ul className="space-y-1 p-2">
                   {items.map((item, index) => {

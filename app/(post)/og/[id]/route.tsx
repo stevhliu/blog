@@ -27,10 +27,11 @@ const geistSansBold = readFileSync(
 
 const geistMono = readFileSync(join(fontsDir, "geist-mono-regular.ttf"));
 
-export async function GET(_req: Request, props) {
-  const params = await props.params;
-
-  const { id } = params;
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
 
   const posts = await getPosts();
   const post = posts.find(p => p.id === id);

@@ -6,11 +6,13 @@ export async function Image({
   alt: originalAlt,
   width = null,
   height = null,
+  className,
 }: {
   src: string;
   alt?: string;
   width: number | null;
   height: number | null;
+  className?: string;
 }) {
   const isDataImage = src.startsWith("data:");
 
@@ -57,6 +59,7 @@ export async function Image({
           alt={alt ?? ""}
           src={src}
           unoptimized={src.endsWith(".gif")}
+          className={className}
         />
 
         {alt && <Caption>{alt}</Caption>}

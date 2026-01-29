@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ChevronRight } from "lucide-react";
 
 interface CollapsibleProps {
   trigger: string;
   children: React.ReactNode;
   className?: string;
+  defaultOpen?: boolean;
 }
 
-export function Collapsible({ trigger, children, className = "" }: CollapsibleProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function Collapsible({
+  trigger,
+  children,
+  className = "",
+  defaultOpen = false,
+}: CollapsibleProps) {
+  const contentId = useId();
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const toggleOpen = () => setIsOpen(prev => !prev);
   const chevronClassName = `w-4 h-4 text-gray-500 transition-transform duration-200 ${
@@ -23,7 +30,7 @@ export function Collapsible({ trigger, children, className = "" }: CollapsiblePr
         onClick={toggleOpen}
         className="w-full px-4 py-2 text-left font-medium rounded-t-lg transition-colors"
         aria-expanded={isOpen}
-        aria-controls="collapsible-content"
+        aria-controls={contentId}
       >
         <span className="flex items-center justify-between">
           {trigger}
@@ -32,7 +39,7 @@ export function Collapsible({ trigger, children, className = "" }: CollapsiblePr
       </button>
       {isOpen && (
         <div 
-          id="collapsible-content"
+          id={contentId}
           className="p-4 rounded-b-lg"
         >
           {children}

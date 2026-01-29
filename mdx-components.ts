@@ -17,6 +17,9 @@ import { Figure } from "./app/components/figure";
 import { Snippet } from "./app/components/snippet";
 import { Caption } from "./app/components/caption";
 import { Callout, Tip, Warning } from "./app/components/callout";
+import { ProBadge } from "./app/components/pro-badge";
+import { SpaceFan } from "./app/components/space-fan";
+import { ZeroBadge } from "./app/components/zero-badge";
 import { Blockquote as blockquote } from "./app/components/blockquote";
 // Lazy-load diagram components to reduce initial bundle size
 // Attention diagrams
@@ -166,6 +169,9 @@ export function useMDXComponents(components: {
     Callout,
     Tip,
     Warning,
+    ProBadge,
+    SpaceFan,
+    ZeroBadge,
     FloatingTOC,
     HoverWord,
     Table,
