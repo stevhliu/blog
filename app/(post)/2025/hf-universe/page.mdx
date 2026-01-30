@@ -29,11 +29,11 @@ export const metadata = {
   ]}
 />
 
-I often see people ask, *what is Hugging Face*? The answer is usually some variant of "Hugging Face is the GitHub of machine learning".
-
 <Figure>
   <Image src="/images/hf-universe.png" alt="The Hugging-Verse" width={672} height={378} className="rounded-xl" />
 </Figure>
+
+I often see people ask, *what is Hugging Face*? The answer is usually some variant of "Hugging Face is the GitHub of machine learning".
 
 It's not a bad answer, but it hides a lot of depth. The Hugging Face ecosystem, or Hugging-Verse, is expansive and encompasses nearly every aspect of machine learning. For this reason, it can be overwhelming if you're just getting started.
 
@@ -105,6 +105,7 @@ Serverless inference lets you run your model through an API without having to ma
 <Snippet>
 {`hf jobs uv run --flavor a100-large --timeout 6h --with trl --secrets HF_TOKEN train.py`}
 </Snippet>
+<Caption>Launch a finetuning job on an A100 GPU.</Caption>
 
 This is useful for one-off or scheduled workloads like finetuning and data processing.
 
@@ -114,6 +115,7 @@ This is useful for one-off or scheduled workloads like finetuning and data proce
 
 <iframe
   src="https://huggingface.co/datasets/HuggingFaceFW/finewiki/embed/viewer/en/train"
+  title="FineWiki dataset viewer"
   width="100%"
   height="560px"
   loading="lazy"
@@ -144,6 +146,7 @@ This is a good late-game buff.
 
 <iframe
 	src="https://huggingfacetb-smol-training-playbook.hf.space"
+	title="Smol Training Playbook"
 	className="mx-auto block"
 	width="600"
 	height="450"
