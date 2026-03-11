@@ -15,6 +15,7 @@ export const metadata = {
     { text: "skill tree", href: "#skill-tree", level: 3 },
     { text: "the hub", href: "#the-hub" },
     { text: "storage", href: "#storage", level: 3 },
+    { text: "buckets", href: "#buckets", level: 3 },
     { text: "spaces", href: "#spaces", level: 3 },
     { text: "inference providers and endpoints", href: "#inference-providers", level: 3 },
     { text: "jobs", href: "#jobs", level: 3},
@@ -81,6 +82,12 @@ The [Hub](https://huggingface.co) is where you go for shops and services to get 
 One of the main services the Hub offers is storage for models and datasets you create. It pairs the Git workflow with [Xet's](https://huggingface.co/docs/hub/xet/index) storage system. Xet is faster and more efficient than Git LFS because it uses content-defined chunking (CDC) to deduplicate data. Only the parts of a file that changed are uploaded, unlike Git LFS, which uploads the entire file again.
 
 The starter storage is pretty generous and comes with around 8TB of public storage and 100GB of private storage.
+
+### buckets [#buckets]
+
+[Buckets](https://huggingface.co/docs/huggingface_hub/en/guides/buckets) are a type of storage container designed for storing intermediate stuff, like checkpoints from a training run or processed data from a data pipeline. These files can be overwritten, deleted, and don't require versioning. When you're ready, publish these artifacts to [storage](#storage). Buckets is backed by the same Xet storage system for faster transfers and lower costs.
+
+This is useful for working environments and keeping the entire ML training loop in one place without leaving the Hub.
 
 ### spaces [#spaces]
 
