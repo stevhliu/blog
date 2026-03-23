@@ -1,6 +1,8 @@
 import { Logo } from "./logo";
 import Link from "next/link";
 
+const tweetIconStyle = { marginRight: 4 } as const;
+
 export function Header() {
   return (
     <header className="flex mb-5 md:mb-10 items-center">
@@ -10,19 +12,20 @@ export function Header() {
 
         <Link
           href="/about"
-          className="p-2"
+          className="nav-link p-2"
         >
-      <span className="[a:hover_&]:bg-neutral-200 dark:[a:hover_&]:bg-neutral-700 rounded-xl py-0.5 px-1.5 inline-flex">
+      <span className="rounded-xl py-0.5 px-1.5 inline-flex">
         about
       </span>
         </Link>
         <a
           href="https://x.com/stevhliu"
           target="_blank"
-          className="inline-flex items-center p-2 rounded-sm transition-[background-color] whitespace-nowrap -mr-2"
+          rel="noopener noreferrer"
+          className="nav-link inline-flex items-center p-2 rounded-sm whitespace-nowrap -mr-2"
         >
-      <span className="[a:hover_&]:bg-neutral-200 dark:[a:hover_&]:bg-neutral-700 rounded-xl py-0.5 px-1.5 inline-flex items-center gap-1">
-        <TweetIcon style={{ marginRight: 4 }} />
+      <span className="rounded-xl py-0.5 px-1.5 inline-flex items-center gap-1">
+        <TweetIcon style={tweetIconStyle} />
         <span>follow me</span>
       </span>
         </a>
@@ -34,6 +37,7 @@ export function Header() {
 function TweetIcon(props: any) {
   return (
     <svg
+      aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       width={16}
       height={16}

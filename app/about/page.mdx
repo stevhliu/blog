@@ -11,7 +11,11 @@ export const metadata = {
   }
 }
 
-<a href="https://twitter.com/stevhliu" target="_blank">
+import { bgStyle } from "@/app/posts";
+
+<div className="fixed inset-0 -z-10" style={bgStyle} aria-hidden="true" />
+
+<a href="https://twitter.com/stevhliu" target="_blank" rel="noopener noreferrer">
   <Image
     src="/images/stevhliu.PNG"
     alt="Steven Liu"

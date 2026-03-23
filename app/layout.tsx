@@ -28,7 +28,10 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "transparent",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
+    { media: "(prefers-color-scheme: dark)", color: "#1C1C1C" },
+  ],
 };
 
 export default function RootLayout({
@@ -51,10 +54,15 @@ export default function RootLayout({
       </head>
 
       <body className="dark:text-gray-100 max-w-2xl m-auto">
-        <main className="p-6 pt-3 md:pt-6 min-h-screen">
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-white focus:text-black dark:focus:bg-neutral-900 dark:focus:text-white">
+          Skip to content
+        </a>
+        <div className="relative z-10 p-6 pt-3 md:pt-6 min-h-screen">
           <Header />
-          {children}
-        </main>
+          <main id="main">
+            {children}
+          </main>
+        </div>
 
         <Footer />
         <Analytics />

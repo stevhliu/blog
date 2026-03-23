@@ -5,7 +5,7 @@ export function Logo() {
     <span className="text-md md:text-lg whitespace-nowrap font-bold">
       <Link
         href="/"
-        className="hover:bg-neutral-200 dark:hover:bg-neutral-700 p-2 rounded-2xl -ml-2 transition-[background-color]"
+        className="nav-link p-2 rounded-2xl -ml-2"
       >
         steven liu
       </Link>

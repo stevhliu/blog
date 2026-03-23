@@ -1,31 +1,40 @@
 import Link from "next/link";
 import { TreePine } from "lucide-react";
 import type { Post } from "./get-posts";
-import { HomeDotPattern } from "./components/home-dot-pattern";
+
+export const bgStyle = {
+  backgroundImage: "url(/images/background.jpg)",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+} as const;
 
 function EvergreenIcon() {
   return (
-    <TreePine className="inline-block w-4 h-4 ml-1.5 mb-0.5 text-green-600 dark:text-green-500" />
+    <TreePine aria-hidden="true" className="inline-block w-4 h-4 ml-1.5 mb-0.5 text-green-600 dark:text-green-500" />
   );
 }
 
 export function Posts({ posts }: { posts: Post[] }) {
   const hasEvergreen = posts.some((post) => post.evergreen);
   return (
-    <main className="relative max-w-2xl m-auto mb-10 text-sm text-black dark:text-gray-100">
-      <HomeDotPattern />
+    <section className="relative max-w-2xl m-auto mb-10 text-sm text-black dark:text-gray-100">
+      <div
+        className="fixed inset-0 -z-10"
+        style={bgStyle}
+        aria-hidden="true"
+      />
       <div className="relative z-10">
         <List posts={posts} />
-        {hasEvergreen && (
+        {hasEvergreen ? (
           <div className="mt-8">
-            <span className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+            <span className="flex items-center gap-1.5 text-xs text-neutral-700 dark:text-neutral-400">
               <EvergreenIcon />
               <span>evergreen posts are updated with new content</span>
             </span>
           </div>
-        )}
+        ) : null}
       </div>
-    </main>
+    </section>
   );
 }
 
@@ -52,19 +61,19 @@ function List({ posts }: { posts: Post[] }) {
                   }`}
                 >
                   {firstOfYear && (
-                    <span className="w-14 inline-block shrink-0 text-neutral-500 text-xs dark:text-neutral-500">
+                    <span className="w-14 inline-block shrink-0 text-neutral-700 text-xs dark:text-neutral-400">
                       {year}
                     </span>
                   )}
 
-                  <span className="grow dark:text-gray-100">
-                    <span className="text-base [li:hover_&]:bg-neutral-200 dark:[li:hover_&]:bg-neutral-700 transition-all rounded-xl py-0.5 px-1.5">
+                  <span className="grow min-w-0 dark:text-gray-100">
+                    <span className="post-title text-base py-0.5 px-1.5 inline-block break-words">
                       {post.title}
-                      {post.evergreen && <EvergreenIcon />}
+                      {post.evergreen ? <EvergreenIcon /> : null}
                     </span>
                   </span>
 
-                  <span className="text-neutral-500 dark:text-neutral-500 text-xs">
+                  <span className="text-neutral-700 dark:text-neutral-400 text-xs tabular-nums">
                     {post.viewsFormatted}
                   </span>
                 </span>
