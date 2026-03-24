@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { Work } from "@/app/components/work";
+import { bgStyle } from "@/app/posts";
 
 export const metadata = {
   title: 'Steven Liu',
@@ -11,19 +11,10 @@ export const metadata = {
   }
 }
 
-import { bgStyle } from "@/app/posts";
-
 <div className="fixed inset-0 -z-10" style={bgStyle} aria-hidden="true" />
 
-<a href="https://twitter.com/stevhliu" target="_blank" rel="noopener noreferrer">
-  <Image
-    src="/images/stevhliu.PNG"
-    alt="Steven Liu"
-    className="rounded-full bg-gray-100 block mb-5 mx-auto sm:float-right sm:ml-5 sm:mb-5 grayscale"
-    width={115}
-    height={115}
-  />
-</a>
+<div className="glass rounded-2xl p-6">
+
 soft ripples of thought
 
 night air cool, the moon serene
@@ -31,3 +22,5 @@ night air cool, the moon serene
 words settle like dew
 
 <Work />
+
+</div>

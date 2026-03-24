@@ -1,6 +1,5 @@
 import { cache } from "react";
 import postsData from "./posts.json";
-import commaNumber from "comma-number";
 import { supabase } from "./supabase";
 
 export type Post = {
@@ -23,7 +22,7 @@ export const getPosts = cache(async () => {
     return postsData.posts.map((post): Post => ({
       ...post,
       views: 0,
-      viewsFormatted: commaNumber(0),
+      viewsFormatted: Intl.NumberFormat().format(0),
     }));
   }
 
@@ -52,7 +51,7 @@ export const getPosts = cache(async () => {
     return {
       ...post,
       views,
-      viewsFormatted: commaNumber(views),
+      viewsFormatted: Intl.NumberFormat().format(views),
     };
   });
 });

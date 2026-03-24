@@ -3,7 +3,7 @@ import { TreePine } from "lucide-react";
 import type { Post } from "./get-posts";
 
 export const bgStyle = {
-  backgroundImage: "url(/images/background.jpg)",
+  backgroundImage: "url(/images/background-2.png)",
   backgroundSize: "cover",
   backgroundPosition: "center",
 } as const;
@@ -17,24 +17,20 @@ function EvergreenIcon() {
 export function Posts({ posts }: { posts: Post[] }) {
   const hasEvergreen = posts.some((post) => post.evergreen);
   return (
-    <section className="relative max-w-2xl m-auto mb-10 text-sm text-black dark:text-gray-100">
-      <div
-        className="fixed inset-0 -z-10"
-        style={bgStyle}
-        aria-hidden="true"
-      />
-      <div className="relative z-10">
+    <>
+    <div className="fixed inset-0 -z-10" style={bgStyle} aria-hidden="true" />
+    <section className="relative max-w-2xl m-auto mb-10 text-sm text-black dark:text-gray-100 glass rounded-2xl p-4">
         <List posts={posts} />
         {hasEvergreen ? (
           <div className="mt-8">
-            <span className="flex items-center gap-1.5 text-xs text-neutral-700 dark:text-neutral-400">
+            <span className="flex items-center gap-1.5 text-xs subtext">
               <EvergreenIcon />
               <span>evergreen posts are updated with new content</span>
             </span>
           </div>
         ) : null}
-      </div>
     </section>
+    </>
   );
 }
 
@@ -61,7 +57,7 @@ function List({ posts }: { posts: Post[] }) {
                   }`}
                 >
                   {firstOfYear && (
-                    <span className="w-14 inline-block shrink-0 text-neutral-700 text-xs dark:text-neutral-400">
+                    <span className="w-14 inline-block shrink-0 subtext text-xs">
                       {year}
                     </span>
                   )}
@@ -73,7 +69,7 @@ function List({ posts }: { posts: Post[] }) {
                     </span>
                   </span>
 
-                  <span className="text-neutral-700 dark:text-neutral-400 text-xs tabular-nums">
+                  <span className="subtext text-xs tabular-nums">
                     {post.viewsFormatted}
                   </span>
                 </span>

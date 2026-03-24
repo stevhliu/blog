@@ -4,9 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "./analytics";
 import { Header } from "./header";
-import { Footer } from "./footer";
 import { doge } from "./doge";
-
 export const metadata = {
   title: "steven liu",
   description:
@@ -63,8 +61,6 @@ export default function RootLayout({
             {children}
           </main>
         </div>
-
-        <Footer />
         <Analytics />
       </body>
     </html>
