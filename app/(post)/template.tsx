@@ -7,7 +7,7 @@ export default async function Template({ children }) {
   const posts = await getPosts();
 
   return (
-    <article className="text-gray-800 dark:text-gray-300 mb-10">
+    <article className="text-[var(--color-text)] mb-10">
       <Header posts={posts} />
 
       {children}

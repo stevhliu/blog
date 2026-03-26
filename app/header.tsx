@@ -1,56 +1,29 @@
 import { Logo } from "./logo";
 import Link from "next/link";
 
-const tweetIconStyle = { marginRight: 4 } as const;
-
 export function Header() {
   return (
-    <header className="flex mb-5 md:mb-10 items-center">
-      <Logo />
+    <header className="mb-10 md:mb-16">
+      <div className="flex justify-between text-xs text-[#64a70b] font-medium tracking-wide">
+        <div>
+          Hugging Face
+          <br />
+          Developer Docs
+        </div>
+        <div>
+          <a href="https://x.com/stevhliu" target="_blank" rel="noopener noreferrer" className="transition-colors duration-150 hover:text-[var(--color-blue)]">@stevhliu</a>
+          <br />
+          2024
+        </div>
+      </div>
 
-      <nav className="text-xs grow justify-end items-center flex">
+      <div className="mt-2 h-px bg-[var(--color-text)]" />
 
-        <Link
-          href="/about"
-          className="nav-link p-2"
-        >
-      <span className="rounded-xl py-0.5 px-1.5 inline-flex">
-        about
-      </span>
-        </Link>
-        <a
-          href="https://x.com/stevhliu"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="nav-link inline-flex items-center p-2 rounded-sm whitespace-nowrap -mr-2"
-        >
-      <span className="rounded-xl py-0.5 px-1.5 inline-flex items-center gap-1">
-        <TweetIcon style={tweetIconStyle} />
-        <span>follow me</span>
-      </span>
-        </a>
-      </nav>
+      <div className="mt-1 h-px bg-[var(--color-text)]" />
+
+      <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-[#64a70b] text-balance">
+        <Link href="/" className="nav-link">Steven Liu</Link>
+      </h1>
     </header>
-  );
-}
-
-function TweetIcon(props: any) {
-  return (
-    <svg
-      aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-      width={16}
-      height={16}
-      viewBox="0 0 24 24"
-      {...props}
-    >
-      <path
-        fill="currentColor"
-        fillRule="nonzero"
-        stroke="none"
-        strokeWidth={1}
-        d="M8.28 20.26c7.55 0 11.68-6.26 11.68-11.67v-.53c.8-.58 1.49-1.3 2.04-2.13-.74.33-1.53.54-2.36.65.85-.5 1.5-1.32 1.8-2.28-.78.48-1.66.81-2.6 1a4.1 4.1 0 0 0-7 3.74c-3.4-.17-6.43-1.8-8.46-4.29a4.1 4.1 0 0 0 1.28 5.48c-.68-.02-1.3-.2-1.86-.5v.05a4.11 4.11 0 0 0 3.29 4.02 4 4 0 0 1-1.85.08 4.1 4.1 0 0 0 3.83 2.85A8.23 8.23 0 0 1 2 18.43a11.67 11.67 0 0 0 6.28 1.83"
-      />
-    </svg>
   );
 }

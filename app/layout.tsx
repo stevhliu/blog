@@ -27,8 +27,8 @@ export const metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
-    { media: "(prefers-color-scheme: dark)", color: "#1C1C1C" },
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#141414" },
   ],
 };
 
@@ -51,7 +51,7 @@ export default function RootLayout({
         />
       </head>
 
-      <body className="dark:text-gray-100 max-w-2xl m-auto">
+      <body className="text-[var(--color-text)] max-w-2xl m-auto">
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-white focus:text-black dark:focus:bg-neutral-900 dark:focus:text-white">
           Skip to content
         </a>

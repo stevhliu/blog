@@ -4,13 +4,13 @@ import { usePathname } from "next/navigation";
 import type { Post } from "@/app/get-posts";
 import { ViewCounter } from "./view-counter";
 
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
 function getRelativeTime(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
   if (diffDays < 1) {
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -32,8 +32,7 @@ function getRelativeTime(dateString: string): string {
 
 export function Header({ posts }: { posts: Post[] }) {
   const pathname = usePathname();
-  
-  // Extract post ID from pathname (e.g., /2025/my-post -> my-post)
+
   const segments = pathname.split("/").filter(Boolean);
   const postId = segments[segments.length - 1];
   const post = posts.find(p => p.id === postId) ?? null;
@@ -43,36 +42,36 @@ export function Header({ posts }: { posts: Post[] }) {
   const relativeTime = getRelativeTime(post.date);
 
   return (
-    <>
-      <h1 className="text-2xl font-bold mb-1 dark:text-gray-100">
+    <header className="mb-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-3 tracking-tight text-[var(--color-text)] text-balance">
         {post.title}
       </h1>
 
-      <p className="font-mono flex text-xs text-neutral-500 dark:text-neutral-500">
-        <span className="flex-grow">
+      <div className="flex items-center text-xs font-mono text-[var(--color-subtext)] tracking-wide">
+        <span className="flex-grow flex items-center gap-2">
           <span className="hidden md:inline">
-            <span>
-              <a
-                href="https://twitter.com/stevhliu"
-                className="hover:text-neutral-800 dark:hover:text-neutral-400"
-                target="_blank"
-              >
-                @stevhliu
-              </a>
-            </span>
-
-            <span className="mx-2">|</span>
+            <a
+              href="https://twitter.com/stevhliu"
+              className="transition-colors duration-150 hover:text-[var(--color-blue)]"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              @stevhliu
+            </a>
+            <span className="mx-2 text-[var(--color-rule)]">|</span>
           </span>
 
-          <span>
+          <span suppressHydrationWarning>
             {post.date} ({relativeTime})
           </span>
         </span>
 
-        <span className="pr-1.5">
+        <span>
           <ViewCounter id={post.id} initialViews={post.viewsFormatted} />
         </span>
-      </p>
-    </>
+      </div>
+
+      <div className="mt-4 h-px bg-[var(--color-rule)]" />
+    </header>
   );
 }

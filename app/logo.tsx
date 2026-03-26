@@ -2,12 +2,12 @@ import Link from "next/link";
 
 export function Logo() {
   return (
-    <span className="text-md md:text-lg whitespace-nowrap font-bold">
+    <span className="text-lg md:text-xl whitespace-nowrap font-bold tracking-tight">
       <Link
         href="/"
-        className="nav-link p-2 rounded-2xl -ml-2"
+        className="nav-link inline-flex items-center gap-2"
       >
-        steven liu
+        <span>Steven Liu</span>
       </Link>
     </span>
   );

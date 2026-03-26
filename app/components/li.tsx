@@ -4,7 +4,6 @@ export function LI({ children }) {
     <li
       className={`
     my-2
-    dark:text-gray-400
     [ul_&]:relative
     [ul_&]:pl-4
     [ul_&]:before:text-gray-400

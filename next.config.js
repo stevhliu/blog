@@ -4,6 +4,7 @@ module.exports = withMDX({
   pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
   experimental: {
     mdxRs: true,
+    optimizePackageImports: ["lucide-react"],
   },
   images: {
     minimumCacheTTL: 2678400,

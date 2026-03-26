@@ -1,14 +1,15 @@
 import { Children } from "react";
 
+const HEADING_ID_RE = /\[#([^\]]+)\]\s*$/m;
+
 export function withHeadingId(children) {
   return Children.map(children, el => {
     if ("string" === typeof el) {
-      const re = /\[#([^\]]+)\]\s*$/m;
-      const match = el.match(re);
+      const match = el.match(HEADING_ID_RE);
 
       if (match && match[1]?.length) {
         return (
-          <span className="relative">
+          <span id={match[1]} className="relative scroll-mt-8">
             <a
               className={`
                 absolute
@@ -27,14 +28,6 @@ export function withHeadingId(children) {
             >
               #
             </a>
-
-            <a
-              id={match[1]}
-              className={`
-              absolute
-              -top-[20px]
-            `}
-            />
             {el.substring(0, match.index)}
           </span>
         );

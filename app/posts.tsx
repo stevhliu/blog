@@ -2,86 +2,68 @@ import Link from "next/link";
 import { TreePine } from "lucide-react";
 import type { Post } from "./get-posts";
 
-export const bgStyle = {
-  backgroundImage: "url(/images/background-2.png)",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-} as const;
-
 function EvergreenIcon() {
   return (
-    <TreePine aria-hidden="true" className="inline-block w-4 h-4 ml-1.5 mb-0.5 text-green-600 dark:text-green-500" />
+    <TreePine aria-hidden="true" strokeWidth={2.5} className="inline-block w-3.5 h-3.5 ml-1.5 mb-0.5 text-[var(--color-blue)]" />
   );
 }
 
 export function Posts({ posts }: { posts: Post[] }) {
   const hasEvergreen = posts.some((post) => post.evergreen);
+  const grouped = groupByYear(posts);
+
   return (
-    <>
-    <div className="fixed inset-0 -z-10" style={bgStyle} aria-hidden="true" />
-    <section className="relative max-w-2xl m-auto mb-10 text-sm text-black dark:text-gray-100 glass rounded-2xl p-4">
-        <List posts={posts} />
-        {hasEvergreen ? (
-          <div className="mt-8">
-            <span className="flex items-center gap-1.5 text-xs subtext">
-              <EvergreenIcon />
-              <span>evergreen posts are updated with new content</span>
-            </span>
-          </div>
-        ) : null}
+    <section className="mt-[38vh] flex flex-col min-h-[calc(100vh-120px)]">
+      {grouped.map(([year, yearPosts]) => (
+        <YearGroup key={year} year={year} posts={yearPosts} />
+      ))}
+
+      {hasEvergreen ? (
+        <div className="mt-auto pt-12">
+          <span className="flex items-center gap-1.5 text-xs text-[#64a70b] font-medium uppercase tracking-wide">
+            <EvergreenIcon />
+            <span>evergreen posts are updated with new content</span>
+          </span>
+        </div>
+      ) : null}
     </section>
-    </>
   );
 }
 
-function List({ posts }: { posts: Post[] }) {
+function YearGroup({ year, posts }: { year: number; posts: Post[] }) {
   return (
-    <ul>
-      {posts.map((post, i: number) => {
-        const year = getYear(post.date);
-        const firstOfYear = !posts[i - 1] || getYear(posts[i - 1].date) !== year;
-        const lastOfYear = !posts[i + 1] || getYear(posts[i + 1].date) !== year;
+    <div className="flex border-t border-[var(--color-rule)]">
+      <div className="w-72 shrink-0 pt-3 pr-16">
+        <span className="text-sm font-medium">{year}</span>
+      </div>
 
-        return (
-          <li key={post.id}>
-            <Link href={`/${new Date(post.date).getFullYear()}/${post.id}`}>
-              <span
-                className={`flex
-                ${!firstOfYear ? "border-t-0" : ""}
-                ${lastOfYear ? "border-b-0" : ""}
-              `}
-              >
-                <span
-                  className={`py-2 flex grow items-baseline ${
-                    !firstOfYear ? "ml-14" : ""
-                  }`}
-                >
-                  {firstOfYear && (
-                    <span className="w-14 inline-block shrink-0 subtext text-xs">
-                      {year}
-                    </span>
-                  )}
-
-                  <span className="grow min-w-0 dark:text-gray-100">
-                    <span className="post-title text-base py-0.5 px-1.5 inline-block break-words">
-                      {post.title}
-                      {post.evergreen ? <EvergreenIcon /> : null}
-                    </span>
-                  </span>
-
-                  <span className="subtext text-xs tabular-nums">
-                    {post.viewsFormatted}
-                  </span>
+      <div className="grow">
+        {posts.map((post, i) => (
+          <Link key={post.id} href={`/${new Date(post.date).getFullYear()}/${post.id}`} className="post-link">
+            <div className={`flex items-baseline py-2.5 ${i < posts.length - 1 ? "border-b border-[var(--color-rule)]" : ""}`}>
+              <span className="grow min-w-0">
+                <span className="post-title text-sm inline-block">
+                  {post.title}
+                  {post.evergreen ? <EvergreenIcon /> : null}
                 </span>
               </span>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+              <span className="text-[var(--color-text)] text-xs tabular-nums font-mono ml-4 shrink-0">
+                {post.viewsFormatted}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }
 
-function getYear(date: string) {
-  return new Date(date).getFullYear();
+function groupByYear(posts: Post[]): [number, Post[]][] {
+  const map = new Map<number, Post[]>();
+  for (const post of posts) {
+    const year = new Date(post.date).getFullYear();
+    if (!map.has(year)) map.set(year, []);
+    map.get(year)!.push(post);
+  }
+  return Array.from(map.entries());
 }
