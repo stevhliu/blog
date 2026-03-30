@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, startTransition } from 'react';
 
 interface TOCItem {
   text: string;
@@ -13,7 +13,6 @@ interface FloatingTOCProps {
   title?: string;
 }
 
-// Color system
 const COLORS = ['green', 'blue', 'purple', 'pink', 'orange', 'teal', 'indigo', 'rose'] as const;
 type Color = typeof COLORS[number];
 
@@ -52,16 +51,15 @@ const COLOR_CLASSES: Record<Color, { active: string; hover: string }> = {
   }
 };
 
-// Constants
 const SCROLL_THRESHOLD = 100;
 const SCROLL_OFFSET = 150;
 const EXPANDED_WIDTH = '240px';
 
-// Hamburger Icon Component
 function HamburgerIcon() {
   return (
     <svg
-      className="h-5 w-5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer transition-colors"
+      aria-hidden="true"
+      className="h-5 w-5 text-gray-500 transition-[color] duration-150"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -76,7 +74,6 @@ function HamburgerIcon() {
   );
 }
 
-// TOC Item Component
 function TOCItem({ item, isActive, colorClasses }: { 
   item: TOCItem; 
   isActive: boolean; 
@@ -88,7 +85,7 @@ function TOCItem({ item, isActive, colorClasses }: {
     <li>
       <a
         href={item.href}
-        className={`block py-1 px-2 rounded text-sm transition-all duration-200 ${
+        className={`block py-1 px-2 rounded text-sm transition-[color,background-color] duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] ${
           isNested ? 'ml-4' : ''
         } ${
           isActive
@@ -107,40 +104,60 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [currentColor, setCurrentColor] = useState<Color>('green');
+  const offsetCacheRef = useRef<Map<string, { top: number; bottom: number }>>(new Map());
 
   const getRandomColor = (): Color => 
     COLORS[Math.floor(Math.random() * COLORS.length)];
 
-  // Memoize section IDs to avoid recreating array on each scroll
   const sectionIds = useMemo(() => items.map(item => item.href.substring(1)), [items]);
 
+  const rebuildOffsetCache = useCallback(() => {
+    const cache = new Map<string, { top: number; bottom: number }>();
+    for (const id of sectionIds) {
+      const el = document.getElementById(id);
+      if (el) {
+        cache.set(id, { top: el.offsetTop, bottom: el.offsetTop + el.offsetHeight });
+      }
+    }
+    offsetCacheRef.current = cache;
+  }, [sectionIds]);
+
   const findActiveSection = useCallback((scrollPosition: number) => {
-    return sectionIds.find(sectionId => {
-      const element = document.getElementById(sectionId);
-      if (!element) return false;
-      
-      const elementTop = element.offsetTop;
-      const elementBottom = elementTop + element.offsetHeight;
-      return scrollPosition >= elementTop && scrollPosition < elementBottom;
+    const cache = offsetCacheRef.current;
+    return sectionIds.find(id => {
+      const bounds = cache.get(id);
+      if (!bounds) return false;
+      return scrollPosition >= bounds.top && scrollPosition < bounds.bottom;
     }) || '';
   }, [sectionIds]);
 
-  // Combined scroll handler
   useEffect(() => {
+    rebuildOffsetCache();
+
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      
-      // Update visibility
-      setIsVisible(scrollY > SCROLL_THRESHOLD);
-      
-      // Update active section
-      const scrollPosition = scrollY + SCROLL_OFFSET;
-      setActiveSection(findActiveSection(scrollPosition));
+      startTransition(() => {
+        setIsVisible(scrollY > SCROLL_THRESHOLD);
+        setActiveSection(findActiveSection(scrollY + SCROLL_OFFSET));
+      });
     };
 
+    const handleResize = () => rebuildOffsetCache();
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [findActiveSection]);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [findActiveSection, rebuildOffsetCache]);
+
+  const toggle = () => {
+    setIsExpanded(prev => {
+      if (!prev) setCurrentColor(getRandomColor());
+      return !prev;
+    });
+  };
 
   const handleMouseEnter = () => {
     setIsExpanded(true);
@@ -149,6 +166,15 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
 
   const handleMouseLeave = () => setIsExpanded(false);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggle();
+    } else if (e.key === 'Escape' && isExpanded) {
+      setIsExpanded(false);
+    }
+  };
+
   if (!isVisible) return null;
 
   const colorClasses = COLOR_CLASSES[currentColor];
@@ -156,22 +182,25 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   return (
     <div className="fixed top-20 left-4 md:left-8 z-50">
       <div
-        className={`transition-all duration-300 ease-in-out ${isExpanded ? 'sm:w-60 md:w-72' : ''}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        style={{
-          width: isExpanded ? EXPANDED_WIDTH : 'auto',
-          overflow: 'hidden'
-        }}
+        style={{ width: isExpanded ? EXPANDED_WIDTH : 'auto', overflow: 'hidden' }}
+        className="transition-[width,opacity] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)]"
       >
-        <div className="p-2">
+        <button
+          onClick={toggle}
+          onKeyDown={handleKeyDown}
+          aria-expanded={isExpanded}
+          aria-label="Table of contents"
+          className="p-2 rounded-lg"
+        >
           <HamburgerIcon />
-        </div>
+        </button>
         
         {isExpanded && (
           <div className="mt-2">
             <div className="max-h-[32rem] overflow-y-auto">
-              <nav>
+              <nav aria-label="Table of contents">
                 <ul className="space-y-1 p-2">
                   {items.map((item, index) => {
                     const sectionId = item.href.substring(1);

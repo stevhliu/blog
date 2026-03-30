@@ -63,25 +63,18 @@ const CURSOR_SVGS = {
   dark: createCursorSvg('#ffffff')
 };
 
-// Dark mode hook
 const useDarkMode = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+      : false
+  );
 
   useEffect(() => {
-    const checkDarkMode = () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setIsDarkMode(isDark);
-    };
-
-    checkDarkMode();
-
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
-    return () => observer.disconnect();
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
   }, []);
 
   return isDarkMode;
@@ -112,15 +105,8 @@ function HoverContent({ title, description }: { title?: ReactNode; description: 
 }
 
 export function HoverWord({ word, title, description, className = "" }: HoverWordProps) {
-  const [currentColor, setCurrentColor] = useState<Color>('blue');
+  const [currentColor] = useState<Color>(() => COLORS[Math.floor(Math.random() * COLORS.length)]);
   const isDarkMode = useDarkMode();
-
-  const getRandomColor = (): Color => 
-    COLORS[Math.floor(Math.random() * COLORS.length)];
-
-  useEffect(() => {
-    setCurrentColor(getRandomColor());
-  }, []);
 
   const colorClasses = COLOR_CLASSES[currentColor];
   const cursorSvg = isDarkMode ? CURSOR_SVGS.dark : CURSOR_SVGS.light;

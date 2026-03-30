@@ -13,14 +13,13 @@ export function Posts({ posts }: { posts: Post[] }) {
   const grouped = groupByYear(posts);
 
   return (
-    <section className="mt-[38vh] flex flex-col min-h-[calc(100vh-120px)]">
+    <section className="mt-16 md:mt-[20vh] flex flex-col min-h-[calc(100vh-10rem)] md:min-h-[calc(100vh-20vh-120px)]">
       {grouped.map(([year, yearPosts]) => (
         <YearGroup key={year} year={year} posts={yearPosts} />
       ))}
-
       {hasEvergreen ? (
         <div className="mt-auto pt-12">
-          <span className="flex items-center gap-1.5 text-xs text-[#64a70b] font-medium uppercase tracking-wide">
+          <span className="flex items-center gap-1.5 text-xs text-[var(--color-text)] font-medium uppercase tracking-wide">
             <EvergreenIcon />
             <span>evergreen posts are updated with new content</span>
           </span>
@@ -32,22 +31,22 @@ export function Posts({ posts }: { posts: Post[] }) {
 
 function YearGroup({ year, posts }: { year: number; posts: Post[] }) {
   return (
-    <div className="flex border-t border-[var(--color-rule)]">
-      <div className="w-72 shrink-0 pt-3 pr-16">
-        <span className="text-sm font-medium">{year}</span>
+    <div className="flex flex-col md:flex-row border-t border-[var(--color-rule)]">
+      <div className="pt-3 md:w-72 md:shrink-0 md:pr-16">
+        <span className="text-xs font-medium uppercase tracking-[0.15em]">{year}</span>
       </div>
 
       <div className="grow">
         {posts.map((post, i) => (
           <Link key={post.id} href={`/${new Date(post.date).getFullYear()}/${post.id}`} className="post-link">
-            <div className={`flex items-baseline py-2.5 ${i < posts.length - 1 ? "border-b border-[var(--color-rule)]" : ""}`}>
-              <span className="grow min-w-0">
-                <span className="post-title text-sm inline-block">
+            <div className="flex items-center py-2.5">
+              <span className="grow min-w-0 flex items-center">
+                <span className="post-title text-sm truncate">
                   {post.title}
                   {post.evergreen ? <EvergreenIcon /> : null}
                 </span>
               </span>
-              <span className="text-[var(--color-text)] text-xs tabular-nums font-mono ml-4 shrink-0">
+              <span className="text-[var(--color-text)] text-xs leading-5 tabular-nums font-mono ml-4 shrink-0">
                 {post.viewsFormatted}
               </span>
             </div>

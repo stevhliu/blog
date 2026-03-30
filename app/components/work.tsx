@@ -14,7 +14,7 @@ const WORK_HISTORY = [
 export function Work() {
   return (
     <div className="mt-12">
-      <h2 className="text-black dark:text-gray-100 mb-6 font-medium">work</h2>
+      <h2 className="text-[var(--color-text)] mb-6 font-medium">work</h2>
       <div className="flex flex-col gap-2">
         {WORK_HISTORY.map((job) => (
           <a
@@ -25,7 +25,7 @@ export function Work() {
             className="nav-link flex items-center justify-between group -mx-3 px-3 py-2 rounded-xl"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+              <div className="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
                 <Image
                   src={job.logo}
                   alt={job.company}
@@ -35,7 +35,7 @@ export function Work() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="font-medium text-black dark:text-gray-100">
+                <span className="font-medium text-[var(--color-text)]">
                   {job.company}
                 </span>
                 <span className="subtext">{job.role}</span>

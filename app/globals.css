@@ -10,9 +10,10 @@
     --color-bg: #FFFFFF;
     --color-text: #1A1A1A;
     --color-subtext: #7A7A7A;
-    --color-blue: #64a70b;
-    --color-accent: #64a70b;
+    --color-blue: #0e6cb6;
+    --color-accent: #0e6cb6;
     --color-rule: #1A1A1A;
+    --color-surface: rgba(0, 0, 0, 0.05);
     @apply bg-white;
   }
 
@@ -22,9 +23,10 @@
       --color-bg: #141414;
       --color-text: #E8E4DD;
       --color-subtext: #8A8A8A;
-      --color-blue: #7CC020;
-      --color-accent: #7CC020;
-      --color-rule: #2A2A2A;
+      --color-blue: #3399FF;
+      --color-accent: #3399FF;
+      --color-rule: #E8E4DD;
+      --color-surface: rgba(255, 255, 255, 0.08);
       @apply bg-[#141414];
     }
   }
@@ -77,7 +79,7 @@ li a,
   }
 
   .nav-link:hover {
-    opacity: 0.7;
+    opacity: 0.8;
   }
 
   nav a:active,

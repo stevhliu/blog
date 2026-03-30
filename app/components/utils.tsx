@@ -15,16 +15,17 @@ export function withHeadingId(children) {
                 absolute
                 px-3
                 -left-[2rem]
-                invisible
-                [span:hover_&]:visible
+                opacity-0
+                [span:hover_&]:opacity-100
+                transition-opacity
+                duration-100
                 font-mono
                 font-normal
-                text-gray-400
-                hover:text-gray-600
-                dark:text-gray-500
-                dark:hover:text-gray-400
+                text-[var(--color-subtext)]
+                hover:text-[var(--color-text)]
               `}
               href={`#${match[1]}`}
+              aria-label="Link to this section"
             >
               #
             </a>

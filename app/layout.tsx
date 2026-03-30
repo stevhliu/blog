@@ -52,7 +52,7 @@ export default function RootLayout({
       </head>
 
       <body className="text-[var(--color-text)] max-w-2xl m-auto">
-        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-white focus:text-black dark:focus:bg-neutral-900 dark:focus:text-white">
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-[var(--color-bg)] focus:text-[var(--color-text)]">
           Skip to content
         </a>
         <div className="relative z-10 p-6 pt-3 md:pt-6 min-h-screen">
