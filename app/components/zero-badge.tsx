@@ -4,14 +4,15 @@ export function ZeroBadge() {
       href="https://huggingface.co/docs/hub/spaces-zerogpu"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-block align-middle transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100"
+      aria-label="ZeroGPU (opens in new tab)"
+      className="inline-block align-middle transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 active:scale-[0.97] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
     >
       <svg
         viewBox="0 0 32 11"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="block h-5 w-auto"
-        aria-label="ZeroGPU"
+        aria-hidden="true"
       >
         <rect
           width="29.28"

@@ -32,10 +32,10 @@ const TABLE_CLASSES = {
   table: "w-full caption-bottom text-sm border-separate border-spacing-0",
   thead: "[&_tr]:border-b",
   tbody: "[&_tr:last-child]:border-0",
-  headerRow: "border-b transition-colors [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted/50 data-[state=selected]:bg-muted",
-  headerCell: "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 transition-colors",
-  dataRow: "border-b transition-colors [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted/50 data-[state=selected]:bg-muted",
-  dataCell: "p-4 align-middle [&:has([role=checkbox])]:pr-0 transition-colors cursor-pointer",
+  headerRow: "border-b transition-[background-color,color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted/50 data-[state=selected]:bg-muted",
+  headerCell: "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 transition-[background-color,color] duration-150 ease-out",
+  dataRow: "border-b transition-[background-color,color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted/50 data-[state=selected]:bg-muted",
+  dataCell: "p-4 align-middle [&:has([role=checkbox])]:pr-0 cursor-pointer transition-[background-color,color] duration-150 ease-out",
   title: "mb-4 text-lg font-semibold text-center",
   caption: "mt-4 text-sm text-muted-foreground"
 } as const;

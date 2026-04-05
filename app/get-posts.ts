@@ -16,13 +16,15 @@ type Views = {
   [key: string]: number;
 };
 
+const numberFormat = Intl.NumberFormat();
+
 // Wrapped with React.cache() to deduplicate requests within the same render pass
 export const getPosts = cache(async () => {
   if (!supabase) {
     return postsData.posts.map((post): Post => ({
       ...post,
       views: 0,
-      viewsFormatted: Intl.NumberFormat().format(0),
+      viewsFormatted: numberFormat.format(0),
     }));
   }
 
@@ -51,7 +53,7 @@ export const getPosts = cache(async () => {
     return {
       ...post,
       views,
-      viewsFormatted: Intl.NumberFormat().format(views),
+      viewsFormatted: numberFormat.format(views),
     };
   });
 });

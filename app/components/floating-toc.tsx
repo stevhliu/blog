@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef, startTransition } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, startTransition, memo } from 'react';
 
-interface TOCItem {
+interface FloatingTOCItem {
   text: string;
   href: string;
   level?: 2 | 3;
 }
 
 interface FloatingTOCProps {
-  items: TOCItem[];
+  items: FloatingTOCItem[];
   title?: string;
 }
 
@@ -81,13 +81,17 @@ function HamburgerIcon() {
   );
 }
 
-function TOCItem({ item, isActive, colorClasses }: { 
-  item: TOCItem; 
-  isActive: boolean; 
-  colorClasses: { active: string; hover: string } 
+const TOCItemRow = memo(function TOCItemRow({
+  item,
+  isActive,
+  colorClasses,
+}: {
+  item: FloatingTOCItem;
+  isActive: boolean;
+  colorClasses: { active: string; hover: string };
 }) {
   const isNested = item.level === 3;
-  
+
   return (
     <li>
       <a
@@ -104,7 +108,7 @@ function TOCItem({ item, isActive, colorClasses }: {
       </a>
     </li>
   );
-}
+});
 
 export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -219,13 +223,13 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
         >
           <nav aria-label="Table of contents">
             <ul className="space-y-1 p-2">
-              {items.map((item, index) => {
+              {items.map((item) => {
                 const sectionId = item.href.substring(1);
                 const isActive = activeSection === sectionId;
 
                 return (
-                  <TOCItem
-                    key={index}
+                  <TOCItemRow
+                    key={item.href}
                     item={item}
                     isActive={isActive}
                     colorClasses={colorClasses}

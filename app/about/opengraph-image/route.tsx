@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
 import { readFileSync } from "fs";
 import { join } from "path";
-import commaNumber from "comma-number";
+const numberFormat = Intl.NumberFormat();
 
 // Image
 const stevhliuPhoto = toArrayBuffer(
@@ -63,7 +63,7 @@ export async function GET() {
           tw="flex w-full justify-center text-2xl text-gray-500"
           style={font("Geist Mono")}
         >
-          {posts.length} posts / {commaNumber(viewsSum)} views
+          {posts.length} posts / {numberFormat.format(viewsSum)} views
         </footer>
       </div>
     ),

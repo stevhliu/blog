@@ -1,8 +1,10 @@
 import postsData from "@/app/posts.json";
-import commaNumber from "comma-number";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { supabase } from "@/app/supabase";
+
+const postsById = new Map(postsData.posts.map((p) => [p.id, p]));
+const numberFormat = Intl.NumberFormat();
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -20,7 +22,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const post = postsData.posts.find(post => post.id === id);
+  const post = postsById.get(id);
 
   if (post == null) {
     return NextResponse.json(
@@ -39,7 +41,7 @@ export async function GET(req: NextRequest) {
       {
         ...post,
         views: 0,
-        viewsFormatted: commaNumber(0),
+        viewsFormatted: numberFormat.format(0),
       },
       { status: 200 }
     );
@@ -57,7 +59,7 @@ export async function GET(req: NextRequest) {
       {
         ...post,
         views,
-        viewsFormatted: commaNumber(views),
+        viewsFormatted: numberFormat.format(views),
       },
       { status: error ? 500 : 200 }
     );
@@ -77,7 +79,7 @@ export async function GET(req: NextRequest) {
       {
         ...post,
         views,
-        viewsFormatted: commaNumber(views),
+        viewsFormatted: numberFormat.format(views),
       },
       { status: error ? 500 : 200 }
     );

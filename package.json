@@ -8,7 +8,6 @@
     "@supabase/supabase-js": "^2.89.0",
     "@vercel/analytics": "^1.4.1",
     "clsx": "^2.1.1",
-    "comma-number": "^2.1.0",
     "geist": "^1.4.2",
     "lucide-react": "^0.536.0",
     "next": "15.0.7",
@@ -18,7 +17,6 @@
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
-    "@types/comma-number": "^2.1.0",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "autoprefixer": "^10.4.14",

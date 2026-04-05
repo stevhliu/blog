@@ -125,7 +125,6 @@ export function HoverWord({ word, title, description, className = "" }: HoverWor
     <HoverCard
       content={<HoverContent title={title} description={description} />}
       className={`${colorClasses.text} ${className}`}
-      delay={200}
     >
       <span 
         className="underline decoration-wavy decoration-current underline-offset-4"

@@ -42,32 +42,56 @@ export async function GET(
   return new ImageResponse(
     (
       <div
-        tw="flex p-10 h-full w-full bg-white flex-col"
+        tw="flex h-full w-full flex-col bg-white p-10"
         style={font("Geist")}
       >
-        <header tw="flex text-[36px] w-full">
+        <header tw="mb-6 flex w-full text-[36px]">
           <div tw="font-bold" style={font("Geist Medium")}>
             Steven Liu
           </div>
           <div tw="grow" />
-          <div tw="text-[28px]">stevhliu.com</div>
+          <div tw="text-[28px] text-gray-600">stevhliu.com</div>
         </header>
 
-        <main tw="flex grow pb-3 flex-col items-center justify-center">
-          <div tw="flex">
+        <main tw="flex grow flex-col justify-center">
+          <div tw="mb-10 flex flex-col items-center px-6">
             <div
-              tw="p-8 text-7xl font-medium rounded-md text-center"
+              tw="mb-5 text-sm font-medium uppercase tracking-[0.2em] text-gray-400"
+              style={font("Geist Mono")}
+            >
+              Title
+            </div>
+            <div
+              tw="max-w-[1000px] text-center text-[52px] font-medium leading-tight text-gray-900"
               style={font("Geist Medium")}
             >
               {post.title}
             </div>
           </div>
 
-          <div
-            tw="mt-5 flex text-3xl text-gray-500"
-            style={font("Geist Mono")}
-          >
-            {post.date} – {post.viewsFormatted} views
+          <div tw="flex w-full flex-row items-start justify-center gap-20">
+            <div tw="flex flex-col items-center">
+              <div
+                tw="mb-2 text-sm font-medium uppercase tracking-[0.15em] text-gray-400"
+                style={font("Geist Mono")}
+              >
+                Published
+              </div>
+              <div tw="text-[32px] font-medium text-gray-900" style={font("Geist Medium")}>
+                {post.date}
+              </div>
+            </div>
+            <div tw="flex flex-col items-center">
+              <div
+                tw="mb-2 text-sm font-medium uppercase tracking-[0.15em] text-gray-400"
+                style={font("Geist Mono")}
+              >
+                Views
+              </div>
+              <div tw="text-[32px] text-gray-900" style={font("Geist Mono")}>
+                {post.viewsFormatted}
+              </div>
+            </div>
           </div>
         </main>
       </div>

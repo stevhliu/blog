@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface HoverCardProps {
   children: React.ReactNode;
@@ -19,6 +19,19 @@ type Align = "start" | "center" | "end";
 // Constants
 const OFFSET = 8;
 const HIDE_DELAY = 100;
+const DEFAULT_OPEN_DELAY = 200;
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mql.matches);
+    const onChange = () => setReduced(mql.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
 
 // Timeout utility
 const useTimeout = () => {
@@ -168,7 +181,7 @@ export function HoverCard({
   content,
   className = "",
   contentClassName = "",
-  delay = 300,
+  delay = DEFAULT_OPEN_DELAY,
   side = "top",
   align = "center",
 }: HoverCardProps) {
@@ -177,6 +190,8 @@ export function HoverCard({
   const triggerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
   const { setTimeout, clearTimeout } = useTimeout();
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const openDelay = prefersReducedMotion ? 0 : delay;
 
   const updatePosition = useCallback(() => {
     if (!triggerRef.current || !contentRef.current) return;
@@ -208,7 +223,7 @@ export function HoverCard({
     setTimeout(() => {
       setIsOpen(true);
       updatePosition();
-    }, delay);
+    }, openDelay);
   };
 
   const handleMouseLeave = () => {
@@ -229,7 +244,7 @@ export function HoverCard({
   return (
     <span
       ref={triggerRef}
-      className={`inline-block ${className}`}
+      className={`inline-block transition-[opacity,transform] duration-150 ease-out active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
