@@ -15,12 +15,13 @@ export const metadata = {
       "Steven Liu is a technical writer at Hugging Face.",
     url: "https://stevhliu.com",
     siteName: "steven liu",
-    images: ["/opengraph-image"]
+    images: ["/images/socials.png"]
   },
   twitter: {
     card: "summary_large_image",
     site: "@stevhliu",
     creator: "@stevhliu",
+    images: ["/images/socials.png"],
   },
   metadataBase: new URL("https://stevhliu.com"),
 };
@@ -52,7 +53,10 @@ export default function RootLayout({
       </head>
 
       <body className="text-[var(--color-text)] max-w-2xl m-auto">
-        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-[var(--color-bg)] focus:text-[var(--color-text)]">
+        <a
+          href="#main"
+          className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:z-50 focus-visible:p-2 focus-visible:bg-[var(--color-bg)] focus-visible:text-[var(--color-text)]"
+        >
           Skip to content
         </a>
         <div className="relative z-10 p-6 pt-3 md:pt-6 min-h-screen">

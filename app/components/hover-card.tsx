@@ -116,13 +116,27 @@ const constrainToViewport = (position: Position, contentRect: DOMRect): Position
 };
 
 // Hover Content Component
-function HoverContent({ 
-  content, 
-  position, 
-  contentClassName, 
-  onMouseEnter, 
+function transformOriginForSide(side: Side): string {
+  switch (side) {
+    case "top":
+      return "50% 100%";
+    case "bottom":
+      return "50% 0%";
+    case "left":
+      return "100% 50%";
+    case "right":
+      return "0% 50%";
+  }
+}
+
+function HoverContent({
+  content,
+  position,
+  contentClassName,
+  onMouseEnter,
   onMouseLeave,
-  contentRef
+  contentRef,
+  side,
 }: {
   content: React.ReactNode;
   position: Position;
@@ -130,12 +144,17 @@ function HoverContent({
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   contentRef: React.RefObject<HTMLSpanElement | null>;
+  side: Side;
 }) {
   return (
     <span
       ref={contentRef}
-      className={`fixed z-50 p-3 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-w-xs block ${contentClassName}`}
-      style={{ top: position.top, left: position.left }}
+      className={`fixed z-50 block max-w-xs rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-lg dark:border-gray-700 dark:bg-gray-800 ${contentClassName}`}
+      style={{
+        top: position.top,
+        left: position.left,
+        transformOrigin: transformOriginForSide(side),
+      }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
@@ -223,6 +242,7 @@ export function HoverCard({
           onMouseEnter={handleContentMouseEnter}
           onMouseLeave={handleMouseLeave}
           contentRef={contentRef}
+          side={side}
         />
       )}
     </span>

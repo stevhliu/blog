@@ -1,4 +1,5 @@
 import { type ReactNode, Suspense } from "react";
+import { unstable_after as after } from "next/server";
 import { Tweet, getTweet } from "react-tweet/api";
 import {
   EmbeddedTweet,
@@ -30,17 +31,21 @@ async function getAndCacheTweet(id: string): Promise<Tweet | undefined> {
     return undefined;
   }
 
+  const sb = supabase;
+
   // we first prioritize getting a fresh tweet
   try {
     const tweet = await getTweet(id);
 
     // @ts-ignore
     if (tweet && !tweet.tombstone) {
-      // we populate the cache if we have a fresh tweet
-      await supabase.from("tweet_cache").upsert({
-        tweet_id: id,
-        data: tweet,
-        cached_at: new Date().toISOString(),
+      after(async () => {
+        const { error } = await sb.from("tweet_cache").upsert({
+          tweet_id: id,
+          data: tweet,
+          cached_at: new Date().toISOString(),
+        });
+        if (error) console.error("tweet cache upsert error", error);
       });
       return tweet;
     }
@@ -48,7 +53,7 @@ async function getAndCacheTweet(id: string): Promise<Tweet | undefined> {
     console.error("tweet fetch error", error);
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("tweet_cache")
     .select("data")
     .eq("tweet_id", id)

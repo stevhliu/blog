@@ -52,6 +52,18 @@ const COLOR_CLASSES: Record<Color, { text: string; border: string }> = {
   }
 };
 
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function colorFromWord(word: string): Color {
+  return COLORS[hashString(word) % COLORS.length];
+}
+
 // Cursor SVG utilities
 const createCursorSvg = (strokeColor: string) => 
   `data:image/svg+xml;base64,${btoa(`
@@ -63,18 +75,16 @@ const CURSOR_SVGS = {
   dark: createCursorSvg('#ffffff')
 };
 
+/** SSR-safe: first paint always assumes light cursor; syncs after mount. */
 const useDarkMode = () => {
-  const [isDarkMode, setIsDarkMode] = useState(() =>
-    typeof window !== 'undefined'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-      : false
-  );
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    setIsDarkMode(mql.matches);
     const onChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
   }, []);
 
   return isDarkMode;
@@ -105,7 +115,7 @@ function HoverContent({ title, description }: { title?: ReactNode; description: 
 }
 
 export function HoverWord({ word, title, description, className = "" }: HoverWordProps) {
-  const [currentColor] = useState<Color>(() => COLORS[Math.floor(Math.random() * COLORS.length)]);
+  const currentColor = colorFromWord(word);
   const isDarkMode = useDarkMode();
 
   const colorClasses = COLOR_CLASSES[currentColor];
@@ -115,6 +125,7 @@ export function HoverWord({ word, title, description, className = "" }: HoverWor
     <HoverCard
       content={<HoverContent title={title} description={description} />}
       className={`${colorClasses.text} ${className}`}
+      delay={200}
     >
       <span 
         className="underline decoration-wavy decoration-current underline-offset-4"

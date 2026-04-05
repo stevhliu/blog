@@ -50,13 +50,13 @@ export function KVCacheDiagram() {
         {/* Step 4: even more recomputation */}
         <g transform="translate(320, 30)">
           <rect x="0" y="0" width="28" height="40" rx="3" className="fill-rose-100 stroke-rose-400 dark:fill-rose-900 dark:stroke-rose-500" strokeWidth="1.5"/>
-          <text x="14" y="22" textAnchor="middle" className="fill-rose-500 dark:fill-rose-400 text-[6px]">...</text>
+          <text x="14" y="22" textAnchor="middle" className="fill-rose-500 dark:fill-rose-400 text-[6px]">…</text>
           
           <rect x="32" y="0" width="28" height="40" rx="3" className="fill-rose-100 stroke-rose-400 dark:fill-rose-900 dark:stroke-rose-500" strokeWidth="1.5"/>
-          <text x="46" y="22" textAnchor="middle" className="fill-rose-500 dark:fill-rose-400 text-[6px]">...</text>
+          <text x="46" y="22" textAnchor="middle" className="fill-rose-500 dark:fill-rose-400 text-[6px]">…</text>
           
           <rect x="64" y="0" width="28" height="40" rx="3" className="fill-rose-100 stroke-rose-400 dark:fill-rose-900 dark:stroke-rose-500" strokeWidth="1.5"/>
-          <text x="78" y="22" textAnchor="middle" className="fill-rose-500 dark:fill-rose-400 text-[6px]">...</text>
+          <text x="78" y="22" textAnchor="middle" className="fill-rose-500 dark:fill-rose-400 text-[6px]">…</text>
           
           <rect x="96" y="0" width="28" height="40" rx="3" className="fill-amber-100 stroke-amber-400 dark:fill-amber-900 dark:stroke-amber-500" strokeWidth="1.5"/>
           <text x="110" y="16" textAnchor="middle" className="fill-amber-700 dark:fill-amber-300 text-[6px] font-medium">K₄V₄</text>
@@ -103,13 +103,13 @@ export function KVCacheDiagram() {
         {/* Step 4: all cached, one new */}
         <g transform="translate(320, 105)">
           <rect x="0" y="0" width="28" height="40" rx="3" className="fill-emerald-100 stroke-emerald-400 dark:fill-emerald-900 dark:stroke-emerald-500" strokeWidth="1.5"/>
-          <text x="14" y="22" textAnchor="middle" className="fill-emerald-500 dark:fill-emerald-400 text-[6px]">...</text>
+          <text x="14" y="22" textAnchor="middle" className="fill-emerald-500 dark:fill-emerald-400 text-[6px]">…</text>
           
           <rect x="32" y="0" width="28" height="40" rx="3" className="fill-emerald-100 stroke-emerald-400 dark:fill-emerald-900 dark:stroke-emerald-500" strokeWidth="1.5"/>
-          <text x="46" y="22" textAnchor="middle" className="fill-emerald-500 dark:fill-emerald-400 text-[6px]">...</text>
+          <text x="46" y="22" textAnchor="middle" className="fill-emerald-500 dark:fill-emerald-400 text-[6px]">…</text>
           
           <rect x="64" y="0" width="28" height="40" rx="3" className="fill-emerald-100 stroke-emerald-400 dark:fill-emerald-900 dark:stroke-emerald-500" strokeWidth="1.5"/>
-          <text x="78" y="22" textAnchor="middle" className="fill-emerald-500 dark:fill-emerald-400 text-[6px]">...</text>
+          <text x="78" y="22" textAnchor="middle" className="fill-emerald-500 dark:fill-emerald-400 text-[6px]">…</text>
           
           <rect x="96" y="0" width="28" height="40" rx="3" className="fill-emerald-100 stroke-emerald-400 dark:fill-emerald-900 dark:stroke-emerald-500" strokeWidth="1.5"/>
           <text x="110" y="16" textAnchor="middle" className="fill-emerald-700 dark:fill-emerald-300 text-[6px] font-medium">K₄V₄</text>

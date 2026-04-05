@@ -33,7 +33,7 @@ export async function Image({
 
   if (isDataImage) {
     /* eslint-disable @next/next/no-img-element */
-    return <img src={src} alt={originalAlt ?? ""} />;
+    return <img src={src} alt={originalAlt ?? ""} loading="lazy" decoding="async" />;
   }
 
   if (width === null || height === null) {
@@ -43,6 +43,8 @@ export async function Image({
         <img
           src={src}
           alt={alt ?? ""}
+          loading="lazy"
+          decoding="async"
           style={{ width: `${factor * 100}%` }}
           className="h-auto"
         />

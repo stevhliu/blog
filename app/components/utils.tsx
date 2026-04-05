@@ -16,13 +16,15 @@ export function withHeadingId(children) {
                 px-3
                 -left-[2rem]
                 opacity-0
-                [span:hover_&]:opacity-100
+                focus-visible:opacity-100
+                [@media(hover:hover)_and_(pointer:fine)]:[span:hover_&]:opacity-100
                 transition-opacity
                 duration-100
+                ease-out
                 font-mono
                 font-normal
                 text-[var(--color-subtext)]
-                hover:text-[var(--color-text)]
+                [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-text)]
               `}
               href={`#${match[1]}`}
               aria-label="Link to this section"

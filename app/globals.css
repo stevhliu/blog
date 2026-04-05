@@ -7,6 +7,7 @@
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     -webkit-tap-highlight-color: transparent;
     color-scheme: light;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --color-bg: #FFFFFF;
     --color-text: #1A1A1A;
     --color-subtext: #7A7A7A;
@@ -62,14 +63,14 @@ button:focus-visible,
 }
 
 .post-title {
-  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 150ms var(--ease-out);
 }
 
 nav a,
 li a,
 .post-link {
-  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
-              opacity 100ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 160ms var(--ease-out),
+              opacity 100ms var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -86,7 +87,7 @@ li a,
   li a:active,
   .nav-link:active,
   .post-link:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
   }
 }
 
@@ -98,7 +99,7 @@ li a,
   nav a,
   li a,
   .post-link {
-    transition: opacity 100ms cubic-bezier(0.23, 1, 0.32, 1);
+    transition: opacity 100ms var(--ease-out);
   }
 
   .post-link:hover .post-title {
@@ -110,5 +111,17 @@ li a,
   .nav-link:active,
   .post-link:active {
     transform: none;
+  }
+}
+
+@layer utilities {
+  /* Scroll still works; bar hidden (Firefox / WebKit / legacy Edge) */
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
   }
 }

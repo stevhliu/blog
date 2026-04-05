@@ -29,15 +29,3 @@ export function HeaderInfo() {
   );
 }
 
-export function HeaderInfoMobile() {
-  const { post, dateLabel } = useCurrentPost();
-
-  return (
-    <>
-      {" · "}{dateLabel}
-      {post && (
-        <>{" · "}<ViewCounter id={post.id} initialViews="0" /></>
-      )}
-    </>
-  );
-}

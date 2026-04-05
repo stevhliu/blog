@@ -4,7 +4,7 @@ export function ZeroBadge() {
       href="https://huggingface.co/docs/hub/spaces-zerogpu"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-block align-middle transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)]:hover:scale-105 active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100"
+      className="inline-block align-middle transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100"
     >
       <svg
         viewBox="0 0 32 11"

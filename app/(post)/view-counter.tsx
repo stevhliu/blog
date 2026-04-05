@@ -28,6 +28,10 @@ export function ViewCounter({
       .catch(console.error);
   }, [id]);
 
-  return <span>{views} views</span>;
+  return (
+    <span aria-live="polite" aria-atomic="true">
+      {views} views
+    </span>
+  );
 }
 

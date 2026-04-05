@@ -1,26 +1,11 @@
 import Link from "next/link";
-import { HeaderInfo, HeaderInfoMobile } from "./header-info";
+import { HeaderInfo } from "./header-info";
 
 export function Header() {
   return (
     <header className="mb-4 md:mb-6">
-      {/* Mobile: stacked layout */}
-      <div className="flex flex-col gap-3 text-xs text-[var(--color-text)] font-medium tracking-wide md:hidden">
-        <div>
-          Hugging&nbsp;Face &middot; Open&nbsp;Source&nbsp;Team &middot; Developer&nbsp;Docs
-        </div>
-        <div className="flex justify-between">
-          <span>North&nbsp;Bay&nbsp;Area, California</span>
-          <span>
-            <a href="https://x.com/stevhliu" target="_blank" rel="noopener noreferrer" className="transition-[color] duration-150 hover:text-[var(--color-blue)]">@stevhliu</a>
-            <HeaderInfoMobile />
-          </span>
-        </div>
-      </div>
-
-      {/* Desktop: 3-column layout */}
-      <div className="hidden md:flex text-xs text-[var(--color-text)] font-medium tracking-wide">
-        <div className="w-72 shrink-0 pr-16">
+      <div className="flex gap-4 text-xs text-[var(--color-text)] font-medium tracking-wide">
+        <div className="w-28 md:w-72 shrink-0 md:pr-16">
           Hugging&nbsp;Face
           <br />
           Open&nbsp;Source&nbsp;Team
@@ -33,7 +18,14 @@ export function Header() {
           California
         </div>
         <div className="shrink-0 text-right">
-          <a href="https://x.com/stevhliu" target="_blank" rel="noopener noreferrer" className="transition-[color] duration-150 hover:text-[var(--color-blue)]">@stevhliu</a>
+          <a
+            href="https://x.com/stevhliu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-[color,transform] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-blue)] active:scale-[0.97] motion-reduce:active:scale-100"
+          >
+            @stevhliu
+          </a>
           <br />
           <HeaderInfo />
         </div>
@@ -51,6 +43,7 @@ export function Header() {
           alt=""
           width={192}
           height={128}
+          fetchPriority="high"
           className="w-14 h-auto object-contain"
         />
       </picture>
@@ -65,6 +58,7 @@ export function Header() {
             alt=""
             width={192}
             height={128}
+            fetchPriority="high"
             className="w-24 h-auto object-contain absolute right-full mr-8"
           />
         </picture>

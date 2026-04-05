@@ -20,15 +20,16 @@ export function Collapsible({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const toggleOpen = () => setIsOpen(prev => !prev);
-  const chevronClassName = `w-4 h-4 text-gray-500 transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] ${
-    isOpen ? 'rotate-90' : ''
+  const chevronClassName = `w-4 h-4 shrink-0 text-gray-500 transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none ${
+    isOpen ? "rotate-90" : ""
   }`;
 
   return (
     <div className={`rounded-lg -ml-4 ${className}`}>
       <button
+        type="button"
         onClick={toggleOpen}
-        className="w-full px-4 py-2 text-left font-medium rounded-t-lg"
+        className="w-full rounded-t-lg px-4 py-2 text-left font-medium transition-[color,background-color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)]"
         aria-expanded={isOpen}
         aria-controls={contentId}
       >

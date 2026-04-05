@@ -13,7 +13,7 @@ export function Posts({ posts }: { posts: Post[] }) {
   const grouped = groupByYear(posts);
 
   return (
-    <section className="mt-16 md:mt-[20vh] flex flex-col min-h-[calc(100vh-10rem)] md:min-h-[calc(100vh-20vh-120px)]">
+    <section className="mt-24 md:mt-[26vh] flex flex-col min-h-[calc(100vh-10rem)] md:min-h-[calc(100vh-26vh-120px)]">
       {grouped.map(([year, yearPosts]) => (
         <YearGroup key={year} year={year} posts={yearPosts} />
       ))}
@@ -37,8 +37,8 @@ function YearGroup({ year, posts }: { year: number; posts: Post[] }) {
       </div>
 
       <div className="grow">
-        {posts.map((post, i) => (
-          <Link key={post.id} href={`/${new Date(post.date).getFullYear()}/${post.id}`} className="post-link">
+        {posts.map((post) => (
+          <Link key={post.id} href={`/${year}/${post.id}`} className="post-link">
             <div className="flex items-center py-2.5">
               <span className="grow min-w-0 flex items-center">
                 <span className="post-title text-sm truncate">

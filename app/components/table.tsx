@@ -32,9 +32,9 @@ const TABLE_CLASSES = {
   table: "w-full caption-bottom text-sm border-separate border-spacing-0",
   thead: "[&_tr]:border-b",
   tbody: "[&_tr:last-child]:border-0",
-  headerRow: "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+  headerRow: "border-b transition-colors [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted/50 data-[state=selected]:bg-muted",
   headerCell: "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 transition-colors",
-  dataRow: "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+  dataRow: "border-b transition-colors [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted/50 data-[state=selected]:bg-muted",
   dataCell: "p-4 align-middle [&:has([role=checkbox])]:pr-0 transition-colors cursor-pointer",
   title: "mb-4 text-lg font-semibold text-center",
   caption: "mt-4 text-sm text-muted-foreground"
