@@ -47,7 +47,11 @@ export function Collapsible({
         style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
       >
         <div className="overflow-hidden">
-          <div className="p-4 rounded-b-lg">
+          <div
+            className={`p-4 rounded-b-lg transition-opacity duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none ${
+              isOpen ? "opacity-100" : "opacity-0"
+            }`}
+          >
             {children}
           </div>
         </div>

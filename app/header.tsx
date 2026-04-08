@@ -33,22 +33,8 @@ export function Header() {
 
       <div className="mt-4 h-px bg-[var(--color-rule)]" />
 
-      <picture className="mt-2 md:hidden">
-        <source
-          srcSet="/images/logo-dark-mode.png"
-          media="(prefers-color-scheme: dark)"
-        />
-        <img
-          src="/images/logo.png"
-          alt=""
-          width={192}
-          height={128}
-          fetchPriority="high"
-          className="w-14 h-auto object-contain"
-        />
-      </picture>
-      <h1 className="mt-2 text-4xl md:text-7xl font-bold tracking-tight text-[var(--color-text)] text-balance relative flex items-start">
-        <picture className="hidden md:block">
+      <h1 className="mt-2 text-4xl md:text-7xl font-bold tracking-tight text-[var(--color-text)] text-balance relative flex items-center md:items-start gap-3 md:gap-0">
+        <picture>
           <source
             srcSet="/images/logo-dark-mode.png"
             media="(prefers-color-scheme: dark)"
@@ -59,7 +45,7 @@ export function Header() {
             width={192}
             height={128}
             fetchPriority="high"
-            className="w-24 h-auto object-contain absolute right-full mr-8"
+            className="w-14 h-auto object-contain md:w-24 md:absolute md:right-full md:mr-8"
           />
         </picture>
         <Link href="/" className="nav-link">Steven&nbsp;Liu</Link>

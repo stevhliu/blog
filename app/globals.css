@@ -73,6 +73,13 @@ li a,
               opacity 100ms var(--ease-out);
 }
 
+nav a:active,
+li a:active,
+.nav-link:active,
+.post-link:active {
+  transform: scale(0.97);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .post-link:hover .post-title {
     transform: translateX(4px);
@@ -80,13 +87,6 @@ li a,
 
   .nav-link:hover {
     opacity: 0.8;
-  }
-
-  nav a:active,
-  li a:active,
-  .nav-link:active,
-  .post-link:active {
-    transform: scale(0.97);
   }
 }
 
@@ -109,7 +109,7 @@ li a,
   li a:active,
   .nav-link:active,
   .post-link:active {
-    transform: none;
+    transform: none; /* scale feedback already removed; keep override for safety */
   }
 }
 

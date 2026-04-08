@@ -66,7 +66,7 @@ function HamburgerIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="h-5 w-5 text-gray-500 transition-[color,transform] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-gray-700 [@media(hover:hover)_and_(pointer:fine)]:dark:group-hover:text-gray-200"
+      className="h-5 w-5 text-gray-500 transition-[color] duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-gray-700 [@media(hover:hover)_and_(pointer:fine)]:dark:group-hover:text-gray-200"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -202,7 +202,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
           aria-expanded={isExpanded}
           aria-controls="floating-toc-panel"
           aria-label="Table of contents"
-          className="group p-2 rounded-lg transition-transform duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)]"
+          className="group p-2 rounded-lg transition-[transform,background-color] duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)]"
         >
           <HamburgerIcon />
         </button>
