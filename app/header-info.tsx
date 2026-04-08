@@ -21,12 +21,12 @@ export function HeaderInfo() {
   return (
     <>
       {dateLabel}
-      {post && (
+      {post ? (
         <>
           <br />
           <ViewCounter id={post.id} initialViews="0" />
         </>
-      )}
+      ) : null}
     </>
   );
 }

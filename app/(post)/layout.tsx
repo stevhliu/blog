@@ -12,6 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [{ url: `/og/${postId}` }],
     },
     twitter: {
+      card: "summary_large_image",
       images: [`/og/${postId}`],
     },
   };

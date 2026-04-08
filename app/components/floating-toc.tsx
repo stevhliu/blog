@@ -62,6 +62,8 @@ const COLOR_CLASSES: Record<Color, { active: string; hover: string }> = {
 const SCROLL_THRESHOLD = 100;
 const SCROLL_OFFSET = 150;
 
+const getRandomColor = (): Color => COLORS[Math.floor(Math.random() * COLORS.length)];
+
 function HamburgerIcon() {
   return (
     <svg
@@ -116,9 +118,6 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   const [activeSection, setActiveSection] = useState('');
   const [currentColor, setCurrentColor] = useState<Color>('green');
   const offsetCacheRef = useRef<Map<string, { top: number; bottom: number }>>(new Map());
-
-  const getRandomColor = (): Color => 
-    COLORS[Math.floor(Math.random() * COLORS.length)];
 
   const sectionIds = useMemo(() => items.map(item => item.href.substring(1)), [items]);
 
@@ -212,7 +211,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
           inert={!isExpanded ? true : undefined}
           aria-hidden={!isExpanded}
           className={[
-            'absolute top-full left-0 w-[240px] max-h-[32rem] overflow-y-auto overscroll-y-contain scrollbar-hidden rounded-lg bg-[var(--color-bg)] shadow-md pt-2',
+            'absolute top-full left-0 w-[240px] max-h-[32rem] overflow-y-auto overscroll-y-contain scrollbar-hidden rounded-lg pt-2',
             'transition-[opacity,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
             isExpanded
               ? 'opacity-100 translate-y-0'
