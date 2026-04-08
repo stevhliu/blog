@@ -76,7 +76,6 @@ li a,
 @media (hover: hover) and (pointer: fine) {
   .post-link:hover .post-title {
     transform: translateX(4px);
-    transition-duration: 200ms;
   }
 
   .nav-link:hover {

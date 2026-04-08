@@ -42,7 +42,7 @@ export function Work() {
               </div>
             </div>
             <div className="subtext tabular-nums text-sm">
-              {job.start} — {job.end}
+              {job.start}&nbsp;—&nbsp;{job.end}
             </div>
           </a>
         ))}

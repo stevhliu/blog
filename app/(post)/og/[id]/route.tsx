@@ -1,4 +1,3 @@
-
 export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
@@ -10,22 +9,15 @@ export async function generateStaticParams() {
   return (await getPosts()).map(post => ({ id: post.id }));
 }
 
-// fonts
 const fontsDir = join(process.cwd(), "fonts");
 
-const geistSans = readFileSync(
-  join(fontsDir, "geist-regular.ttf")
-);
-
-const geistSansMedium = readFileSync(
-  join(fontsDir, "geist-medium.ttf")
-);
-
-const geistSansBold = readFileSync(
-  join(fontsDir, "geist-bold.ttf")
-);
-
+const geistSansMedium = readFileSync(join(fontsDir, "geist-medium.ttf"));
 const geistMono = readFileSync(join(fontsDir, "geist-mono-regular.ttf"));
+
+const socialsImageData = readFileSync(
+  join(process.cwd(), "public/images/socials.png")
+);
+const socialsImageBase64 = `data:image/png;base64,${socialsImageData.toString("base64")}`;
 
 export async function GET(
   _req: Request,
@@ -41,59 +33,34 @@ export async function GET(
 
   return new ImageResponse(
     (
-      <div
-        tw="flex h-full w-full flex-col bg-white p-10"
-        style={font("Geist")}
-      >
-        <header tw="mb-6 flex w-full text-[36px]">
-          <div tw="font-bold" style={font("Geist Medium")}>
-            Steven Liu
-          </div>
-          <div tw="grow" />
-          <div tw="text-[28px] text-gray-600">stevhliu.com</div>
-        </header>
+      <div tw="flex h-full w-full relative">
+        {/* Background */}
+        <img
+          src={socialsImageBase64}
+          tw="absolute inset-0 w-full h-full"
+          style={{ objectFit: "cover" }}
+        />
 
-        <main tw="flex grow flex-col justify-center">
-          <div tw="mb-10 flex flex-col items-center px-6">
-            <div
-              tw="mb-5 text-sm font-medium uppercase tracking-[0.2em] text-gray-400"
-              style={font("Geist Mono")}
-            >
-              Title
-            </div>
-            <div
-              tw="max-w-[1000px] text-center text-[52px] font-medium leading-tight text-gray-900"
-              style={font("Geist Medium")}
-            >
-              {post.title}
-            </div>
+        {/* Overlay */}
+        <div
+          tw="absolute inset-0 flex flex-col justify-end p-[60px]"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.0) 55%)" }}
+        >
+          <div
+            tw="text-white text-[52px] leading-tight mb-4 max-w-[900px]"
+            style={{ fontFamily: "Geist Medium", letterSpacing: "-0.02em" }}
+          >
+            {post.title}
           </div>
-
-          <div tw="flex w-full flex-row items-start justify-center gap-20">
-            <div tw="flex flex-col items-center">
-              <div
-                tw="mb-2 text-sm font-medium uppercase tracking-[0.15em] text-gray-400"
-                style={font("Geist Mono")}
-              >
-                Published
-              </div>
-              <div tw="text-[32px] font-medium text-gray-900" style={font("Geist Medium")}>
-                {post.date}
-              </div>
-            </div>
-            <div tw="flex flex-col items-center">
-              <div
-                tw="mb-2 text-sm font-medium uppercase tracking-[0.15em] text-gray-400"
-                style={font("Geist Mono")}
-              >
-                Views
-              </div>
-              <div tw="text-[32px] text-gray-900" style={font("Geist Mono")}>
-                {post.viewsFormatted}
-              </div>
-            </div>
+          <div
+            tw="flex items-center gap-6 text-[22px]"
+            style={{ fontFamily: "Geist Mono", color: "rgba(255,255,255,0.6)" }}
+          >
+            <span>{post.date}</span>
+            <span>·</span>
+            <span>{post.viewsFormatted} views</span>
           </div>
-        </main>
+        </div>
       </div>
     ),
     {
@@ -101,16 +68,8 @@ export async function GET(
       height: 630,
       fonts: [
         {
-          name: "Geist",
-          data: geistSans,
-        },
-        {
           name: "Geist Medium",
           data: geistSansMedium,
-        },
-        {
-          name: "Geist Bold",
-          data: geistSansBold,
         },
         {
           name: "Geist Mono",
@@ -119,9 +78,4 @@ export async function GET(
       ],
     }
   );
-}
-
-// lil helper for more succinct styles
-function font(fontFamily: string) {
-  return { fontFamily };
 }

@@ -16,7 +16,6 @@ type Position = { top: number; left: number };
 type Side = "top" | "right" | "bottom" | "left";
 type Align = "start" | "center" | "end";
 
-// Constants
 const OFFSET = 8;
 const HIDE_DELAY = 100;
 const DEFAULT_OPEN_DELAY = 200;
@@ -33,31 +32,29 @@ function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
-// Timeout utility
 const useTimeout = () => {
   const timeoutRef = useRef<number | undefined>(undefined);
-  
+
   const clearTimeout = () => {
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
     }
   };
-  
+
   const setTimeout = (callback: () => void, delay: number) => {
     clearTimeout();
     timeoutRef.current = window.setTimeout(callback, delay);
   };
-  
+
   useEffect(() => clearTimeout, []);
-  
+
   return { setTimeout, clearTimeout };
 };
 
-// Position calculation utilities
 const calculateSidePosition = (side: Side, triggerRect: DOMRect, contentRect: DOMRect): Position => {
   const basePosition = { top: 0, left: 0 };
-  
+
   switch (side) {
     case "top":
       basePosition.top = triggerRect.top - contentRect.height - OFFSET;
@@ -72,14 +69,14 @@ const calculateSidePosition = (side: Side, triggerRect: DOMRect, contentRect: DO
       basePosition.left = triggerRect.right + OFFSET;
       break;
   }
-  
+
   return basePosition;
 };
 
 const calculateAlignment = (side: Side, align: Align, triggerRect: DOMRect, contentRect: DOMRect): Position => {
   const position = { top: 0, left: 0 };
   const isVertical = side === "top" || side === "bottom";
-  
+
   switch (align) {
     case "start":
       if (isVertical) {
@@ -103,42 +100,35 @@ const calculateAlignment = (side: Side, align: Align, triggerRect: DOMRect, cont
       }
       break;
   }
-  
+
   return position;
 };
 
 const constrainToViewport = (position: Position, contentRect: DOMRect): Position => {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  
+
   let { top, left } = position;
-  
-  // Constrain horizontal position
+
   if (left < OFFSET) left = OFFSET;
   if (left + contentRect.width > viewportWidth - OFFSET) {
     left = viewportWidth - contentRect.width - OFFSET;
   }
-  
-  // Constrain vertical position
+
   if (top < OFFSET) top = OFFSET;
   if (top + contentRect.height > viewportHeight - OFFSET) {
     top = viewportHeight - contentRect.height - OFFSET;
   }
-  
+
   return { top, left };
 };
 
-// Hover Content Component
 function transformOriginForSide(side: Side): string {
   switch (side) {
-    case "top":
-      return "50% 100%";
-    case "bottom":
-      return "50% 0%";
-    case "left":
-      return "100% 50%";
-    case "right":
-      return "0% 50%";
+    case "top":    return "50% 100%";
+    case "bottom": return "50% 0%";
+    case "left":   return "100% 50%";
+    case "right":  return "0% 50%";
   }
 }
 
@@ -150,6 +140,8 @@ function HoverContent({
   onMouseLeave,
   contentRef,
   side,
+  isOpen,
+  prefersReducedMotion,
 }: {
   content: React.ReactNode;
   position: Position;
@@ -158,15 +150,24 @@ function HoverContent({
   onMouseLeave: () => void;
   contentRef: React.RefObject<HTMLSpanElement | null>;
   side: Side;
+  isOpen: boolean;
+  prefersReducedMotion: boolean;
 }) {
   return (
     <span
       ref={contentRef}
+      inert={!isOpen ? true : undefined}
       className={`fixed z-50 block max-w-xs rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-lg dark:border-gray-700 dark:bg-gray-800 ${contentClassName}`}
       style={{
         top: position.top,
         left: position.left,
         transformOrigin: transformOriginForSide(side),
+        transition: prefersReducedMotion
+          ? "opacity 0ms"
+          : "opacity 150ms cubic-bezier(0.23, 1, 0.32, 1), transform 150ms cubic-bezier(0.23, 1, 0.32, 1)",
+        opacity: isOpen ? 1 : 0,
+        transform: isOpen ? "scale(1)" : "scale(0.95)",
+        pointerEvents: isOpen ? "auto" : "none",
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -186,6 +187,7 @@ export function HoverCard({
   align = "center",
 }: HoverCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
@@ -199,27 +201,22 @@ export function HoverCard({
     const triggerRect = triggerRef.current.getBoundingClientRect();
     const contentRect = contentRef.current.getBoundingClientRect();
 
-    // Calculate base position based on side
     const sidePosition = calculateSidePosition(side, triggerRect, contentRect);
-    
-    // Apply alignment
     const alignedPosition = calculateAlignment(side, align, triggerRect, contentRect);
-    
-    // Combine positions - alignment overrides side position for the relevant axis
+
     const isVertical = side === "top" || side === "bottom";
     const combinedPosition = {
       top: isVertical ? sidePosition.top : alignedPosition.top,
       left: isVertical ? alignedPosition.left : sidePosition.left,
     };
-    
-    // Constrain to viewport
+
     const finalPosition = constrainToViewport(combinedPosition, contentRect);
-    
     setPosition(finalPosition);
   }, [side, align]);
 
   const handleMouseEnter = () => {
     clearTimeout();
+    setIsMounted(true);
     setTimeout(() => {
       setIsOpen(true);
       updatePosition();
@@ -244,12 +241,15 @@ export function HoverCard({
   return (
     <span
       ref={triggerRef}
+      tabIndex={0}
       className={`inline-block transition-[opacity,transform] duration-150 ease-out active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onFocus={handleMouseEnter}
+      onBlur={handleMouseLeave}
     >
       {children}
-      {isOpen && (
+      {isMounted ? (
         <HoverContent
           content={content}
           position={position}
@@ -258,8 +258,10 @@ export function HoverCard({
           onMouseLeave={handleMouseLeave}
           contentRef={contentRef}
           side={side}
+          isOpen={isOpen}
+          prefersReducedMotion={prefersReducedMotion}
         />
-      )}
+      ) : null}
     </span>
   );
-} 
+}

@@ -164,10 +164,8 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
   }, [findActiveSection, rebuildOffsetCache]);
 
   const toggle = () => {
-    setIsExpanded(prev => {
-      if (!prev) setCurrentColor(getRandomColor());
-      return !prev;
-    });
+    if (!isExpanded) setCurrentColor(getRandomColor());
+    setIsExpanded(prev => !prev);
   };
 
   const handleMouseEnter = () => {
@@ -215,7 +213,7 @@ export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
           aria-hidden={!isExpanded}
           className={[
             'absolute top-full left-0 w-[240px] max-h-[32rem] overflow-y-auto overscroll-y-contain scrollbar-hidden rounded-lg bg-[var(--color-bg)] shadow-md pt-2',
-            'transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+            'transition-[opacity,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
             isExpanded
               ? 'opacity-100 translate-y-0'
               : 'pointer-events-none opacity-0 -translate-y-1 motion-reduce:translate-y-0',
