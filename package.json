@@ -7,14 +7,12 @@
     "@next/mdx": "15.0.2",
     "@supabase/supabase-js": "^2.89.0",
     "@vercel/analytics": "^1.4.1",
-    "clsx": "^2.1.1",
     "geist": "^1.4.2",
     "lucide-react": "^0.536.0",
     "next": "15.0.7",
     "react": "19.0.0-rc-02c0e824-20241028",
     "react-dom": "19.0.0-rc-02c0e824-20241028",
-    "react-tweet": "^3.1.1",
-    "tailwind-merge": "^3.3.1"
+    "react-tweet": "^3.1.1"
   },
   "devDependencies": {
     "@types/react": "npm:types-react@19.0.0-rc.1",
