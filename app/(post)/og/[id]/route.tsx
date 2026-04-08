@@ -43,11 +43,10 @@ export async function GET(
 
         {/* Overlay */}
         <div
-          tw="absolute inset-0 flex flex-col justify-end p-[60px]"
-          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.0) 55%)" }}
+          tw="absolute inset-0 flex flex-col items-center justify-center p-[60px]"
         >
           <div
-            tw="text-white text-[52px] leading-tight mb-4 max-w-[900px]"
+            tw="text-white text-[52px] leading-tight mb-4 max-w-[900px] text-center"
             style={{ fontFamily: "Geist Medium", letterSpacing: "-0.02em" }}
           >
             {post.title}
