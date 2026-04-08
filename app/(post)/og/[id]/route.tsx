@@ -33,32 +33,27 @@ export async function GET(
 
   return new ImageResponse(
     (
-      <div tw="flex h-full w-full relative">
-        {/* Background */}
-        <img
-          src={socialsImageBase64}
-          tw="absolute inset-0 w-full h-full"
-          style={{ objectFit: "cover" }}
-        />
-
-        {/* Overlay */}
+      <div
+        tw="flex h-full w-full flex-col items-center justify-center p-[60px]"
+        style={{
+          backgroundImage: `url(${socialsImageBase64})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <div
-          tw="absolute inset-0 flex flex-col items-center justify-center p-[60px]"
+          tw="text-white text-[52px] leading-tight mb-4 max-w-[900px] text-center"
+          style={{ fontFamily: "Geist Medium", letterSpacing: "-0.02em" }}
         >
-          <div
-            tw="text-white text-[52px] leading-tight mb-4 max-w-[900px] text-center"
-            style={{ fontFamily: "Geist Medium", letterSpacing: "-0.02em" }}
-          >
-            {post.title}
-          </div>
-          <div
-            tw="flex items-center gap-6 text-[22px]"
-            style={{ fontFamily: "Geist Mono", color: "rgba(255,255,255,0.6)" }}
-          >
-            <span>{post.date}</span>
-            <span>·</span>
-            <span>{post.viewsFormatted} views</span>
-          </div>
+          {post.title}
+        </div>
+        <div
+          tw="flex items-center gap-6 text-[22px]"
+          style={{ fontFamily: "Geist Mono", color: "rgba(255,255,255,0.6)" }}
+        >
+          <span>{post.date}</span>
+          <span>·</span>
+          <span>{post.viewsFormatted} views</span>
         </div>
       </div>
     ),
