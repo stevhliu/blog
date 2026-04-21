@@ -1,0 +1,210 @@
+export const metadata = {
+  title: 'Transformers Compendium - Part 1',
+  description: 'A collection of engineering details and design in Transformers.',
+};
+
+<FloatingTOC
+  items={[
+    { text: "PyTorch meta device", href: "#pytorch-meta-device" },
+    { text: "Lazy safetensor slices", href: "#lazy-safetensor-slices" },
+    { text: "Deleting temporaries", href: "#deleting-temporaries" },
+    { text: "Sync path", href: "#sync-path" },
+    { text: "Disk offloading", href: "#disk-offloading" },
+    { text: "Weight tying", href: "#weight-tying" },
+    { text: "Fuse dtype and device transfers", href: "#fuse-dtype-and-device-transfers" },
+  ]}
+/>
+
+> Science is made up of so many things that appear obvious after they are explained. - *Kynes, Dune*
+
+A collection of working notes on how Transformers loads large models without doubling peak memory.
+
+## PyTorch meta device [#pytorch-meta-device]
+
+The PyTorch [meta device](https://docs.pytorch.org/docs/stable/meta.html) lets Transformers build a model of any size regardless of the amount of storage available.
+
+<Snippet>
+{`import torch
+
+x = torch.empty(10000, 10000, device="meta")
+y = torch.randn(10000, 10000, device="meta")
+z = x@y
+print(z.shape, z.dtype)
+print(z.device)
+print(x)
+# tensor(..., device='meta', size=(10000, 10000))`}
+</Snippet>
+
+A basic loading flow allocates a real tensor and fills it with random values from the model config. A 70B model in fp16 requires ~140GB of memory. Next, the actual model parameters are read into a second copy in CPU memory, requiring another ~140GB of memory. Finally, the randomly initialized parameters are overwritten with the actual parameters. The peak memory is 2x the model size, and the work required to load the randomly initialized parameters that are discarded adds wasteful overhead.
+
+<Snippet>
+{`init_contexts.extend([torch.device("meta"), init.meta_device_safe_creation_ops()])
+
+# get_init_context returns torch.device("meta")
+model_init_context = cls.get_init_context(dtype, is_quantized, _is_ds_init_called, allow_all_kernels)
+
+config = copy.deepcopy(config)
+with ContextManagers(model_init_context):
+		# every parameter is placed on the meta device
+    model = cls(config, *model_args, **model_kwargs)
+    patch_output_recorders(model)`}
+</Snippet>
+
+Building the model on the meta device doesn't allocate any storage. The “meta” device only holds the data associated with tensors such as shape and dtype. This creates a model skeleton.
+
+Transformers computes each parameter's size from the expected shape and dtype (read from the safetensors slice) and creates a map for where to load the actual weights. This costs ~0 bytes of storage.
+
+Transformers iterates over the checkpoint shards and reads tensors into a CPU buffer. It checks the plan for where the parameter belongs to, allocates real storage on that device, and then copies the parameter in. The CPU buffer is freed so the next shard can be read in. The peak memory is the size of the shard being read (a few GB) and the size of the final model. You avoid holding 2x copies of the model in memory at the same time.
+
+## Lazy safetensor slices [#lazy-safetensor-slices]
+
+Each tensor in a safetensors file has a unique name or key, like `model.layers.0.self_attn.q_proj.weight`. This lets the loader know which weight block in the file corresponds to which model parameter.
+
+When a safetensors file is opened, `get_slice()` reads the shape and dtype of the tensor from its key into a small temporary object. The weight tensor isn't materialized yet, and no memory has been allocated yet.
+
+<Snippet>
+{`for k in file_pointer.keys():
+    merged_state_dict[k] = file_pointer.get_slice(k)  # don't materialize yet`}
+</Snippet>
+
+This allows Transformers to go through all the checkpoint entries sorted by key and figure out where each tensor goes, which it can do from the keys, metadata, and slices. Once it has figured out exactly where to place each tensor, tensor[...] reads the real tensors into the model and replaces the corresponding parameter on the meta device. Anything not in the checkpoint file stays on the meta device.
+
+<Snippet>
+{`def _materialize_copy(tensor: torch.Tensor, device=None, dtype=None) -> torch.Tensor:
+    # This slicing is what actually loads the tensor from the safetensors slice object
+    tensor = tensor[...]
+    if dtype is not None or device is not None:
+        tensor = tensor.to(device=device, dtype=dtype)
+    return tensor`}
+</Snippet>
+
+The slicing API defers reading the weight bytes into real torch.Tensor's and then copying it into the model. Lazy slice objects only keeps the open file and metadata in memory which is a lot cheaper and smaller. Like the meta device, slicing lets Transformers build a skeleton and plan loading without actually loading copies of the weights into memory.
+
+## Deleting temporaries [#deleting-temporaries]
+
+Transformers' dynamic weight loading system loads checkpoints that don't match the format a model expects at runtime.
+
+`WeightRenaming.convert()` maps the checkpoint source tensors to the key expected by the model by renaming it if it differs and `WeightConverter.convert()` performs a series of operations (for example, concatenating q, k, v into a single tensor) that restructures the weights from their checkpoint layout to the model layout.
+
+These methods identify source patterns that describe how weights are named in a checkpoint. For example, the checkpoint `model.layers.5.self_attn.qkv.weight` matches the pattern `*.self_attn.qkv.weight`. Based on the pattern, different checkpoint tensors are sorted to separate buckets. As the loader iterates over the checkpoint, each matched tensor is submitted to the thread pool and the resulting `Future` is appended to the list for that pattern in `self.collected_tensors`.
+
+When it's time to materialize, `pop(key)` removes that source pattern bucket from `self.collected_tensors` and returns the list of `Future`. This list is resolved into real `torch.Tensor`'s that is stored in a local `collected_tensors` dict and used by `convert()`. `pop()` detaches the pending work of renaming or restructuring to `convert()`.
+
+Without `pop()`, `self.collected_tensors` would still hold all the `Future` references. `pop()` is a way to clear `self.collected_tensors` to avoid growing or maintaining these references after they've been processed by `convert()`.
+
+<Snippet>
+{`def materialize_tensors(self):
+    collected_tensors = {}
+    for key in list(self.collected_tensors.keys()):
+        tensors = self.collected_tensors.pop(key)  # <-- pop, not read
+        # ... resolve futures/callables ...
+        collected_tensors[key] = tensors
+    return collected_tensors`}
+</Snippet>
+
+convert() outputs a dict of realized tensors that is written into the model. The dict is deleted once the tensors are assigned, releasing memory that is no longer required, capping peak memory between conversion batches. This prevents them from accumulating unnecessarily in storage until loading is complete.
+
+<Snippet>
+{`for first_param_name, mapping in tqdm(param_name_to_load.items(), desc="Loading weights"):
+    realized_value = mapping.convert(...)
+    for target_name, param in realized_value.items():
+        set_param_for_module(model, target_name, param, ...)
+    del realized_value  # <-- immediately free after setting`}
+</Snippet>
+
+
+## Sync path [#sync-path]
+
+Under tighter memory loading scenarios, disk offload or on-the-fly quantization, Transformers  uses the sync path. The async path is faster because it spawns a worker thread to materialize tensors even while the main thread is still iterating over the checkpoint, collecting and sorting keys, or when it's running `convert()`.
+
+Memory spikes if there are a lot of finished loads sitting in `Future`'s because a completed `Future` holds a real `torch.Tensor`. This can happen if a worker thread finishes faster than the main thread that's running `convert()` or `materialize_tensors()`. Or if several large tensors are being allocated or decoded at the same time, memory may also spike. Spikes occur when tensors accumulate ahead of the step that quantizes or frees them (assign and remove temporaries).
+
+<Snippet>
+{`has_on_the_fly_quantization = hf_quantizer is not None and not hf_quantizer.pre_quantized
+if (
+    is_env_variable_true("HF_DEACTIVATE_ASYNC_LOAD")
+    or "disk" in device_map.values()
+    or has_on_the_fly_quantization
+):
+    thread_pool = None`}
+</Snippet>
+
+For on-the-fly quantization, the loader explicitly disables the async path with thread_pool = None because worker threads may pull full-precision weights to device faster than the main thread quantizes and releases them. Forcing sequential loading ensures each tensor is quantized before the next one is loaded.
+
+<Snippet>
+{`def _job():
+    return _materialize_copy(tensor, device, dtype)
+
+if thread_pool is not None:
+    return thread_pool.submit(_job)
+else:
+    # Return the Callable here, not the Tensor itself, so we actually delay loading to avoid saturating cpu
+    # memory during Conversion
+    return _job`}
+</Snippet>
+
+The sync path doesn't submit a job to a worker thread. It returns the `_job` `Callable` itself instead of a `Future`, so the read only runs later when the main thread invokes it — in order, one tensor at a time.
+
+The `Callable` is stored in `collected_tensors[...]` and it's only read from disk when `materialize_tensors()` calls `func()`. Storing as eager tensors means that during collection, real `torch.Tensor` objects are held in `collected_tensors` instead while the collection loop continues processing checkpoint keys. Every matched weight during collection becomes a large tensor in `collected_tensors` until `convert()` runs. Peak memory during collection increases with how many weights are collected. A `Callable` enables deferring the actual disk read until `materialize_tensors()` calls `func()`.
+
+## Disk offloading [#disk-offloading]
+
+<Snippet>
+{`if param_device == "disk" and (target_name not in model_buffers or offload_buffers):
+    disk_offload_index = offload_and_maybe_resave_param(
+        target_name, param, loading_info, disk_offload_folder, disk_offload_index, mapping
+    )`}
+</Snippet>
+
+For safetensors files, Transformers builds an index for each parameter that maps to `"disk"`. It records the shard file and tensor name that already holds that weight so it can remain in the original file instead of being copied again.
+
+The tensors that are mapped to `"disk"` are either re-saved to `offloaded_folder` , or if its already in the index, it skips re-saving and points to the original file. Transformers installs hooks that perform on-demand loading for the `"disk"` parameters, for example, if they're needed for a forward pass. This avoids keeping all `"disk"` parameters as full parameters on the GPU/CPU. They're loaded lazily when required and has a smaller GPU/CPU memory footprint compared to a full model in memory. For offloaded parameters on disk, it points to the original file which avoids a second full copy and extra writes.
+
+Transformers uses the sync path when parameters are offloaded to disk so async workers don't accumulate loaded tensors before the offload.
+
+## Weight tying [#weight-tying]
+
+<Snippet>
+{`# Perform the actual tying
+source_param = self.get_parameter_or_buffer(source_param_name)
+if "." in target_param_name:
+		parent_name, name = target_param_name.rsplit(".", 1)
+		parent = self.get_submodule(parent_name)
+else:
+		name = target_param_name
+		parent = self
+# Tie the weights
+setattr(parent, name, source_param)`}
+</Snippet>
+
+Two parameter names, like lm_head and embed_tokens, may have the same underlying tensor. Weight tying installs the same set of parameters in both places. Only one allocation is made in memory for both parameters. This halves the storage cost instead of maintaining two independent matrices.
+
+<Snippet>
+{`def mark_tied_weights_as_initialized(self, loading_info):
+    """Adds the \`_is_hf_initialized\` flag on parameters that will be tied, in order to avoid initializing them
+    later as they will be tied (overwritten) anyway.
+    This is very important as most embeddings are tied, and they are huge params (vocabularies are often 256k), so
+    running inits on them is very costly."""
+    for tied_param in getattr(self, "all_tied_weights_keys", {}).keys():
+        param = self.get_parameter(tied_param)
+        param._is_hf_initialized = True`}
+</Snippet>
+
+Checkpoints often store only one copy of the tied weights (like `embed_tokens`) and is “missing” `lm_head` because it's understood that `tie_weights()` enables `lm_head` to share the same matrix as `embed_tokens`. To skip initializing the `lm_head` parameters, because its going to be overwritten later when it's tied, `mark_tied_weights_as_initialized` adds a `_is_hf_initialized` flag to skip initialization for `lm_head`. This flag skips re-initializing weights that are already assigned into the model. Only truly missing parameters are re-initialized after loading.
+
+This lets Transformers avoid allocating and filling a second matrix for `lm_head` , which lowers peak memory.
+
+## Fuse dtype and device transfers [#fuse-dtype-and-device-transfers]
+
+
+<Snippet>
+{`def _materialize_copy(tensor: torch.Tensor, device=None, dtype=None) -> torch.Tensor:
+    ...
+    if dtype is not None or device is not None:
+        tensor = tensor.to(device=device, dtype=dtype)
+    return tensor`}
+</Snippet>
+
+When a lazy slice is materialized, device transfer and dtype casting is performed in a single operation. A basic workflow pattern moves the tensor in the checkpoint dtype (often in fp32) onto the GPU, and a second pass casts the dtype to the desired dtype. For a fp32 tensor on GPU before casting, it requires 2x more GPU memory to run.
+
+Combining device and dtype in one `to(device, dtype)` makes it so that the tensor is allocated once in the target dtype.
