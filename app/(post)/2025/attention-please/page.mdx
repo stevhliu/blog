@@ -3,21 +3,6 @@ export const metadata = {
   description: 'An overview of different attention variants',
 };
 
-<FloatingTOC
-  items={[
-    { text: "self-attention", href: "#self-attention" },
-    { text: "causal self-attention", href: "#causal-self-attention" },
-    { text: "multi-head attention", href: "#multi-head-attention" },
-    { text: "multi-query attention", href: "#multi-query-attention" },
-    { text: "grouped-query attention", href: "#grouped-query-attention" },
-    { text: "multi-head latent attention", href: "#multi-head-latent-attention" },
-    { text: "flashattention", href: "#flashattention" },
-    { text: "flashattention-2", href: "#flashattention-2" },
-    { text: "flashattention-3", href: "#flashattention-3" },
-    { text: "summary", href: "#summary" },
-    { text: "resources", href: "#resources" }
-  ]}
-/>
 
 > An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.
 > - [Attention Is All You Need](https://huggingface.co/papers/1706.03762)

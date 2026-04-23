@@ -11,23 +11,22 @@ function useCurrentPost() {
   const segments = pathname.split("/").filter(Boolean);
   const slug = segments.length >= 2 ? segments[segments.length - 1] : null;
   const post = slug ? postsById.get(slug) ?? null : null;
-  const dateLabel = post ? post.date : "2024";
-  return { post, dateLabel };
+  return { post };
 }
 
 export function HeaderInfo() {
-  const { post, dateLabel } = useCurrentPost();
+  const { post } = useCurrentPost();
+  const total = postsData.posts.length.toString().padStart(3, "0");
 
-  return (
-    <>
-      {dateLabel}
-      {post ? (
-        <>
-          <br />
-          <ViewCounter id={post.id} initialViews="0" />
-        </>
-      ) : null}
-    </>
-  );
+  if (post) {
+    return (
+      <>
+        {post.date}
+        <br />
+        <ViewCounter id={post.id} initialViews="0" />
+      </>
+    );
+  }
+
+  return <>Total Records: {total}</>;
 }
-

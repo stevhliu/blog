@@ -3,19 +3,8 @@ export const metadata = {
   description: 'A collection of engineering details and design in Transformers.',
 };
 
-<FloatingTOC
-  items={[
-    { text: "PyTorch meta device", href: "#pytorch-meta-device" },
-    { text: "Lazy safetensor slices", href: "#lazy-safetensor-slices" },
-    { text: "Deleting temporaries", href: "#deleting-temporaries" },
-    { text: "Sync path", href: "#sync-path" },
-    { text: "Disk offloading", href: "#disk-offloading" },
-    { text: "Weight tying", href: "#weight-tying" },
-    { text: "Fuse dtype and device transfers", href: "#fuse-dtype-and-device-transfers" },
-  ]}
-/>
 
-> Science is made up of so many things that appear obvious after they are explained. - *Kynes, Dune*
+*Science is made up of so many things that appear obvious after they are explained. - Kynes, Dune*
 
 A collection of working notes on how Transformers loads large models without doubling peak memory.
 
@@ -102,7 +91,7 @@ Without `pop()`, `self.collected_tensors` would still hold all the `Future` refe
     return collected_tensors`}
 </Snippet>
 
-convert() outputs a dict of realized tensors that is written into the model. The dict is deleted once the tensors are assigned, releasing memory that is no longer required, capping peak memory between conversion batches. This prevents them from accumulating unnecessarily in storage until loading is complete.
+`convert()` outputs a dict of realized tensors that is written into the model. The dict is deleted once the tensors are assigned, releasing memory that is no longer required, capping peak memory between conversion batches. This prevents them from accumulating unnecessarily in storage until loading is complete.
 
 <Snippet>
 {`for first_param_name, mapping in tqdm(param_name_to_load.items(), desc="Loading weights"):

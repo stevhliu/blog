@@ -1,13 +1,14 @@
+// Post page header — thin top meta row only (the title now lives inside template.tsx's article column).
+import Link from "next/link";
+import { HeaderInfo } from "../header-info";
+
 export function Header({ title }: { title: string | null }) {
-  if (title == null) return null;
-
   return (
-    <header className="mb-0">
-      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--color-text)] text-balance">
-        {title}
-      </h1>
-
-      <div className="mt-16 md:mt-[20vh] mb-0 h-px bg-[var(--color-rule)]" />
+    <header className="flex justify-between items-baseline pb-4 border-b border-[var(--color-blue)] archive-meta text-[var(--color-blue)]">
+      <Link href="/" className="nav-link">← Observation Log</Link>
+      <span>
+        <HeaderInfo />
+      </span>
     </header>
   );
 }
