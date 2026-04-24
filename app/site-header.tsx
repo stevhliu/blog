@@ -32,8 +32,8 @@ export function SiteHeader({ totalRecords }: { totalRecords: number }) {
       </div>
 
       <section className="mt-20 md:mt-28 pb-6 border-b-2 border-[var(--color-rule)]">
-        <h1 className="archive-title text-[var(--color-text)] text-[56px] md:text-[96px] m-0" aria-label="Observation Log">
-          <Link href="/" className="nav-link no-underline text-inherit" aria-label="Home">
+        <h1 className="archive-title text-[var(--color-text)] text-[56px] md:text-[96px] m-0">
+          <Link href="/" className="nav-link no-underline text-inherit">
             <AsciiCat />
           </Link>
         </h1>

@@ -43,6 +43,8 @@ export function Collapsible({
 
       <div
         id={contentId}
+        aria-hidden={!isOpen}
+        inert={!isOpen ? true : undefined}
         className="grid transition-[grid-template-rows] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
         style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
       >

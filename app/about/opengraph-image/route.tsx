@@ -2,23 +2,13 @@ export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { font, loadGeistFont, loadPublicImageDataUrl } from "@/app/og-assets";
 const numberFormat = Intl.NumberFormat();
 
-// Image
-const stevhliuPhoto = toArrayBuffer(
-  readFileSync(join(process.cwd(), "public/images/stevhliu.PNG"))
-);
-
-// Fonts
-const fontsDir = join(process.cwd(), "fonts");
-
-const geistSans = readFileSync(join(fontsDir, "geist-light.ttf"));
-
-const geistSansMedium = readFileSync(join(fontsDir, "geist-medium.ttf"));
-
-const geistMono = readFileSync(join(fontsDir, "geist-mono-regular.ttf"));
+const stevhliuPhoto = loadPublicImageDataUrl("images/stevhliu.PNG", "image/png");
+const geistSans = loadGeistFont("geist-light.ttf");
+const geistSansMedium = loadGeistFont("geist-medium.ttf");
+const geistMono = loadGeistFont("geist-mono-regular.ttf");
 
 export async function GET() {
   const posts = await getPosts();
@@ -37,7 +27,6 @@ export async function GET() {
               <img
                 tw="rounded-full h-74"
                 alt="Steven Liu"
-                // @ts-ignore
                 src={stevhliuPhoto}
               />
             </div>
@@ -88,17 +77,5 @@ export async function GET() {
         },
       ],
     }
-  );
-}
-
-// lil helper for more succinct styles
-function font(fontFamily: string) {
-  return { fontFamily };
-}
-
-function toArrayBuffer(buffer) {
-  return buffer.buffer.slice(
-    buffer.byteOffset,
-    buffer.byteOffset + buffer.byteLength
   );
 }

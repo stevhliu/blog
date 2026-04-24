@@ -183,6 +183,16 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
                   <a
                     href={`#${it.id}`}
                     onClick={(e) => {
+                      if (
+                        e.button !== 0 ||
+                        e.metaKey ||
+                        e.altKey ||
+                        e.ctrlKey ||
+                        e.shiftKey
+                      ) {
+                        return;
+                      }
+
                       e.preventDefault();
                       activeIdRef.current = it.id;
                       setActiveId(it.id);

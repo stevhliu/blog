@@ -10,10 +10,6 @@ interface TableProps {
   title?: string;
 }
 
-// Color system
-const COLORS = ['green', 'blue', 'purple', 'pink', 'orange', 'teal', 'indigo', 'rose'] as const;
-type Color = typeof COLORS[number];
-
 const HOVER_COLORS = [
   'bg-green-100 dark:bg-green-800/30',
   'bg-blue-100 dark:bg-blue-800/30',
@@ -32,12 +28,12 @@ const TABLE_CLASSES = {
   table: "w-full caption-bottom text-sm border-separate border-spacing-0",
   thead: "[&_tr]:border-b",
   tbody: "[&_tr:last-child]:border-0",
-  headerRow: "border-b transition-[background-color,color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted/50 data-[state=selected]:bg-muted",
-  headerCell: "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 transition-[background-color,color] duration-150 ease-out",
-  dataRow: "border-b transition-[background-color,color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted/50 data-[state=selected]:bg-muted",
+  headerRow: "border-b transition-[background-color,color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] data-[state=selected]:bg-[var(--color-surface)]",
+  headerCell: "h-12 px-4 text-left align-middle font-medium text-[var(--color-subtext)] [&:has([role=checkbox])]:pr-0 transition-[background-color,color] duration-150 ease-out",
+  dataRow: "border-b transition-[background-color,color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] data-[state=selected]:bg-[var(--color-surface)]",
   dataCell: "p-4 align-middle [&:has([role=checkbox])]:pr-0 transition-[background-color,color] duration-150 ease-out",
   title: "mb-4 text-lg font-semibold text-center",
-  caption: "mt-4 text-sm text-muted-foreground"
+  caption: "mt-4 text-sm text-[var(--color-subtext)]"
 } as const;
 
 // Table Header Component

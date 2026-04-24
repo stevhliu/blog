@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 
 interface HoverCardProps {
   children: React.ReactNode;
@@ -133,6 +133,7 @@ function transformOriginForSide(side: Side): string {
 }
 
 function HoverContent({
+  id,
   content,
   position,
   contentClassName,
@@ -143,6 +144,7 @@ function HoverContent({
   isOpen,
   prefersReducedMotion,
 }: {
+  id: string;
   content: React.ReactNode;
   position: Position;
   contentClassName: string;
@@ -155,7 +157,9 @@ function HoverContent({
 }) {
   return (
     <span
+      id={id}
       ref={contentRef}
+      role="tooltip"
       inert={!isOpen ? true : undefined}
       className={`fixed z-50 block max-w-xs rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-lg dark:border-gray-700 dark:bg-gray-800 ${contentClassName}`}
       style={{
@@ -189,7 +193,8 @@ export function HoverCard({
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const contentId = useId();
+  const triggerRef = useRef<HTMLSpanElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
   const { setTimeout, clearTimeout } = useTimeout();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -232,6 +237,12 @@ export function HoverCard({
     clearTimeout();
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key !== "Escape") return;
+    clearTimeout();
+    setIsOpen(false);
+  };
+
   useEffect(() => {
     if (isOpen) {
       updatePosition();
@@ -242,15 +253,18 @@ export function HoverCard({
     <span
       ref={triggerRef}
       tabIndex={0}
+      aria-describedby={isOpen ? contentId : undefined}
       className={`inline-block transition-[opacity,transform] duration-150 ease-out active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
       onBlur={handleMouseLeave}
+      onKeyDown={handleKeyDown}
     >
       {children}
       {isMounted ? (
         <HoverContent
+          id={contentId}
           content={content}
           position={position}
           contentClassName={contentClassName}

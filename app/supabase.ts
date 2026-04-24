@@ -13,5 +13,3 @@ export const supabase =
 if (!supabase) {
   console.warn("Supabase environment variables are missing; view counts will use local fallbacks.");
 }
-
-export default supabase;

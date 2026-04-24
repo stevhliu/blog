@@ -1,11 +1,10 @@
 import { headers } from "next/headers";
 import type { Metadata } from "next";
+import { postIdFromPathname } from "./post-pathname";
 
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-  const segments = pathname.split("/").filter(Boolean);
-  const postId = segments[segments.length - 1];
+  const postId = postIdFromPathname(headersList.get("x-pathname") ?? "") ?? "";
 
   return {
     openGraph: {

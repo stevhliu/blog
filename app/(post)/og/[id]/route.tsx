@@ -2,22 +2,15 @@ export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { loadGeistFont, loadPublicImageDataUrl } from "@/app/og-assets";
 
 export async function generateStaticParams() {
   return (await getPosts()).map(post => ({ id: post.id }));
 }
 
-const fontsDir = join(process.cwd(), "fonts");
-
-const geistSansMedium = readFileSync(join(fontsDir, "geist-medium.ttf"));
-const geistMono = readFileSync(join(fontsDir, "geist-mono-regular.ttf"));
-
-const socialsImageData = readFileSync(
-  join(process.cwd(), "public/images/socials.png")
-);
-const socialsImageBase64 = `data:image/png;base64,${socialsImageData.toString("base64")}`;
+const geistSansMedium = loadGeistFont("geist-medium.ttf");
+const geistMono = loadGeistFont("geist-mono-regular.ttf");
+const socialsImage = loadPublicImageDataUrl("images/socials.png", "image/png");
 
 export async function GET(
   _req: Request,
@@ -36,7 +29,7 @@ export async function GET(
       <div
         tw="flex h-full w-full flex-col items-center justify-center p-[60px]"
         style={{
-          backgroundImage: `url(${socialsImageBase64})`,
+          backgroundImage: `url(${socialsImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -48,11 +41,11 @@ export async function GET(
           {post.title}
         </div>
         <div
-          tw="flex items-center gap-6 text-[22px]"
+          tw="flex items-center text-[22px]"
           style={{ fontFamily: "Geist Mono", color: "rgba(255,255,255,0.6)" }}
         >
-          <span>{post.date}</span>
-          <span>·</span>
+          <span tw="mr-6">{post.date}</span>
+          <span tw="mr-6">·</span>
           <span>{post.viewsFormatted} views</span>
         </div>
       </div>

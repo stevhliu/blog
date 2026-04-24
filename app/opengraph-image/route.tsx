@@ -2,22 +2,11 @@ export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { font, loadGeistFont } from "@/app/og-assets";
 
-const fontsDir = join(process.cwd(), "fonts");
-
-const geistSans = readFileSync(
-  join(fontsDir, "geist-light.ttf")
-);
-
-const geistSansBold = readFileSync(
-  join(fontsDir, "geist-bold.ttf")
-);
-
-const geistMono = readFileSync(
-  join(fontsDir, "geist-mono-regular.ttf")
-);
+const geistSans = loadGeistFont("geist-light.ttf");
+const geistSansBold = loadGeistFont("geist-bold.ttf");
+const geistMono = loadGeistFont("geist-mono-regular.ttf");
 
 export async function GET() {
   const posts = await getPosts();
@@ -88,9 +77,4 @@ export async function GET() {
 // lil helper to convert posts.json `date` to full year
 function getYear(date: string) {
   return new Date(date).getFullYear();
-}
-
-// lil helper for more succinct styles
-function font(fontFamily: string) {
-  return { fontFamily };
 }

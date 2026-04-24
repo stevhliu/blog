@@ -4,7 +4,6 @@
 
 @layer base {
   :root {
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     -webkit-tap-highlight-color: transparent;
     color-scheme: light;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);

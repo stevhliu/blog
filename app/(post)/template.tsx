@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { archiveSecYearForPost } from "../archive-section";
 import { TocSidebar } from "./toc-sidebar";
 import { getPosts } from "../get-posts";
+import { postIdFromPathname } from "./post-pathname";
 
 export const revalidate = 60;
 
@@ -10,10 +11,8 @@ export default async function Template({ children }) {
     getPosts(),
     headers(),
   ]);
-  const pathname = headersList.get("x-pathname") ?? "";
-  const segments = pathname.split("/").filter(Boolean);
-  const postId = segments[segments.length - 1];
-  const post = posts.find((p) => p.id === postId);
+  const postId = postIdFromPathname(headersList.get("x-pathname") ?? "");
+  const post = postId ? posts.find((p) => p.id === postId) : null;
   const secYear = post ? archiveSecYearForPost(post, posts) : null;
 
   return (
