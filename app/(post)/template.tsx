@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { Header } from "./header";
+import { archiveSecYearForPost } from "../archive-section";
 import { TocSidebar } from "./toc-sidebar";
 import { getPosts } from "../get-posts";
 
@@ -14,19 +14,40 @@ export default async function Template({ children }) {
   const segments = pathname.split("/").filter(Boolean);
   const postId = segments[segments.length - 1];
   const post = posts.find((p) => p.id === postId);
+  const secYear = post ? archiveSecYearForPost(post, posts) : null;
 
   return (
     <div className="text-[var(--color-text)]">
-      <Header title={post?.title ?? null} />
-
-      <div className="mt-10 grid grid-cols-1 md:grid-cols-[220px_minmax(0,560px)] md:gap-20 gap-8">
+      <div
+        className={[
+          "mt-6 flex flex-col gap-5 sm:mt-8 sm:gap-6",
+          "md:mt-10 md:grid md:items-start md:gap-x-8 md:gap-y-0",
+          "md:grid-cols-[12.5rem_minmax(0,35rem)]",
+          "lg:grid-cols-[13.75rem_minmax(0,35rem)] lg:gap-x-10",
+          "xl:grid-cols-[15rem_minmax(0,35rem)] xl:gap-x-14",
+          "2xl:grid-cols-[16rem_minmax(0,35rem)] 2xl:gap-x-20",
+        ].join(" ")}
+      >
         <TocSidebar />
         <article className="min-w-0">
           {post?.title ? (
             <header className="mb-7">
+              {secYear ? (
+                <div className="mb-2 archive-meta flex justify-between text-black dark:text-white">
+                  <span>
+                    SEC.&nbsp;{String(secYear.section).padStart(2, "0")}
+                    &nbsp;/&nbsp;{secYear.year}
+                  </span>
+                </div>
+              ) : null}
               <h1 className="font-[Times_New_Roman,serif] text-[44px] md:text-[48px] leading-[0.95] tracking-[-0.03em] font-normal text-black dark:text-white m-0">
                 {post.title}
               </h1>
+              {post.date ? (
+                <p className="m-0 mt-3 font-mono text-[11px] uppercase leading-none tracking-[0.04em] text-black dark:text-white">
+                  <time className="tabular-nums">{post.date}</time>
+                </p>
+              ) : null}
             </header>
           ) : null}
           <div className="post-body text-black dark:text-white">
