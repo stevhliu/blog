@@ -11,13 +11,7 @@ export const supabase =
     : null;
 
 if (!supabase) {
-  const message = "Supabase environment variables are missing";
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(message);
-  } else {
-    console.warn(message);
-  }
+  console.warn("Supabase environment variables are missing; view counts will use local fallbacks.");
 }
 
 export default supabase;
-

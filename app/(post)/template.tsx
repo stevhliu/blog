@@ -28,29 +28,31 @@ export default async function Template({ children }) {
           "2xl:grid-cols-[16rem_minmax(0,35rem)] 2xl:gap-x-20",
         ].join(" ")}
       >
-        <TocSidebar />
+        <TocSidebar postTitle={post?.title ?? null} />
         <article className="min-w-0">
           {post?.title ? (
             <header className="mb-7">
               {secYear ? (
-                <div className="mb-2 archive-meta flex justify-between text-black dark:text-white">
+                /* Sec row is dimmed warm-gray, not black, on post pages. */
+                <div className="mb-2 archive-meta flex justify-between text-[var(--color-dim)]">
                   <span>
                     SEC.&nbsp;{String(secYear.section).padStart(2, "0")}
                     &nbsp;/&nbsp;{secYear.year}
                   </span>
                 </div>
               ) : null}
-              <h1 className="font-[Times_New_Roman,serif] text-[44px] md:text-[48px] leading-[0.95] tracking-[-0.03em] font-normal text-black dark:text-white m-0">
+              {/* Geist sans, medium weight, tight tracking — NOT Times New Roman. */}
+              <h1 className="m-0 text-balance font-sans text-[44px] font-medium leading-[1.05] tracking-[-0.03em] text-[var(--color-body)] md:text-[48px]">
                 {post.title}
               </h1>
               {post.date ? (
-                <p className="m-0 mt-3 font-mono text-[11px] uppercase leading-none tracking-[0.04em] text-black dark:text-white">
+                <p className="m-0 mt-3 font-mono text-[11px] uppercase leading-none tracking-[0.04em] text-[var(--color-dim)]">
                   <time className="tabular-nums">{post.date}</time>
                 </p>
               ) : null}
             </header>
           ) : null}
-          <div className="post-body text-black dark:text-white">
+          <div className="post-body text-[var(--color-body)]">
             {children}
           </div>
         </article>

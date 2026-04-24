@@ -1,13 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type TocItem = { id: string; text: string };
 
-export function TocSidebar() {
+function shouldReduceMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * Left sidebar on post-detail pages.
+ *
+ * Changes from the previous design:
+ *   • "INDEX" back link uses a real SVG arrow-left (not the `←` glyph) and
+ *     sits in warm-gray (#b8b0a2) until hover.
+ *   • The sidebar's heading is the POST TITLE (passed in as a prop), not a
+ *     generic "Contents" label. It stays dim until the reader scrolls past
+ *     the article header, then fades to --color-body via data-scrolled=true.
+ *   • Inactive TOC items are warm-gray (#b8b0a2); active is --color-body.
+ */
+export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
   const [items, setItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const activeIdRef = useRef<string | null>(null);
+  const scrolledRef = useRef(false);
+  const titleActive = scrolled && activeId === null;
 
   // Collect h2s from the article body after mount
   useEffect(() => {
@@ -25,7 +44,7 @@ export function TocSidebar() {
             .trim()
             .replace(/\s+/g, "-") ?? "";
         }
-        (h.style as any).scrollMarginTop = "40px";
+        h.style.scrollMarginTop = "40px";
         const id = fromSpan || h.id;
         const text = (h.textContent ?? "").replace(/^\s*#\s*/m, "").replace(/\s+/g, " ").trim();
         return { id, text };
@@ -38,25 +57,28 @@ export function TocSidebar() {
     return () => window.clearTimeout(id);
   }, []);
 
-  // Scroll-spy: track which heading is "current" (last section whose title has passed a reader line).
-  // A fixed 120px line fails on tall viewports: the in-view h2 is often 200px+ from the top, so 07
-  // never "wins" over 06. Scale the line with viewport height and pick the last heading with top <= line.
+  // Scroll-spy: track which heading is "current" + whether we've passed the article header.
   useEffect(() => {
-    if (!items.length) return;
+    const updateState = () => {
+      const headerEl = document.querySelector("article > header");
+      if (headerEl) {
+        const { bottom } = headerEl.getBoundingClientRect();
+        const nextScrolled = bottom < 40;
+        if (nextScrolled !== scrolledRef.current) {
+          scrolledRef.current = nextScrolled;
+          setScrolled(nextScrolled);
+        }
+      }
 
-    const updateActive = () => {
+      if (!items.length) return;
       const h = window.innerHeight;
-      // Reader line: a heading is “in play” for active state while its top is at or above this (px from viewport top).
-      // 100px + 45% of viewport is enough for ~250px in-view h2s on common laptop sizes (fixed 120 was too tight).
       const line = 120 + 0.5 * h;
       let current: string | null = null;
       for (const item of items) {
         const el = document.getElementById(item.id);
         if (!el) continue;
         const { top } = el.getBoundingClientRect();
-        if (top <= line) {
-          current = item.id;
-        }
+        if (top <= line) current = item.id;
       }
       if (!current) {
         for (const item of items) {
@@ -69,15 +91,28 @@ export function TocSidebar() {
           }
         }
       }
-      setActiveId(current ?? items[0]!.id);
+      if (current !== activeIdRef.current) {
+        activeIdRef.current = current;
+        setActiveId(current);
+      }
     };
 
-    updateActive();
-    window.addEventListener("scroll", updateActive, { passive: true });
-    window.addEventListener("resize", updateActive, { passive: true });
+    let frame = 0;
+    const requestUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updateState();
+      });
+    };
+
+    updateState();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate, { passive: true });
     return () => {
-      window.removeEventListener("scroll", updateActive);
-      window.removeEventListener("resize", updateActive);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
     };
   }, [items]);
 
@@ -87,30 +122,55 @@ export function TocSidebar() {
       className={[
         "hidden w-full min-w-0 [touch-action:manipulation] md:block",
         "md:sticky md:self-start",
-        "md:top-8 md:-ml-3",
-        "lg:top-10 lg:-ml-5",
-        "xl:top-12 xl:-ml-7 2xl:-ml-8",
+        "md:top-8 md:-ml-9",
+        "lg:top-10 lg:-ml-9",
+        "xl:top-12 xl:-ml-9 2xl:-ml-9",
       ].join(" ")}
     >
       <Link
         href="/"
-        aria-label="Back to home"
-        className="inline-flex items-baseline gap-1.5 font-mono text-[10px] uppercase leading-none tracking-[0.04em] text-black dark:text-white opacity-30 no-underline mb-3 min-h-6 -ml-0.5 pl-0.5 transition-[color,opacity] duration-200 sm:mb-4 lg:text-[11px] max-md:mb-3 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-100"
+        aria-label="Back to index"
+        className="inline-flex items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-200 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
       >
-        <span className="select-none" aria-hidden>
-          ←
-        </span>
-        <span>INDEX</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+          className="shrink-0"
+        >
+          <path d="m12 19-7-7 7-7" />
+          <path d="M19 12H5" />
+        </svg>
+        <span>Index</span>
       </Link>
-      {items.length > 0 ? (
-        <>
-          <div className="font-mono text-[10px] uppercase leading-none tracking-[0.04em] text-black dark:text-white max-md:mt-0.5 lg:text-[11px]">
-            Contents
-          </div>
+
+      <nav
+        data-scrolled={scrolled ? "true" : "false"}
+        aria-label="On this page"
+        className="side-nav block"
+      >
+        {postTitle ? (
+          <h2
+            className={[
+              "side-section font-mono text-[11px] font-medium uppercase tracking-[0.04em] leading-tight m-0 mb-2.5 transition-[color] duration-200 motion-reduce:transition-none",
+              titleActive ? "text-[var(--color-body)]" : "text-[var(--color-dim)]",
+            ].join(" ")}
+          >
+            {postTitle}
+          </h2>
+        ) : null}
+        {items.length > 0 ? (
           <ul
             className={[
-              "list-none p-0 mt-2.5 font-mono leading-[1.8] [scrollbar-gutter:stable]",
-              "text-[10px] lg:text-[11px] lg:leading-[1.75]",
+              "list-none p-0 m-0 font-mono leading-[1.9] [scrollbar-gutter:stable]",
+              "text-[11px]",
               "max-md:max-h-[min(50dvh,22rem)] max-md:overflow-y-auto max-md:overscroll-y-contain max-md:pr-0.5",
               "md:max-h-[min(28rem,calc(100dvh-7rem))] md:overflow-y-auto md:overflow-x-hidden md:overscroll-y-contain",
               "lg:max-h-[min(32rem,calc(100dvh-8rem))] xl:max-h-[min(36rem,calc(100dvh-8.5rem))]",
@@ -119,22 +179,27 @@ export function TocSidebar() {
             {items.map((it) => {
               const active = it.id === activeId;
               return (
-                <li key={it.id}>
+                <li key={it.id} data-active={active ? "true" : "false"}>
                   <a
                     href={`#${it.id}`}
                     onClick={(e) => {
                       e.preventDefault();
+                      activeIdRef.current = it.id;
                       setActiveId(it.id);
-                      document.getElementById(it.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      document
+                        .getElementById(it.id)
+                        ?.scrollIntoView({
+                          behavior: shouldReduceMotion() ? "auto" : "smooth",
+                          block: "start",
+                        });
                       history.replaceState(null, "", `#${it.id}`);
                     }}
                     className={[
-                      "block break-words py-[2px] pl-0 pr-0.5 no-underline transition-[color,opacity] duration-200",
+                      "block break-words py-[2px] pr-0.5 no-underline transition-[color] duration-200",
                       "max-md:min-h-11 max-md:py-2.5 max-md:leading-snug",
                       "md:py-0.5 md:leading-snug lg:py-px",
-                      active
-                        ? "text-black dark:text-white font-medium"
-                        : "text-black dark:text-white opacity-30",
+                      active ? "text-[var(--color-body)]" : "text-[var(--color-dim)]",
+                      "[@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]",
                     ].join(" ")}
                   >
                     {it.text}
@@ -143,8 +208,8 @@ export function TocSidebar() {
               );
             })}
           </ul>
-        </>
-      ) : null}
+        ) : null}
+      </nav>
     </aside>
   );
 }

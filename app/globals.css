@@ -8,15 +8,20 @@
     -webkit-tap-highlight-color: transparent;
     color-scheme: light;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-    --color-bg: #FFFFFF;
-    --color-text: #2c3ce1;
-    --color-subtext: rgba(44, 60, 225, 0.6);
-    --color-blue: #2c3ce1;
-    --color-accent: #2c3ce1;
-    --color-rule: #2c3ce1;
-    --color-rule-soft: rgba(44, 60, 225, 0.3);
-    --color-surface: rgba(44, 60, 225, 0.05);
-    @apply bg-white;
+    /* Warm off-white paper + black ink for the index. Post detail overrides --color-body below. */
+    --color-bg: #faf9f7;
+    --color-text: #000000;
+    --color-subtext: rgba(0, 0, 0, 0.6);
+    --color-blue: #000000;
+    --color-accent: #000000;
+    --color-rule: #000000;
+    --color-rule-soft: rgba(0, 0, 0, 0.3);
+    --color-surface: rgba(0, 0, 0, 0.05);
+    /* Body copy color — same as --color-text on the index, and also black on post pages. */
+    --color-body: #000000;
+    /* Warm-gray used on post detail for dimmed meta (sec row, date, inactive TOC, Index link). */
+    --color-dim: #b8b0a2;
+    @apply bg-[#faf9f7];
   }
 
   @media (prefers-color-scheme: dark) {
@@ -30,6 +35,8 @@
       --color-rule: #58a6ff;
       --color-rule-soft: rgba(88, 166, 255, 0.3);
       --color-surface: rgba(88, 166, 255, 0.08);
+      --color-body: #ffffff;
+      --color-dim: rgba(88, 166, 255, 0.5);
       @apply bg-[#0a0a0f];
     }
   }
@@ -73,11 +80,13 @@ button:focus-visible,
   font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
+/* Observation Log title: Geist sans, medium weight, tight tracking. The hero is the ASCII cat;
+   the text label only shows for screen readers. */
 .archive-title {
-  font-family: "Times New Roman", Times, serif;
-  font-weight: 400;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-weight: 500;
   letter-spacing: -0.04em;
-  line-height: 0.82;
+  line-height: 0.9;
 }
 
 .archive-meta {
@@ -99,11 +108,7 @@ button:focus-visible,
   align-items: flex-start;
   padding: 6px 0;
   border-bottom: 1px dotted var(--color-rule-soft);
-  transition: background 120ms var(--ease-out);
-}
-
-.archive-entry:hover {
-  background: var(--color-surface);
+  transition: background-color 120ms var(--ease-out);
 }
 
 .post-title {
@@ -112,6 +117,7 @@ button:focus-visible,
 
 nav a,
 li a,
+.nav-link,
 .post-link {
   transition: transform 160ms var(--ease-out),
               opacity 100ms var(--ease-out);
@@ -125,6 +131,10 @@ li a:active,
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .archive-entry:hover {
+    background: var(--color-surface);
+  }
+
   .post-link:hover .post-title {
     transform: translateX(2px);
   }
@@ -141,6 +151,7 @@ li a:active,
 
   nav a,
   li a,
+  .nav-link,
   .post-link {
     transition: opacity 100ms var(--ease-out);
   }
@@ -154,6 +165,27 @@ li a:active,
   .nav-link:active,
   .post-link:active {
     transform: none;
+  }
+}
+
+/* ─── ASCII dancing-cat title ────────────────────────────
+   The home hero is the cat, not the word "Observation Log".
+   Kept in global CSS so both the server-rendered placeholder and
+   the client-swapped poses share the exact same layout metrics. */
+.ascii-cat {
+  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, Menlo, monospace;
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: var(--color-text);
+  margin: 0;
+  white-space: pre;
+  display: inline-block;
+  will-change: contents;
+}
+@media (min-width: 768px) {
+  .ascii-cat {
+    font-size: 24px;
   }
 }
 

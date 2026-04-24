@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import type { Post } from "../get-posts";
+import { TreePineIcon } from "./tree-pine-icon";
+
+const shortDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "2-digit",
+  day: "2-digit",
+});
 
 function shortDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  const day = String(d.getDate()).padStart(2, "0");
-  const mo = String(d.getMonth() + 1).padStart(2, "0");
-  return `${mo}-${day}`;
+  return shortDateFormatter.format(new Date(dateStr)).replace("/", "-");
 }
 
 export function PostYearColumn({
@@ -32,14 +35,21 @@ export function PostYearColumn({
           href={`/${year}/${post.id}`}
           className="post-link archive-entry text-[var(--color-text)] no-underline"
         >
-          <span className="flex gap-2 max-w-[72%] items-baseline">
+          <span className="flex min-w-0 max-w-[72%] items-baseline gap-2">
             <span className="shrink-0 text-[10px] sm:text-[11px] opacity-70 min-w-[48px] tabular-nums font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
               {shortDate(post.date)}
             </span>
-            <span className="post-title text-[11px] sm:text-xs uppercase tracking-[0.01em] leading-[1.3] font-normal font-[var(--font-geist-mono),monospace]">
+            <span className="post-title min-w-0 break-words text-[11px] sm:text-xs uppercase tracking-[0.01em] leading-[1.3] font-normal font-[var(--font-geist-mono),monospace]">
               {post.title}
               {post.evergreen ? (
-                <span className="archive-serif italic ml-1.5 opacity-70">†</span>
+                <span className="ml-1.5 inline-flex align-[-0.1em] opacity-70">
+                  <TreePineIcon
+                    aria-hidden="true"
+                    className="h-[1em] w-[1em] shrink-0"
+                    strokeWidth={2}
+                  />
+                  <span className="sr-only">Evergreen</span>
+                </span>
               ) : null}
             </span>
           </span>

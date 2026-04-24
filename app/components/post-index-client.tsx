@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Post } from "../get-posts";
 import { PostYearColumn } from "./post-year-column";
+import { TreePineIcon } from "./tree-pine-icon";
 
 const PAGE_SIZE = 2;
 
@@ -62,7 +63,7 @@ export function PostIndexClient({ grouped }: { grouped: Grouped }) {
               type="button"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="archive-meta min-h-11 min-w-11 rounded-md px-3 text-[var(--color-text)] transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] disabled:cursor-not-allowed disabled:opacity-30 enabled:[@media(hover:hover)_and_(pointer:fine)]:hover:opacity-80 [touch-action:manipulation]"
+              className="archive-meta min-h-11 min-w-11 rounded-md px-3 text-[var(--color-text)] transition-[opacity,transform] duration-[160ms] ease-[var(--ease-out)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] disabled:cursor-not-allowed disabled:opacity-30 enabled:active:scale-[0.97] enabled:[@media(hover:hover)_and_(pointer:fine)]:hover:opacity-80 motion-reduce:transition-opacity motion-reduce:enabled:active:scale-100 [touch-action:manipulation]"
             >
               Previous
             </button>
@@ -77,7 +78,7 @@ export function PostIndexClient({ grouped }: { grouped: Grouped }) {
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
-              className="archive-meta min-h-11 min-w-11 rounded-md px-3 text-[var(--color-text)] transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] disabled:cursor-not-allowed disabled:opacity-30 enabled:[@media(hover:hover)_and_(pointer:fine)]:hover:opacity-80 [touch-action:manipulation]"
+              className="archive-meta min-h-11 min-w-11 rounded-md px-3 text-[var(--color-text)] transition-[opacity,transform] duration-[160ms] ease-[var(--ease-out)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] disabled:cursor-not-allowed disabled:opacity-30 enabled:active:scale-[0.97] enabled:[@media(hover:hover)_and_(pointer:fine)]:hover:opacity-80 motion-reduce:transition-opacity motion-reduce:enabled:active:scale-100 [touch-action:manipulation]"
             >
               Next
             </button>
@@ -87,8 +88,13 @@ export function PostIndexClient({ grouped }: { grouped: Grouped }) {
             Index Page 01 / 01
           </div>
         )}
-        <div className="text-right md:justify-self-end archive-meta text-[var(--color-text)]">
-          <span className="archive-serif italic">†</span> denotes evergreen
+        <div className="inline-flex items-center justify-end gap-1 text-right md:justify-self-end archive-meta text-[var(--color-text)]">
+          <TreePineIcon
+            aria-hidden="true"
+            className="h-[1em] w-[1em] shrink-0"
+            strokeWidth={2}
+          />
+          <span>Evergreen</span>
         </div>
       </footer>
     </>

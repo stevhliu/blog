@@ -28,8 +28,8 @@ export const metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0d2a" },
+    { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0f" },
   ],
 };
 
@@ -52,13 +52,14 @@ export default function RootLayout({
         />
       </head>
 
-      <body className="text-[var(--color-text)] max-w-6xl m-auto">
+      <body className="bg-[var(--color-bg)] text-[var(--color-text)] max-w-6xl m-auto">
         <a
           href="#main"
           className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:z-50 focus-visible:p-2 focus-visible:bg-[var(--color-bg)] focus-visible:text-[var(--color-text)]"
         >
           Skip to content
         </a>
+        {/* Matches preview: 20px top, 40px bottom; 24px h-padding on mobile, 40px ≥768px. */}
         <div className="relative z-10 px-6 md:px-10 pt-5 pb-10 min-h-screen">
           <Header />
           <main id="main">
