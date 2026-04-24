@@ -3,7 +3,7 @@ export const revalidate = 60;
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
 import { font, loadGeistFont, loadPublicImageDataUrl } from "@/app/og-assets";
-const numberFormat = Intl.NumberFormat();
+import { formatInteger } from "@/app/post-format";
 
 const stevhliuPhoto = loadPublicImageDataUrl("images/stevhliu.PNG", "image/png");
 const geistSans = loadGeistFont("geist-light.ttf");
@@ -52,7 +52,7 @@ export async function GET() {
           tw="flex w-full justify-center text-2xl text-gray-500"
           style={font("Geist Mono")}
         >
-          {posts.length} posts / {numberFormat.format(viewsSum)} views
+          {posts.length} posts / {formatInteger(viewsSum)} views
         </footer>
       </div>
     ),

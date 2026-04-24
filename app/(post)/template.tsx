@@ -2,11 +2,11 @@ import { headers } from "next/headers";
 import { archiveSecYearForPost } from "../archive-section";
 import { TocSidebar } from "./toc-sidebar";
 import { getPosts } from "../get-posts";
-import { postIdFromPathname } from "./post-pathname";
+import { postIdFromPathname } from "../post-routing";
 
 export const revalidate = 60;
 
-export default async function Template({ children }) {
+export default async function Template({ children }: { children: React.ReactNode }) {
   const [posts, headersList] = await Promise.all([
     getPosts(),
     headers(),

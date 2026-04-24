@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  // Server post chrome reads this because MDX route groups do not receive URL params.
   response.headers.set("x-pathname", request.nextUrl.pathname);
   return response;
 }

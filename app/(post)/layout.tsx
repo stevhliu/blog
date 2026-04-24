@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import type { Metadata } from "next";
-import { postIdFromPathname } from "./post-pathname";
+import { postIdFromPathname } from "../post-routing";
 
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers();

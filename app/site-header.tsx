@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AsciiCat } from "./ascii-cat";
 import { EnvDatetime } from "./env-datetime";
-import { isPostDetailPathname } from "./is-post-detail-pathname";
+import { isPostDetailPathname } from "./post-routing";
 
 /**
  * Post detail URLs: no site header (post template provides title + local nav).

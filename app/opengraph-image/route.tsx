@@ -3,6 +3,7 @@ export const revalidate = 60;
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
 import { font, loadGeistFont } from "@/app/og-assets";
+import { getPostYear } from "@/app/post-format";
 
 const geistSans = loadGeistFont("geist-light.ttf");
 const geistSansBold = loadGeistFont("geist-bold.ttf");
@@ -39,8 +40,8 @@ export async function GET() {
             >
               <div tw="flex text-gray-400 w-24">
                 {posts[i - 1] === undefined ||
-                  getYear(post.date) !== getYear(posts[i - 1].date)
-                  ? getYear(post.date)
+                  getPostYear(post.date) !== getPostYear(posts[i - 1].date)
+                  ? getPostYear(post.date)
                   : ""}
               </div>
               <div tw="flex grow">{post.title}</div>
@@ -72,9 +73,4 @@ export async function GET() {
       ],
     }
   );
-}
-
-// lil helper to convert posts.json `date` to full year
-function getYear(date: string) {
-  return new Date(date).getFullYear();
 }

@@ -10,7 +10,6 @@ interface FloatingTOCItem {
 
 interface FloatingTOCProps {
   items: FloatingTOCItem[];
-  title?: string;
 }
 
 const COLORS = ['green', 'blue', 'purple', 'pink', 'orange', 'teal', 'indigo', 'rose'] as const;
@@ -112,7 +111,7 @@ const TOCItemRow = memo(function TOCItemRow({
   );
 });
 
-export function FloatingTOC({ items, title = "Contents" }: FloatingTOCProps) {
+export function FloatingTOC({ items }: FloatingTOCProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeSection, setActiveSection] = useState('');

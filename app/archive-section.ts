@@ -1,9 +1,10 @@
 import type { Post } from "./get-posts";
+import { getPostYear } from "./post-format";
 
 export function groupByYear(posts: Post[]): [number, Post[]][] {
   const map = new Map<number, Post[]>();
   for (const post of posts) {
-    const year = new Date(post.date).getFullYear();
+    const year = getPostYear(post.date);
     if (!map.has(year)) map.set(year, []);
     map.get(year)!.push(post);
   }
@@ -16,7 +17,7 @@ export function archiveSecYearForPost(
   allPosts: Post[]
 ): { section: number; year: number } | null {
   const grouped = groupByYear(allPosts);
-  const year = new Date(post.date).getFullYear();
+  const year = getPostYear(post.date);
   const idx = grouped.findIndex(([y]) => y === year);
   if (idx === -1) return null;
   return { section: grouped.length - idx, year };
