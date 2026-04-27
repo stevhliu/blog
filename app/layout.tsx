@@ -2,6 +2,7 @@ import "./globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import Script from "next/script";
 import { Analytics } from "./analytics";
 import { Header } from "./header";
 import { doge } from "./doge";
@@ -15,13 +16,13 @@ export const metadata = {
       "Steven Liu is a technical writer at Hugging Face.",
     url: "https://stevhliu.com",
     siteName: "steven liu",
-    images: ["/images/socials.png"]
+    images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
     site: "@stevhliu",
     creator: "@stevhliu",
-    images: ["/images/socials.png"],
+    images: ["/opengraph-image"],
   },
   metadataBase: new URL("https://stevhliu.com"),
 };
@@ -44,14 +45,6 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSans.className} antialiased`}
       suppressHydrationWarning={true}
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(${doge.toString()})();`,
-          }}
-        />
-      </head>
-
       <body className="bg-[var(--color-bg)] text-[var(--color-text)] max-w-6xl m-auto">
         <a
           href="#main"
@@ -66,6 +59,9 @@ export default function RootLayout({
             {children}
           </main>
         </div>
+        <Script id="doge-console" strategy="afterInteractive">
+          {`(${doge.toString()})();`}
+        </Script>
         <Analytics />
       </body>
     </html>

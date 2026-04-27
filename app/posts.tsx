@@ -1,13 +1,13 @@
 import type { Post } from "./get-posts";
 import { groupByYear } from "./archive-section";
-import { PostIndexClient } from "./components/post-index-client";
+import { PostIndex } from "./components/post-index";
 
-export function Posts({ posts }: { posts: Post[] }) {
+export function Posts({ posts, page }: { posts: Post[]; page?: string }) {
   const grouped = groupByYear(posts);
 
   return (
     <section className="mt-8 md:mt-12 flex flex-col min-h-[calc(100vh-20rem)]">
-      <PostIndexClient grouped={grouped} />
+      <PostIndex grouped={grouped} page={page} />
     </section>
   );
 }

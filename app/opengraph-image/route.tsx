@@ -1,75 +1,74 @@
 export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
-import { getPosts } from "@/app/get-posts";
-import { font, loadGeistFont } from "@/app/og-assets";
-import { getPostYear } from "@/app/post-format";
+import { loadGeistFont } from "@/app/og-assets";
 
-const geistSans = loadGeistFont("geist-light.ttf");
-const geistSansBold = loadGeistFont("geist-bold.ttf");
+const geistSansMedium = loadGeistFont("geist-medium.ttf");
 const geistMono = loadGeistFont("geist-mono-regular.ttf");
 
-export async function GET() {
-  const posts = await getPosts();
+// Pose A of the home page's dancing ASCII cat, rendered as a stack of
+// div rows so Satori preserves the exact spacing (it won't respect
+// whitespace in a single <pre>/<div>).
+const CAT_LINES = [
+  "*",
+  "     /\\_/\\   *",
+  "   ( o.o )/",
+  "     > ^ <",
+  "    /     \\",
+  "*  /_/   \\_\\",
+];
 
+export async function GET() {
   return new ImageResponse(
     (
       <div
-        tw="flex p-10 h-full w-full bg-white flex-col"
-        style={font("Geist")}
+        tw="flex h-full w-full"
+        style={{
+          backgroundColor: "#faf9f7",
+          color: "#000000",
+          fontFamily: "Geist Medium",
+        }}
       >
-        <header tw="flex text-[36px] w-full">
-          <div tw="font-bold" style={font("Geist Bold")}>
-            Steven Liu
+        {/* Left: giant ASCII cat */}
+        <div tw="flex flex-1 items-center justify-center">
+          <div
+            tw="flex flex-col"
+            style={{
+              fontFamily: "Geist Mono",
+              fontSize: 54,
+              lineHeight: 1.06,
+              whiteSpace: "pre",
+            }}
+          >
+            {CAT_LINES.map((line, i) => (
+              <div key={i} style={{ whiteSpace: "pre" }}>{line}</div>
+            ))}
           </div>
-          <div tw="grow" />
-          <div tw="text-[28px]">stevhliu.com</div>
-        </header>
+        </div>
 
-        <main tw="flex mt-10 flex-col w-full" style={font("Geist Mono")}>
-          <div tw="flex w-full text-[26px] text-gray-400 mb-3">
-            <div tw="w-24">date</div>
-            <div tw="grow">title</div>
-            <div>views</div>
+        {/* Right: name */}
+        <div tw="flex flex-1 items-center justify-center">
+          <div
+            tw="flex flex-col"
+            style={{
+              fontFamily: "Geist Medium",
+              fontSize: 160,
+              letterSpacing: "-0.055em",
+              lineHeight: 0.9,
+            }}
+          >
+            <div>steven</div>
+            <div>liu</div>
           </div>
-
-          {posts.map((post, i) => (
-            <div
-              key={post.id}
-              tw="flex py-6 text-[26px] border-gray-300 border-t w-full"
-            >
-              <div tw="flex text-gray-400 w-24">
-                {posts[i - 1] === undefined ||
-                  getPostYear(post.date) !== getPostYear(posts[i - 1].date)
-                  ? getPostYear(post.date)
-                  : ""}
-              </div>
-              <div tw="flex grow">{post.title}</div>
-              <div tw="flex text-gray-400 pl-7">{post?.viewsFormatted}</div>
-            </div>
-          ))}
-        </main>
+        </div>
       </div>
     ),
     {
       width: 1200,
       height: 630,
       fonts: [
-        {
-          name: "Geist",
-          data: geistSans,
-          weight: 300,
-        },
-        {
-          name: "Geist Bold",
-          data: geistSansBold,
-          weight: 700,
-        },
-        {
-          name: "Geist Mono",
-          data: geistMono,
-          weight: 400,
-        },
+        { name: "Geist Medium", data: geistSansMedium },
+        { name: "Geist Mono", data: geistMono },
       ],
     }
   );

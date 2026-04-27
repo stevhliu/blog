@@ -6,7 +6,6 @@ export default async function Link(props: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ bot?: string }>;
 }) {
-  const searchParams = await props.searchParams;
   const params = await props.params;
   const link = links[params.id];
 
@@ -14,12 +13,15 @@ export default async function Link(props: {
     return notFound();
   }
 
-  if (
-    searchParams.bot ||
-    /bot/i.test((await headers()).get("user-agent") as string)
-  ) {
+  const searchParams = await props.searchParams;
+  if (searchParams.bot) {
     return <></>;
-  } else {
-    redirect(link.link);
   }
+
+  const userAgent = (await headers()).get("user-agent") ?? "";
+  if (/bot/i.test(userAgent)) {
+    return <></>;
+  }
+
+  redirect(link.link);
 }
