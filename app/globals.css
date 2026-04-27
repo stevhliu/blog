@@ -8,6 +8,8 @@
     color-scheme: light;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     /* Warm off-white paper + black ink for the index. Post detail overrides --color-body below. */
+    --color-page-chrome: #ffffff;
+    --color-page-border: #cbc5bc;
     --color-bg: #faf9f7;
     --color-text: #000000;
     --color-subtext: rgba(0, 0, 0, 0.6);
@@ -20,12 +22,14 @@
     --color-body: #000000;
     /* Warm-gray used on post detail for dimmed meta (sec row, date, inactive TOC, Index link). */
     --color-dim: #b8b0a2;
-    @apply bg-[#faf9f7];
+    background-color: var(--color-page-chrome);
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
       color-scheme: dark;
+      --color-page-chrome: #000000;
+      --color-page-border: rgba(88, 166, 255, 0.24);
       --color-bg: #0a0a0f;
       --color-text: #58a6ff;
       --color-subtext: rgba(88, 166, 255, 0.6);
@@ -36,7 +40,7 @@
       --color-surface: rgba(88, 166, 255, 0.08);
       --color-body: #ffffff;
       --color-dim: rgba(88, 166, 255, 0.5);
-      @apply bg-[#0a0a0f];
+      background-color: var(--color-page-chrome);
     }
   }
 
@@ -182,6 +186,7 @@ li a:active,
   display: inline-block;
   will-change: contents;
 }
+
 @media (min-width: 768px) {
   .ascii-cat {
     font-size: 24px;

@@ -45,19 +45,21 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSans.className} antialiased`}
       suppressHydrationWarning={true}
     >
-      <body className="bg-[var(--color-bg)] text-[var(--color-text)] max-w-6xl m-auto">
-        <a
-          href="#main"
-          className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:z-50 focus-visible:p-2 focus-visible:bg-[var(--color-bg)] focus-visible:text-[var(--color-text)]"
-        >
-          Skip to content
-        </a>
-        {/* Matches preview: 20px top, 40px bottom; 24px h-padding on mobile, 40px ≥768px. */}
-        <div className="relative z-10 px-6 md:px-10 pt-5 pb-10 min-h-screen">
-          <Header />
-          <main id="main">
-            {children}
-          </main>
+      <body className="min-h-screen bg-[var(--color-page-chrome)] text-[var(--color-text)]">
+        <div className="min-h-screen overflow-clip rounded-t-[1rem] border-t border-[var(--color-page-border)] bg-[var(--color-bg)] sm:rounded-t-[1.25rem]">
+          <a
+            href="#main"
+            className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:z-50 focus-visible:p-2 focus-visible:bg-[var(--color-bg)] focus-visible:text-[var(--color-text)]"
+          >
+            Skip to content
+          </a>
+          {/* Matches preview: 20px top, 40px bottom; 24px h-padding on mobile, 40px ≥768px. */}
+          <div className="relative z-10 mx-auto min-h-[inherit] max-w-6xl px-6 pb-10 pt-5 md:px-10">
+            <Header />
+            <main id="main">
+              {children}
+            </main>
+          </div>
         </div>
         <Script id="doge-console" strategy="afterInteractive">
           {`(${doge.toString()})();`}
