@@ -7,6 +7,7 @@
     -webkit-tap-highlight-color: transparent;
     color-scheme: light;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
     /* Warm off-white paper + black ink for the index. Post detail overrides --color-body below. */
     --color-page-chrome: #ffffff;
     --color-page-border: #cbc5bc;
@@ -108,10 +109,18 @@ button:focus-visible,
 .archive-entry {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  min-height: 2.75rem;
   padding: 6px 0;
   border-bottom: 1px dotted var(--color-rule-soft);
   transition: background-color 120ms var(--ease-out);
+}
+
+@media (min-width: 768px) {
+  .archive-entry {
+    align-items: flex-start;
+    min-height: 0;
+  }
 }
 
 .post-title {

@@ -24,6 +24,9 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
   const [items, setItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const headerElRef = useRef<Element | null>(null);
+  const headingElsRef = useRef<Array<{ id: string; element: HTMLElement }>>([]);
+  const itemsKeyRef = useRef("");
   const activeIdRef = useRef<string | null>(null);
   const scrolledRef = useRef(false);
   const titleActive = scrolled && activeId === null;
@@ -33,10 +36,15 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
     const collect = () => {
       const article = document.querySelector("article");
       if (!article) return;
+      headerElRef.current = article.querySelector(":scope > header");
       const hs = Array.from(article.querySelectorAll<HTMLHeadingElement>("h2"));
-      const next = hs.map((h) => {
+      const nextItems: TocItem[] = [];
+      const nextHeadingEls: Array<{ id: string; element: HTMLElement }> = [];
+
+      for (const h of hs) {
         // MDX `## … [#anchor]` places `id` on the inner <span> (see withHeadingId); that is the #hash target.
-        const fromSpan = h.querySelector<HTMLElement>("span[id]")?.id;
+        const span = h.querySelector<HTMLElement>("span[id]");
+        const fromSpan = span?.id;
         if (!h.id && !fromSpan) {
           h.id = h.textContent
             ?.toLowerCase()
@@ -47,9 +55,16 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
         h.style.scrollMarginTop = "40px";
         const id = fromSpan || h.id;
         const text = (h.textContent ?? "").replace(/^\s*#\s*/m, "").replace(/\s+/g, " ").trim();
-        return { id, text };
-      });
-      setItems(next);
+        nextItems.push({ id, text });
+        nextHeadingEls.push({ id, element: span ?? h });
+      }
+
+      headingElsRef.current = nextHeadingEls;
+      const nextKey = nextItems.map(item => `${item.id}:${item.text}`).join("\n");
+      if (nextKey !== itemsKeyRef.current) {
+        itemsKeyRef.current = nextKey;
+        setItems(nextItems);
+      }
     };
     collect();
     // Re-collect after route changes / MDX hydration
@@ -60,7 +75,7 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
   // Scroll-spy: track which heading is "current" + whether we've passed the article header.
   useEffect(() => {
     const updateState = () => {
-      const headerEl = document.querySelector("article > header");
+      const headerEl = headerElRef.current;
       if (headerEl) {
         const { bottom } = headerEl.getBoundingClientRect();
         const nextScrolled = bottom < 40;
@@ -70,21 +85,18 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
         }
       }
 
-      if (!items.length) return;
+      const headingEls = headingElsRef.current;
+      if (!headingEls.length) return;
       const h = window.innerHeight;
       const line = 120 + 0.5 * h;
       let current: string | null = null;
-      for (const item of items) {
-        const el = document.getElementById(item.id);
-        if (!el) continue;
-        const { top } = el.getBoundingClientRect();
+      for (const item of headingEls) {
+        const { top } = item.element.getBoundingClientRect();
         if (top <= line) current = item.id;
       }
       if (!current) {
-        for (const item of items) {
-          const el = document.getElementById(item.id);
-          if (!el) continue;
-          const { top, bottom } = el.getBoundingClientRect();
+        for (const item of headingEls) {
+          const { top, bottom } = item.element.getBoundingClientRect();
           if (top < h && bottom > 0) {
             current = item.id;
             break;

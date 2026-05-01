@@ -6,7 +6,7 @@
   --tweet-font-color: inherit;
 
   /* light colors override */
-  --tweet-bg-color-hover: --tweet-bg-color;
+  --tweet-bg-color-hover: var(--tweet-bg-color);
   --tweet-color-blue-secondary: theme("colors.gray.600");
   --tweet-color-blue-secondary-hover: theme("colors.gray.100");
   --tweet-font-color-secondary: theme("colors.gray.500");
@@ -54,17 +54,32 @@
 .tweet .react-tweet-theme p a {
   /* TODO: figure out a way to reuse this with `a.tsx` so that we are
    * not repeating stuff that we'll have to manually keep in sync */
-  @apply border-b transition-[border-color] border-gray-300 hover:border-gray-600;
+  @apply border-b border-gray-300 transition-[border-color] duration-100 ease-out;
 }
 
 @media (prefers-color-scheme: dark) {
   .tweet .react-tweet-theme p a {
     /* TODO: figure out a way to reuse this with `a.tsx` so that we are
      * not repeating stuff that we'll have to manually keep in sync */
-    @apply text-white border-gray-500 hover:border-white;
+    @apply text-white border-gray-500;
   }
 }
 
-.tweet .react-tweet-theme p a:hover {
-  text-decoration: none;
+@media (hover: hover) and (pointer: fine) {
+  .tweet .react-tweet-theme p a:hover {
+    @apply border-gray-600;
+    text-decoration: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
+  .tweet .react-tweet-theme p a:hover {
+    @apply border-white;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tweet .react-tweet-theme p a {
+    transition-duration: 0ms;
+  }
 }

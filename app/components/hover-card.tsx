@@ -19,6 +19,17 @@ type Align = "start" | "center" | "end";
 const OFFSET = 8;
 const HIDE_DELAY = 100;
 const DEFAULT_OPEN_DELAY = 200;
+const INSTANT_REOPEN_WINDOW = 700;
+
+let instantHoverUntil = 0;
+
+function keepTooltipsWarm() {
+  instantHoverUntil = Date.now() + INSTANT_REOPEN_WINDOW;
+}
+
+function shouldOpenInstantly() {
+  return Date.now() < instantHoverUntil;
+}
 
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -35,19 +46,19 @@ function usePrefersReducedMotion(): boolean {
 const useTimeout = () => {
   const timeoutRef = useRef<number | undefined>(undefined);
 
-  const clearTimeout = () => {
-    if (timeoutRef.current) {
+  const clearTimeout = useCallback(() => {
+    if (timeoutRef.current !== undefined) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
     }
-  };
+  }, []);
 
-  const setTimeout = (callback: () => void, delay: number) => {
+  const setTimeout = useCallback((callback: () => void, delay: number) => {
     clearTimeout();
     timeoutRef.current = window.setTimeout(callback, delay);
-  };
+  }, [clearTimeout]);
 
-  useEffect(() => clearTimeout, []);
+  useEffect(() => clearTimeout, [clearTimeout]);
 
   return { setTimeout, clearTimeout };
 };
@@ -142,6 +153,7 @@ function HoverContent({
   contentRef,
   side,
   isOpen,
+  isInstant,
   prefersReducedMotion,
 }: {
   id: string;
@@ -153,6 +165,7 @@ function HoverContent({
   contentRef: React.RefObject<HTMLSpanElement | null>;
   side: Side;
   isOpen: boolean;
+  isInstant: boolean;
   prefersReducedMotion: boolean;
 }) {
   return (
@@ -166,8 +179,8 @@ function HoverContent({
         top: position.top,
         left: position.left,
         transformOrigin: transformOriginForSide(side),
-        transition: prefersReducedMotion
-          ? "opacity 0ms"
+        transition: prefersReducedMotion || isInstant
+          ? "opacity 0ms, transform 0ms"
           : "opacity 150ms cubic-bezier(0.23, 1, 0.32, 1), transform 150ms cubic-bezier(0.23, 1, 0.32, 1)",
         opacity: isOpen ? 1 : 0,
         transform: isOpen ? "scale(1)" : "scale(0.95)",
@@ -192,13 +205,13 @@ export function HoverCard({
 }: HoverCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isInstant, setIsInstant] = useState(false);
   const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
   const contentId = useId();
   const triggerRef = useRef<HTMLSpanElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
   const { setTimeout, clearTimeout } = useTimeout();
   const prefersReducedMotion = usePrefersReducedMotion();
-  const openDelay = prefersReducedMotion ? 0 : delay;
 
   const updatePosition = useCallback(() => {
     if (!triggerRef.current || !contentRef.current) return;
@@ -219,29 +232,41 @@ export function HoverCard({
     setPosition(finalPosition);
   }, [side, align]);
 
-  const handleMouseEnter = () => {
+  const openTooltip = useCallback((source: "pointer" | "keyboard") => {
+    const instant = prefersReducedMotion || source === "keyboard" || shouldOpenInstantly();
     clearTimeout();
+    setIsInstant(instant);
     setIsMounted(true);
     setTimeout(() => {
+      keepTooltipsWarm();
       setIsOpen(true);
       updatePosition();
-    }, openDelay);
-  };
+    }, instant ? 0 : delay);
+  }, [clearTimeout, delay, prefersReducedMotion, setTimeout, updatePosition]);
 
-  const handleMouseLeave = () => {
+  const handleMouseEnter = useCallback(() => {
+    openTooltip("pointer");
+  }, [openTooltip]);
+
+  const handleMouseLeave = useCallback(() => {
     clearTimeout();
+    keepTooltipsWarm();
     setTimeout(() => setIsOpen(false), HIDE_DELAY);
-  };
+  }, [clearTimeout, setTimeout]);
 
-  const handleContentMouseEnter = () => {
+  const handleFocus = useCallback(() => {
+    openTooltip("keyboard");
+  }, [openTooltip]);
+
+  const handleContentMouseEnter = useCallback(() => {
     clearTimeout();
-  };
+  }, [clearTimeout]);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLSpanElement>) => {
     if (event.key !== "Escape") return;
     clearTimeout();
     setIsOpen(false);
-  };
+  }, [clearTimeout]);
 
   useEffect(() => {
     if (isOpen) {
@@ -254,10 +279,10 @@ export function HoverCard({
       ref={triggerRef}
       tabIndex={0}
       aria-describedby={isOpen ? contentId : undefined}
-      className={`inline-block transition-[opacity,transform] duration-150 ease-out active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 ${className}`}
+      className={`inline-block rounded-sm transition-[opacity,transform] duration-150 ease-out active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onFocus={handleMouseEnter}
+      onFocus={handleFocus}
       onBlur={handleMouseLeave}
       onKeyDown={handleKeyDown}
     >
@@ -273,6 +298,7 @@ export function HoverCard({
           contentRef={contentRef}
           side={side}
           isOpen={isOpen}
+          isInstant={isInstant}
           prefersReducedMotion={prefersReducedMotion}
         />
       ) : null}
