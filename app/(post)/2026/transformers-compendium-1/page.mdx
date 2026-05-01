@@ -30,9 +30,9 @@ During this process, peak memory is 2x the model size, because there are two cop
 
 The PyTorch [meta device](https://docs.pytorch.org/docs/stable/meta.html) lets Transformers build a model of any size regardless of device memory.
 
-Building the model on the meta device doesn't consume any memory. The meta device only holds the data associated with tensors, like shape and dtype. It creates a skeleton of the model.
+Building the model on the meta device doesn't consume any memory. The meta device only holds the metadata for the parameters the model expects, like shape and dtype, creating a skeleton of the model from the config.
 
-From the meta tensors' shape and dtype, Transformers computes how many bytes each parameter will occupy once it's loaded. If a device map is being inferred for automatic placement, sharding, CPU/disk offload, or multi-device loading, those sizes help assign parameters to devices with enough available memory.
+From those expected shapes and dtypes, Transformers computes how many bytes each parameter slot will occupy once it's loaded. If a device map is being inferred for automatic placement, sharding, CPU/disk offload, or multi-device loading, those planned sizes help assign parameters to devices with enough available memory.
 
 <Snippet>
 {`
@@ -61,7 +61,9 @@ Tensors in a safetensors file have a unique name or key like `model.layers.0.sel
 `}
 </Snippet>
 
-When a safetensors file is opened, `get_slice(key)` returns a lightweight slice object for that tensor. The slice exposes the shape and dtype metadata without materializing the tensor bytes.
+When a safetensors file is opened, `get_slice(key)` returns a lightweight slice object for a tensor that actually exists in the checkpoint. The slice exposes that stored tensor's shape and dtype without materializing the tensor bytes.
+
+This is the same kind of metadata as the meta tensor, but it answers a different question. The meta tensor describes the empty parameter slot the model needs. The safetensors slice describes the real weight block available on disk for that slot.
 
 A slice is very lightweight, so Transformers can walk through every entry - sorted by their key, which groups related tensors together (like an attention block's `q_proj`/`k_proj`/`v_proj`) - in the checkpoint. The device map decides where each materialized tensor should go.
 
@@ -82,10 +84,10 @@ Any parameter the model expects, but the checkpoint doesn't contain, remains on 
 
 ## Releasing conversion temporaries [#releasing-conversion-temporaries]
 
-Transformers' [dynamic weight loading system](https://huggingface.co/docs/transformers/main/weightconverter) is able to load checkpoints that don't match the expected model format at runtime. There are two methods available for aligning the formats.
+Transformers' [dynamic weight loading system](https://huggingface.co/docs/transformers/main/weightconverter) is able to load checkpoints that don't match the model's expected parameter layout at runtime. There are two methods available for aligning the formats.
 
 - `WeightRenaming.convert()` maps checkpoint source tensors to the expected model key by renaming it if it's different.
-- `WeightConverter.convert()` performs a series of operations (for example, concatenating q, k, v into a single tensor) that restructures the weights from their checkpoint layout to the model layout.
+- `WeightConverter.convert()` performs a series of operations (for example, concatenating q, k, v into a single tensor) that restructures the weights from their checkpoint layout to the model's expected layout.
 
 These methods identify source patterns that describe how weights are named in a checkpoint. For example, `model.layers.5.self_attn.qkv.weight` matches the pattern `*.self_attn.qkv.weight`. Based on the pattern, different checkpoint tensors are sorted to separate buckets in `self.collected_tensors`. Each bucket is stored in a dict where the value is a list of pending loads for that pattern.
 
@@ -158,7 +160,7 @@ The sync path doesn't submit a job to a worker thread. It returns the `_job` fun
 
 The loader stores `_job` in `collected_tensors[...]`. When `materialize_tensors()` invokes the callable with `func()`, the tensor bytes are read from disk. This keeps the collection phase cheap because while the loader is still scanning checkpoint keys and grouping tensors by pattern, `collected_tensors` holds small callables rather than real `torch.Tensor` objects.
 
-If the sync path loaded tensors immediately instead, every matched weight becomes a real `torch.Tensor` during collection and stay in `collected_tensors` until `convert()` processes them. Returning a callable avoids buildup by deferring each read until the conversion step is ready to consume it.
+If the sync path loaded tensors immediately instead, every matched weight becomes a real `torch.Tensor` during collection and stays in `collected_tensors` until `convert()` processes them. Returning a callable avoids buildup by deferring each read until the conversion step is ready to consume it.
 
 ## Disk offloading [#disk-offloading]
 
@@ -196,7 +198,9 @@ Transformers uses the sync path when parameters are offloaded to disk to keep lo
 `}
 </Snippet>
 
-Two parameter names, like `lm_head` and `embed_tokens`, may point to the same underlying tensor. This is known as weight tying. The model uses one shared embedding matrix to read input tokens and to project hidden states back into vocabulary logits. During training, the model updates one shared embedding instead of learning two separate matrices. A useful side effect is that only one tensor allocation is needed for both parameter names.
+Two parameter names, like `lm_head` and `embed_tokens`, may point to the same underlying tensor. This is known as weight tying. The model uses one shared embedding matrix to read input tokens and to project hidden states back into vocabulary logits. During training, the model updates one shared embedding instead of learning two separate matrices.
+
+A useful side effect is that only one tensor allocation is needed for both parameter names.
 
 Checkpoints often store only one copy of the tied weights (like `embed_tokens`) and is “missing” `lm_head` because it's understood that `tie_weights()` enables `lm_head` to share the same matrix as `embed_tokens`.
 
@@ -232,5 +236,7 @@ When a lazy slice is materialized, device transfer and dtype casting are combine
 The memory benefit appears when the source and target dtype differs. Splitting the device transfer and dtype casting into two calls copies the tensor to the device in the source dtype, then allocates a second tensor for the cast.
 
 Combining device and dtype lets PyTorch produce the destination tensor directly in the requested dtype on the requested device.
+
+---
 
 *Thank you Cyril Vallez for the feedback and adding clarity to some of the mechanisms I was fuzzy on.*
