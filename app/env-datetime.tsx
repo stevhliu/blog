@@ -19,9 +19,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 const timeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "2-digit",
+  hour: "numeric",
   minute: "2-digit",
-  hour12: false,
+  hour12: true,
   timeZone: TZ,
 });
 
