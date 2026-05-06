@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { archiveSecYearForPost } from "../archive-section";
 import { TocSidebar } from "./toc-sidebar";
+import { ViewCounter } from "./view-counter";
 import { getPosts } from "../get-posts";
 import { postIdFromPathname } from "../post-routing";
 
@@ -54,6 +55,7 @@ export default async function Template({ children }: { children: React.ReactNode
           <div className="post-body text-[var(--color-body)]">
             {children}
           </div>
+          {post ? <ViewCounter id={post.id} /> : null}
         </article>
       </div>
     </div>
