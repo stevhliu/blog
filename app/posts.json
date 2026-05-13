@@ -1,6 +1,11 @@
 {
   "posts": [
     {
+      "id": "transformers-compendium-2",
+      "date": "May 26, 2026",
+      "title": "Transformers Compendium - Part 2"
+    },
+    {
       "id": "transformers-compendium-1",
       "date": "May 05, 2026",
       "title": "Transformers Compendium - Part 1"

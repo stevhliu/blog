@@ -97,6 +97,14 @@ const KVCacheDiagram = dynamic(
   () => import("./app/components/quantization/kv-cache-diagram").then(mod => mod.KVCacheDiagram),
   { ssr: true }
 );
+const SyncAsyncLoadingDiagram = dynamic(
+  () => import("./app/components/transformers/sync-async-loading-diagram").then(mod => mod.SyncAsyncLoadingDiagram),
+  { ssr: true }
+);
+const CudaAllocatorDiagram = dynamic(
+  () => import("./app/components/transformers/cuda-allocator-diagram").then(mod => mod.CudaAllocatorDiagram),
+  { ssr: true }
+);
 
 export const diagramComponents = {
   CausalDiagram,
@@ -123,4 +131,6 @@ export const diagramComponents = {
   FP16Diagram,
   Int8Diagram,
   KVCacheDiagram,
+  SyncAsyncLoadingDiagram,
+  CudaAllocatorDiagram,
 };
