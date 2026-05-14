@@ -16,23 +16,36 @@ const CYCLE = 10;
 const COLS = 10;
 const ROWS = 4;
 const CELL = 22;
-const CELL_GAP = 3;
-const STRIDE = CELL + CELL_GAP; // 25
-const GRID_W = COLS * STRIDE - CELL_GAP; // 247
-const GRID_H = ROWS * STRIDE - CELL_GAP; // 97
+const CELL_GAP = 7;
+const STRIDE = CELL + CELL_GAP; // 29
+const GRID_W = COLS * STRIDE - CELL_GAP; // 283
+const GRID_H = ROWS * STRIDE - CELL_GAP; // 109
 
 type TensorSpec = { row: number; col: number; span: number };
 const TENSORS: TensorSpec[] = [
-  { row: 0, col: 0, span: 3 },
-  { row: 0, col: 3, span: 4 },
-  { row: 0, col: 7, span: 3 },
-  { row: 1, col: 0, span: 5 },
-  { row: 1, col: 5, span: 5 },
-  { row: 2, col: 0, span: 4 },
-  { row: 2, col: 4, span: 6 },
-  { row: 3, col: 0, span: 10 },
+  { row: 0, col: 0, span: 3 }, // A — new
+  { row: 0, col: 3, span: 4 }, // B — new
+  { row: 0, col: 7, span: 3 }, // A — cache hit
+  { row: 1, col: 0, span: 5 }, // C — new
+  { row: 1, col: 5, span: 5 }, // C — cache hit
+  { row: 2, col: 0, span: 4 }, // B — cache hit
+  { row: 2, col: 4, span: 6 }, // D — new
+  { row: 3, col: 0, span: 10 }, // E — new
 ];
 const N = TENSORS.length;
+
+// Same-shape tensors share a cudaMalloc — only the first occurrence of each
+// shape (here keyed by span) triggers a real malloc; subsequent same-shape
+// tensors reuse the cached block.
+const isNewShape = (() => {
+  const seen = new Set<number>();
+  return TENSORS.map((t) => {
+    const fresh = !seen.has(t.span);
+    seen.add(t.span);
+    return fresh;
+  });
+})();
+const COLD_MALLOC_COUNT = isNewShape.filter(Boolean).length;
 
 function rectFor(t: TensorSpec) {
   return {
@@ -65,15 +78,11 @@ const COLD_X = SIDE_MARGIN;
 const WARM_X = SIDE_MARGIN + SIDE_WIDTH + 40;
 const GRID_OFFSET_X = (SIDE_WIDTH - GRID_W) / 2;
 
-const LEGEND_Y = 14;
-const SECTION_HEADER_Y = 42;
-const TAG_ROW_Y = 60;
-const GRID_TOP_Y = 84;
+const SECTION_HEADER_Y = 16;
+const GRID_TOP_Y = 34;
 const GRID_BOTTOM_Y = GRID_TOP_Y + GRID_H;
 const COUNTER_Y = GRID_BOTTOM_Y + 24;
 const VIEW_HEIGHT = COUNTER_Y + 18;
-
-const TAG_H = 16;
 
 function CellGrid({ x, y }: { x: number; y: number }) {
   const cells: React.ReactElement[] = [];
@@ -127,53 +136,41 @@ function TensorBlock({
   );
 }
 
-function MallocPill({
-  x,
-  y,
-  width,
-  start,
-  label = "cudaMalloc",
+function MallocOutline({
+  spec,
+  appearAt,
 }: {
-  x: number;
-  y: number;
-  width: number;
-  start: number;
-  label?: string;
+  spec: TensorSpec;
+  appearAt: number;
 }) {
-  const appear = start / CYCLE;
-  const hold = (start + 0.45) / CYCLE;
-  const fade = (start + 0.85) / CYCLE;
+  const { x, y, width, height } = rectFor(spec);
+  const PAD = 2;
+  // Outline appears with the tensor and persists for the rest of the cycle,
+  // marking which tensors triggered a real cudaMalloc.
+  const showStart = Math.max(0, appearAt - 0.2);
+  const ks = showStart / CYCLE;
+  const kIn = (showStart + 0.06) / CYCLE;
   return (
-    <g transform={`translate(${x},${y})`} opacity={0}>
-      <rect
-        x={0}
-        y={0}
-        width={width}
-        height={TAG_H}
-        rx={TAG_H / 2}
-        fill={COLORS.mallocSoft}
-        stroke={COLORS.malloc}
-        strokeOpacity={0.35}
-        strokeWidth={0.8}
-      />
-      <circle cx={9} cy={TAG_H / 2} r={2.8} fill={COLORS.malloc} />
-      <text
-        x={width / 2 + 5}
-        y={TAG_H / 2 + 3.4}
-        textAnchor="middle"
-        fill={COLORS.malloc}
-        style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "0.01em" }}
-      >
-        {label}
-      </text>
+    <rect
+      x={x - PAD}
+      y={y - PAD}
+      width={width + PAD * 2}
+      height={height + PAD * 2}
+      rx={5}
+      fill={COLORS.mallocSofter}
+      stroke={COLORS.malloc}
+      strokeWidth={1.2}
+      strokeDasharray="3,3"
+      opacity={0}
+    >
       <animate
         attributeName="opacity"
-        values={`0;0;1;1;0;0`}
-        keyTimes={`0;${appear};${hold};${fade};${fade + 0.005};1`}
+        values={`0;0;1;1;0`}
+        keyTimes={`0;${ks};${kIn};0.97;1`}
         dur={`${CYCLE}s`}
         repeatCount="indefinite"
       />
-    </g>
+    </rect>
   );
 }
 
@@ -233,17 +230,24 @@ function Counter({
 }
 
 export function CudaAllocatorDiagram() {
-  const coldSteps = [
-    { at: 0, value: 0 },
-    ...TENSORS.map((_, i) => ({
-      at: COLD_TENSOR_AT(i) - 0.05,
-      value: i + 1,
-    })),
-  ];
-  const warmSteps = [
-    { at: 0, value: 0 },
-    { at: WARMUP_START + 0.05, value: 1 },
-  ];
+  // Counter starts at 1 and only increments when a new shape triggers a real
+  // cudaMalloc.
+  const coldSteps = (() => {
+    const steps: { at: number; value: number }[] = [{ at: 0, value: 1 }];
+    let count = 1;
+    let first = true;
+    TENSORS.forEach((_, i) => {
+      if (!isNewShape[i]) return;
+      if (first) {
+        first = false;
+        return; // first new shape is already represented by the initial 1
+      }
+      count += 1;
+      steps.push({ at: COLD_TENSOR_AT(i) - 0.05, value: count });
+    });
+    return steps;
+  })();
+  const warmSteps = [{ at: 0, value: 1 }];
 
   return (
     <figure className="my-10">
@@ -258,43 +262,6 @@ export function CudaAllocatorDiagram() {
               "'Roobert', ui-sans-serif, system-ui, -apple-system, sans-serif",
           }}
         >
-          {/* Legend — centered */}
-          <g transform={`translate(${(VIEW_WIDTH - 195) / 2}, ${LEGEND_Y})`}>
-            <rect
-              x={0}
-              y={1}
-              width={14}
-              height={9}
-              rx={4.5}
-              fill={COLORS.mallocSoft}
-            />
-            <circle cx={7} cy={5.5} r={2.5} fill={COLORS.malloc} />
-            <text
-              x={22}
-              y={8}
-              className="fill-black dark:fill-[#ececec]"
-              style={{ fontSize: "10px", fontWeight: 500 }}
-            >
-              cudaMalloc
-            </text>
-            <rect
-              x={108}
-              y={1}
-              width={10}
-              height={9}
-              rx={2}
-              fill={COLORS.tensor}
-            />
-            <text
-              x={124}
-              y={8}
-              className="fill-black dark:fill-[#ececec]"
-              style={{ fontSize: "10px", fontWeight: 500 }}
-            >
-              tensor
-            </text>
-          </g>
-
           {/* ---------- Cold (left) ---------- */}
           <g transform={`translate(${COLD_X}, 0)`}>
             <text
@@ -309,6 +276,20 @@ export function CudaAllocatorDiagram() {
 
             <CellGrid x={GRID_OFFSET_X} y={GRID_TOP_Y} />
 
+            {/* Every tensor sits inside an allocated region — outline every
+                one. The counter only ticks for tensors that triggered a real
+                cudaMalloc (new shapes); cache-hit tensors reuse memory but
+                still live within a cudaMalloc'd block. */}
+            <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`}>
+              {TENSORS.map((spec, i) => (
+                <MallocOutline
+                  key={i}
+                  spec={spec}
+                  appearAt={COLD_TENSOR_AT(i)}
+                />
+              ))}
+            </g>
+
             {/* Tensors */}
             <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`}>
               {TENSORS.map((spec, i) => (
@@ -320,30 +301,11 @@ export function CudaAllocatorDiagram() {
               ))}
             </g>
 
-            {/* Malloc pills above the grid (single position, width matches the tensor) */}
-            <g transform={`translate(${GRID_OFFSET_X}, 0)`}>
-              {TENSORS.map((spec, i) => {
-                const r = rectFor(spec);
-                const minW = 78;
-                const w = Math.max(r.width, minW);
-                const px = r.x + (r.width - w) / 2;
-                return (
-                  <MallocPill
-                    key={i}
-                    x={px}
-                    y={TAG_ROW_Y}
-                    width={w}
-                    start={COLD_TENSOR_AT(i) - 0.45}
-                  />
-                );
-              })}
-            </g>
-
             <Counter
-              x={GRID_OFFSET_X}
+              x={GRID_OFFSET_X + (GRID_W - 145) / 2}
               y={COUNTER_Y}
               steps={coldSteps}
-              totalLabel={`/ ${N} cudaMalloc`}
+              totalLabel={`cudaMalloc · ${N} tensors`}
             />
           </g>
 
@@ -394,60 +356,12 @@ export function CudaAllocatorDiagram() {
               ))}
             </g>
 
-            {/* Single warmup pill spanning the full grid width */}
-            <g transform={`translate(${GRID_OFFSET_X}, 0)`}>
-              <MallocPill
-                x={-4}
-                y={TAG_ROW_Y}
-                width={GRID_W + 8}
-                start={WARMUP_START}
-                label="cudaMalloc · torch.empty()"
-              />
-            </g>
-
             <Counter
-              x={GRID_OFFSET_X}
+              x={GRID_OFFSET_X + (GRID_W - 145) / 2}
               y={COUNTER_Y}
               steps={warmSteps}
-              totalLabel={`/ 1 cudaMalloc`}
+              totalLabel={`cudaMalloc · ${N} tensors`}
             />
-
-            {/* Done pill */}
-            {(() => {
-              const labelAppear = WARM_DONE / CYCLE;
-              return (
-                <g
-                  transform={`translate(${GRID_OFFSET_X + GRID_W - 70}, ${COUNTER_Y - 12})`}
-                  opacity={0}
-                >
-                  <rect
-                    x={0}
-                    y={0}
-                    width={70}
-                    height={14}
-                    rx={7}
-                    fill={COLORS.doneAccent}
-                    opacity={0.18}
-                  />
-                  <text
-                    x={35}
-                    y={10}
-                    textAnchor="middle"
-                    fill={COLORS.done}
-                    style={{ fontSize: "9px", fontWeight: 600 }}
-                  >
-                    1 call · done
-                  </text>
-                  <animate
-                    attributeName="opacity"
-                    values={`0;0;1;1;0`}
-                    keyTimes={`0;${labelAppear};${labelAppear + 0.005};0.97;1`}
-                    dur={`${CYCLE}s`}
-                    repeatCount="indefinite"
-                  />
-                </g>
-              );
-            })()}
           </g>
 
           {/* Subtle divider between the two paths */}
@@ -462,12 +376,6 @@ export function CudaAllocatorDiagram() {
           />
         </svg>
       </div>
-      <Caption>
-        Each tensor in the cold path pays its own <code>cudaMalloc</code>. One
-        upfront <code>torch.empty()</code> claims a single block sized to the
-        whole model; every subsequent tensor carves a piece from that cached
-        block.
-      </Caption>
     </figure>
   );
 }

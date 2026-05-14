@@ -105,6 +105,10 @@ const CudaAllocatorDiagram = dynamic(
   () => import("./app/components/transformers/cuda-allocator-diagram").then(mod => mod.CudaAllocatorDiagram),
   { ssr: true }
 );
+const WorkersVsLoadTimeChart = dynamic(
+  () => import("./app/components/transformers/workers-vs-load-time-chart").then(mod => mod.WorkersVsLoadTimeChart),
+  { ssr: true }
+);
 
 export const diagramComponents = {
   CausalDiagram,
@@ -133,4 +137,5 @@ export const diagramComponents = {
   KVCacheDiagram,
   SyncAsyncLoadingDiagram,
   CudaAllocatorDiagram,
+  WorkersVsLoadTimeChart,
 };

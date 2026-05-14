@@ -6,8 +6,9 @@ import { Caption } from "../caption";
 const COLORS = {
   read: "#c1b0ff",
   readDark: "#c1b0ff",
-  copy: "#3bd3fd",
-  copyDark: "#5cdcfd",
+  copy: "#000000", // Pitch Black
+  copyDark: "#ffffff",
+  toggleAccent: "#429dff", // Vivid Sky / Azure Blue
   playhead: "#ff7614",
   done: "#0a8a4a",
   doneAccent: "#26b56a",
@@ -403,7 +404,7 @@ export function SyncAsyncLoadingDiagram() {
                       }
                       style={{
                         fontSize: "11px",
-                        background: active ? COLORS.read : "transparent",
+                        background: active ? COLORS.toggleAccent : "transparent",
                         border: "none",
                         cursor: "pointer",
                         transition: "background 120ms ease",
