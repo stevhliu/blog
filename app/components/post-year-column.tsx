@@ -5,19 +5,15 @@ import { TreePineIcon } from "./tree-pine-icon";
 
 export function PostYearColumn({
   year,
-  section,
   posts,
 }: {
   year: number;
-  section: number;
   posts: Post[];
 }) {
   return (
     <div className="flex flex-col">
       <div className="archive-col-header flex justify-between text-[11px] sm:text-xs text-[var(--color-text)] font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
-        <span>
-          SEC.&nbsp;{String(section).padStart(2, "0")}&nbsp;/&nbsp;{year}
-        </span>
+        <span>{year}</span>
       </div>
       {posts.map((post) => (
         <Link
@@ -29,7 +25,7 @@ export function PostYearColumn({
             <span className="shrink-0 text-[10px] sm:text-[11px] opacity-70 min-w-[48px] tabular-nums font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
               {formatShortPostDate(post.date)}
             </span>
-            <span className="post-title min-w-0 break-words text-[11px] sm:text-xs uppercase tracking-[0.01em] leading-[1.3] font-normal font-[var(--font-geist-mono),monospace]">
+            <span className="post-title min-w-0 break-words text-[11px] sm:text-xs tracking-[0.01em] leading-[1.3] font-normal font-[var(--font-geist-mono),monospace]">
               {post.title}
               {post.evergreen ? (
                 <span className="ml-1.5 inline-flex align-[-0.1em] opacity-70">

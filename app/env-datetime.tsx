@@ -28,7 +28,7 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
 function format(now: Date): string {
   const date = dateFormatter.format(now);
   const time = timeFormatter.format(now);
-  return `${date} ${time} PT`.toUpperCase();
+  return `${date} ${time} PT`;
 }
 
 export function EnvDatetime() {

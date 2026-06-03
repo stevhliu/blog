@@ -1,13 +1,13 @@
 import { Caption } from "../caption";
 
 const COLORS = {
-  malloc: "#ff7614",
-  mallocSoft: "rgba(255, 118, 20, 0.16)",
-  mallocSofter: "rgba(255, 118, 20, 0.08)",
-  tensor: "#c1b0ff",
-  tensorEdge: "#8d77e8",
-  done: "#0a8a4a",
-  doneAccent: "#26b56a",
+  malloc: "#474645",
+  mallocSoft: "rgba(71, 70, 69, 0.16)",
+  mallocSofter: "rgba(71, 70, 69, 0.08)",
+  tensor: "#00ca48",
+  tensorEdge: "#00a23a",
+  done: "#474645",
+  doneAccent: "#474645",
 };
 
 const CYCLE = 10;

@@ -52,15 +52,34 @@
   }
 }
 
-/* Add generous padding and rounding inside all Shiki code blocks */
+/* Add generous padding inside all Shiki code blocks. The scroll container
+   (Snippet wrapper) owns rounding + max-height. */
 pre.shiki {
   padding: 1rem 1rem;
-  border-radius: 0.75rem;
   margin: 0;
   font-family: "Geist Mono", monospace;
   white-space: pre;
   overflow-wrap: normal;
   word-break: normal;
+}
+
+/* Pierre dual-theme: default to light vars, swap to dark vars via the
+   site-wide prefers-color-scheme media query. */
+pre.shiki,
+pre.shiki span {
+  color: var(--shiki-light);
+}
+pre.shiki {
+  background-color: var(--shiki-light-bg);
+}
+@media (prefers-color-scheme: dark) {
+  pre.shiki,
+  pre.shiki span {
+    color: var(--shiki-dark);
+  }
+  pre.shiki {
+    background-color: var(--shiki-dark-bg);
+  }
 }
 
 .subtext {

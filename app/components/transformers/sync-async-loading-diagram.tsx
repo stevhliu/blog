@@ -4,14 +4,14 @@ import { useState } from "react";
 import { Caption } from "../caption";
 
 const COLORS = {
-  read: "#c1b0ff",
-  readDark: "#c1b0ff",
-  copy: "#000000", // Pitch Black
-  copyDark: "#ffffff",
-  toggleAccent: "#429dff", // Vivid Sky / Azure Blue
-  playhead: "#ff7614",
-  done: "#0a8a4a",
-  doneAccent: "#26b56a",
+  read: "#00ca48",
+  readDark: "#00ca48",
+  copy: "#0090ff",
+  copyDark: "#0090ff",
+  toggleAccent: "#0090ff",
+  playhead: "#474645",
+  done: "#474645",
+  doneAccent: "#474645",
   queued: "#a8a59d",
 };
 
@@ -200,7 +200,7 @@ const ROW_H = 22;
 const ASYNC_BARS_Y0 = 0;
 
 export function SyncAsyncLoadingDiagram() {
-  const [workerCount, setWorkerCount] = useState(2);
+  const [workerCount, setWorkerCount] = useState(4);
   const { workers, totalTime } = buildSchedule(workerCount);
 
   const syncTasks: Task[] = [];
@@ -334,23 +334,14 @@ export function SyncAsyncLoadingDiagram() {
             </line>
 
             <g transform={`translate(${X_END + 8}, 0)`} opacity={0}>
-              <rect
-                x={0}
-                y={0}
-                width={62}
-                height={14}
-                rx={7}
-                fill={COLORS.playhead}
-                opacity={0.14}
-              />
               <text
-                x={31}
+                x={0}
                 y={10}
-                textAnchor="middle"
+                textAnchor="start"
                 fill={COLORS.playhead}
                 style={{ fontSize: "9px", fontWeight: 600 }}
               >
-                done · 12s
+                12s
               </text>
               <animate
                 attributeName="opacity"
@@ -456,8 +447,7 @@ export function SyncAsyncLoadingDiagram() {
             {(() => {
               const asyncEndX = X0 + totalTime * PX_PER_S;
               const bracketBottom = ASYNC_BARS_Y0 + workerCount * ROW_H - 4;
-              const doneLabel = `done · ~${totalTime.toFixed(1)}s`;
-              const labelWidth = 64;
+              const doneLabel = `~${totalTime.toFixed(1)}s`;
               return (
                 <g>
                   <line
@@ -489,19 +479,10 @@ export function SyncAsyncLoadingDiagram() {
                     transform={`translate(${asyncEndX + 6}, ${ASYNC_BARS_Y0 - 4})`}
                     opacity={0}
                   >
-                    <rect
-                      x={0}
-                      y={0}
-                      width={labelWidth}
-                      height={14}
-                      rx={7}
-                      fill={COLORS.doneAccent}
-                      opacity={0.18}
-                    />
                     <text
-                      x={labelWidth / 2}
+                      x={0}
                       y={10}
-                      textAnchor="middle"
+                      textAnchor="start"
                       fill={COLORS.done}
                       style={{ fontSize: "9px", fontWeight: 600 }}
                     >

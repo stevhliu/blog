@@ -17,6 +17,19 @@ const POSE_B =
 
 const POSES = [POSE_A, POSE_B];
 
+// Each ♪ is tinted a different color, cycling through this palette in the
+// order the notes appear in the pose.
+const NOTE_COLORS = ["#64c6ff", "#00c978", "#ff58ae"];
+
+function colorizeNotes(pose: string): string {
+  let i = 0;
+  return pose.replace(/♪/g, () => {
+    const color = NOTE_COLORS[i % NOTE_COLORS.length];
+    i += 1;
+    return `<span style="color:${color}">♪</span>`;
+  });
+}
+
 export function AsciiCat() {
   const catRef = useRef<HTMLPreElement>(null);
 
@@ -31,7 +44,7 @@ export function AsciiCat() {
     const id = window.setInterval(() => {
       pose = (pose + 1) % POSES.length;
       if (catRef.current) {
-        catRef.current.textContent = POSES[pose];
+        catRef.current.innerHTML = colorizeNotes(POSES[pose]);
       }
     }, 500);
     return () => window.clearInterval(id);
@@ -39,9 +52,12 @@ export function AsciiCat() {
 
   return (
     <>
-      <pre ref={catRef} className="ascii-cat" aria-hidden="true">
-        {POSE_A}
-      </pre>
+      <pre
+        ref={catRef}
+        className="ascii-cat"
+        aria-hidden="true"
+        dangerouslySetInnerHTML={{ __html: colorizeNotes(POSE_A) }}
+      />
       <span className="sr-only">Observation Log</span>
     </>
   );

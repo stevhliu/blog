@@ -72,6 +72,33 @@ async function getAndCacheTweet(id: string): Promise<Tweet | undefined> {
   return cachedTweet;
 }
 
+/**
+ * react-tweet's enrichTweet() iterates entities.{hashtags,urls,user_mentions,
+ * symbols} unconditionally — for the tweet AND its quoted_tweet. Some fetched/
+ * cached tweets omit one of those arrays, which throws "entities is not
+ * iterable". Backfill them on both.
+ */
+function withEntities<T extends { entities?: Tweet["entities"] }>(t: T): T {
+  return {
+    ...t,
+    entities: {
+      hashtags: [],
+      urls: [],
+      user_mentions: [],
+      symbols: [],
+      ...t.entities,
+    },
+  };
+}
+
+function normalizeTweet(tweet: Tweet): Tweet {
+  const normalized = withEntities(tweet);
+  if (normalized.quoted_tweet) {
+    normalized.quoted_tweet = withEntities(normalized.quoted_tweet);
+  }
+  return normalized;
+}
+
 const TweetContent = async ({ id, components }: TweetProps) => {
   const tweet = id ? await getAndCacheTweet(id) : undefined;
 
@@ -79,7 +106,7 @@ const TweetContent = async ({ id, components }: TweetProps) => {
     return <TweetNotFound />;
   }
 
-  return <EmbeddedTweet tweet={tweet} components={components} />;
+  return <EmbeddedTweet tweet={normalizeTweet(tweet)} components={components} />;
 };
 
 export const ReactTweet = (props: TweetProps) => (

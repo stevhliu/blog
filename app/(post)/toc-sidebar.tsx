@@ -142,7 +142,7 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
       <Link
         href="/"
         aria-label="Back to index"
-        className="inline-flex items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-200 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
+        className="inline-flex items-center gap-2 font-mono text-[11px] leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-200 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +171,7 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
         {postTitle ? (
           <h2
             className={[
-              "side-section font-mono text-[11px] font-medium uppercase tracking-[0.04em] leading-tight m-0 mb-2.5 transition-[color] duration-200 motion-reduce:transition-none",
+              "side-section font-mono text-[11px] font-medium tracking-[0.04em] leading-tight m-0 mb-2.5 transition-[color] duration-200 motion-reduce:transition-none",
               titleActive ? "text-[var(--color-body)]" : "text-[var(--color-dim)]",
             ].join(" ")}
           >

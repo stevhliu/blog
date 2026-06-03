@@ -1,12 +1,12 @@
 import { Caption } from "../caption";
 
 const COLORS = {
-  line: "#c1b0ff", // Ube Haze
-  lineEdge: "#8d77e8",
-  dot: "#c1b0ff",
-  dotEdge: "#8d77e8",
-  highlight: "#ff7614", // Tangerine — saturation marker
-  highlightSoft: "rgba(255, 118, 20, 0.12)",
+  line: "#00ca48",
+  lineEdge: "#00a23a",
+  dot: "#00ca48",
+  dotEdge: "#00a23a",
+  highlight: "#474645", // saturation marker
+  highlightSoft: "rgba(71, 70, 69, 0.12)",
 };
 
 const CYCLE = 9;
@@ -31,13 +31,13 @@ const yScale = (t: number) => Y_END - (t / Y_MAX) * CHART_H;
 
 const DATA = [
   { n: 1, t: 8.0 },
-  { n: 2, t: 4.5 },
-  { n: 3, t: 4.0 },
-  { n: 4, t: 3.5 },
-  { n: 5, t: 3.55 },
-  { n: 6, t: 3.65 },
-  { n: 7, t: 3.8 },
-  { n: 8, t: 4.0 },
+  { n: 2, t: 5.5 },
+  { n: 3, t: 5.0 },
+  { n: 4, t: 4.5 },
+  { n: 5, t: 4.55 },
+  { n: 6, t: 4.65 },
+  { n: 7, t: 4.8 },
+  { n: 8, t: 5.0 },
 ];
 
 const SATURATION_N = 4;
