@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Post } from "../get-posts";
+import { EnvDatetime } from "../env-datetime";
 import { PostYearColumn } from "./post-year-column";
 import { TreePineIcon } from "./tree-pine-icon";
 
@@ -81,8 +82,10 @@ export function PostIndex({
       </div>
 
       <footer className="mt-auto pt-16 grid grid-cols-1 gap-4 md:grid-cols-3 md:items-center md:gap-x-6">
-        {/* Empty cell keeps pagination centered / Evergreen right in the 3-col grid. */}
-        <div className="hidden md:block" aria-hidden="true" />
+        {/* Left cell: live PT datetime, in line with pagination (center) and Evergreen (right). */}
+        <div className="text-left md:justify-self-start archive-meta !normal-case text-[var(--color-text)] whitespace-nowrap">
+          <EnvDatetime />
+        </div>
         {totalPages > 1 ? (
           <nav
             className="flex min-h-11 flex-wrap items-center justify-center gap-4 [touch-action:manipulation] md:justify-self-center"

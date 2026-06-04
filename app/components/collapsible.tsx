@@ -34,7 +34,7 @@ export function Collapsible({
           {trigger}
           <ChevronRight
             aria-hidden="true"
-            className={`w-4 h-4 shrink-0 text-gray-500 transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none ${
+            className={`w-4 h-4 shrink-0 text-[var(--color-subtext)] transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none ${
               isOpen ? "rotate-90" : ""
             }`}
           />

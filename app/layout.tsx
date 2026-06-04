@@ -61,7 +61,7 @@ export default function RootLayout({
             </main>
           </div>
         </div>
-        <Script id="doge-console" strategy="afterInteractive">
+        <Script id="doge-console" strategy="lazyOnload">
           {`(${doge.toString()})();`}
         </Script>
         <Analytics />

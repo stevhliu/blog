@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AsciiCat } from "./ascii-cat";
-import { EnvDatetime } from "./env-datetime";
 import { HuggingFaceLogo } from "./components/hugging-face-logo";
 import { SocialLinks } from "./components/social-links";
 import { isPostDetailPathname } from "./post-routing";
@@ -20,14 +19,6 @@ export function SiteHeader() {
 
   return (
     <header className="mb-8">
-      <div className="flex justify-between items-end pb-4 md:pb-5 gap-4">
-        <span
-          className="archive-meta !normal-case text-[var(--color-text)] leading-[1.6] text-left whitespace-nowrap"
-        >
-          <EnvDatetime />
-        </span>
-      </div>
-
       <section className="mt-20 md:mt-28 pb-6 grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-7 md:items-start">
         <h1 className="archive-title text-[var(--color-text)] text-[56px] md:text-[96px] m-0">
           <Link href="/" className="nav-link no-underline text-inherit">

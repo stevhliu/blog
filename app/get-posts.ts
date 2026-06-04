@@ -10,6 +10,7 @@ export type Post = {
   views: number;
   viewsFormatted: string;
   evergreen?: boolean;
+  draft?: boolean;
 };
 
 // shape of the views rows in supabase
@@ -19,8 +20,11 @@ type Views = {
 
 // Wrapped with React.cache() to deduplicate requests within the same render pass
 export const getPosts = cache(async () => {
+  // Drafts are kept in posts.json but excluded from the public index and feed.
+  const publishedPosts = postsData.posts.filter(post => !("draft" in post && post.draft));
+
   if (!supabase) {
-    return postsData.posts.map((post): Post => ({
+    return publishedPosts.map((post): Post => ({
       ...post,
       views: 0,
       viewsFormatted: formatInteger(0),
@@ -47,7 +51,7 @@ export const getPosts = cache(async () => {
     (viewsData ?? []).map(entry => [entry.post_id, Number(entry.count ?? 0)])
   );
 
-  return postsData.posts.map((post): Post => {
+  return publishedPosts.map((post): Post => {
     const views = viewsMap[post.id] ?? 0;
     return {
       ...post,

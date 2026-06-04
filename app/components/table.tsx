@@ -11,9 +11,9 @@ const TABLE_CLASSES = {
   table: "w-full caption-bottom text-sm border-separate border-spacing-0",
   thead: "[&_tr]:border-b",
   tbody: "[&_tr:last-child]:border-0",
-  headerRow: "border-b transition-[background-color,color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] data-[state=selected]:bg-[var(--color-surface)]",
-  headerCell: "h-12 px-4 text-left align-middle font-medium text-[var(--color-subtext)] [&:has([role=checkbox])]:pr-0 transition-[background-color,color] duration-150 ease-out",
-  dataRow: "border-b transition-[background-color,color] duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] data-[state=selected]:bg-[var(--color-surface)]",
+  headerRow: "border-b transition-[background-color,color] duration-150 ease-[var(--ease-out)] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] data-[state=selected]:bg-[var(--color-surface)]",
+  headerCell: "h-12 px-4 text-left align-middle font-medium text-[var(--color-subtext)] [&:has([role=checkbox])]:pr-0 transition-[background-color,color] duration-150 ease-[var(--ease-out)]",
+  dataRow: "border-b transition-[background-color,color] duration-150 ease-[var(--ease-out)] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] data-[state=selected]:bg-[var(--color-surface)]",
   dataCell: "border border-transparent p-4 align-middle transition-[background-color,border-color,color] duration-150 ease-[var(--ease-out)] [@media(hover:hover)_and_(pointer:fine)]:hover:border-[var(--color-rule-soft)] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] [&:has([role=checkbox])]:pr-0",
   title: "mb-4 text-lg font-semibold text-center",
   caption: "mt-4 text-sm text-[var(--color-subtext)]"

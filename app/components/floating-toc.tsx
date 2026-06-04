@@ -67,7 +67,7 @@ function HamburgerIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="h-5 w-5 text-gray-500 transition-[color] duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-gray-700 [@media(hover:hover)_and_(pointer:fine)]:dark:group-hover:text-gray-200"
+      className="h-5 w-5 text-[var(--color-subtext)] transition-[color] duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-[var(--color-text)]"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
