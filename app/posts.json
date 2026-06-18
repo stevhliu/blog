@@ -1,6 +1,12 @@
 {
   "posts": [
     {
+      "id": "how-transformers-standardize-models",
+      "date": "July 25, 2025",
+      "title": "How Hugging Face Transformers is quietly standardizing the model ecosystem",
+      "draft": true
+    },
+    {
       "id": "transformers-compendium-quantization",
       "date": "July 05, 2026",
       "title": "Transformers Compendium - Quantization",

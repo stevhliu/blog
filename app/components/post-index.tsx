@@ -81,14 +81,14 @@ export function PostIndex({
         </div>
       </div>
 
-      <footer className="mt-auto pt-16 grid grid-cols-1 gap-4 md:grid-cols-3 md:items-center md:gap-x-6">
+      <footer className="mt-auto grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 pt-16 md:gap-x-6">
         {/* Left cell: live PT datetime, in line with pagination (center) and Evergreen (right). */}
-        <div className="text-left md:justify-self-start archive-meta !normal-case text-[var(--color-text)] whitespace-nowrap">
+        <div className="archive-meta !normal-case min-w-0 justify-self-start truncate whitespace-nowrap text-left text-[var(--color-text)]">
           <EnvDatetime />
         </div>
         {totalPages > 1 ? (
           <nav
-            className="flex min-h-11 flex-wrap items-center justify-center gap-4 [touch-action:manipulation] md:justify-self-center"
+            className="flex min-h-11 shrink-0 items-center justify-center gap-2 justify-self-center [touch-action:manipulation] md:gap-4"
             aria-label="Archive index pages"
           >
             <PaginationLink
@@ -112,11 +112,11 @@ export function PostIndex({
             </PaginationLink>
           </nav>
         ) : (
-          <div className="text-center tabular-nums md:justify-self-center archive-meta !normal-case text-[var(--color-text)]">
-            Index 01 / 01
+          <div className="archive-meta !normal-case justify-self-center text-center tabular-nums text-[var(--color-text)]">
+            {String(currentPage + 1).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
           </div>
         )}
-        <div className="inline-flex items-center justify-end gap-1 text-right md:justify-self-end archive-meta !normal-case text-[var(--color-text)]">
+        <div className="archive-meta !normal-case inline-flex shrink-0 items-center justify-end justify-self-end gap-1 text-right text-[var(--color-text)]">
           <TreePineIcon
             aria-hidden="true"
             className="h-[1em] w-[1em] shrink-0"
