@@ -5,41 +5,39 @@ export const metadata = {
 
 ## Three inches east
 
-On May 31, 1886, the sound of thousands of sledgehammers striking railroad spikes rang across the southern United States. Over 36 hours, work crews pulled the spikes from 14,000 miles of the west rail, shifted it 3 inches east, and spiked it down again. Laid end to end, that is more than enough track to connect New York and Perth.
+On May 31, 1886, the sound of thousands of sledgehammers striking railroad spikes rang across the southern United States. Over two days, work crews pulled the spikes from 11,500 miles of the west rail, shifted it three inches east, and spiked it down again. Laid end to end, that is enough track to cross the United States nearly four times over.
 
-When railroads were first built in the U.S., the gauge, the distance between two rails, varied from line to line. The New York and Erie Railroad used a 6 ft gauge to support larger, more powerful locomotives. The South Carolina Canal and Rail Road Company used a 5 ft gauge better suited to hauling bales of cotton, the main cash crop in the South.
+When railroads were first built in the U.S., the gauge, the distance between two rails, varied from line to line. The New York and Erie Railroad ran a 6 ft gauge to carry larger, more powerful locomotives, while the South Carolina Canal and Rail Road ran a 5 ft gauge, better suited to the cotton that was the South's main cash crop.
 
-Railroads with different gauges could not connect. When a train reached a break of gauge, the point where one line met another of a different width, everything had to come off. Passengers changed trains, and freight was transloaded onto the next one to continue the journey. Delays were common, and passengers often missed their connections. Unloading and reloading the freight was slow and expensive.
+Railroads with different gauges could not connect. At a break of gauge, where one line met another of a different width, everything had to come off. Passengers changed trains and freight was transloaded onto the next one, slowly and at a cost.
 
-Some towns built their economy on these interchange points. Erie, Pennsylvania, was one of them. The Erie and North East Railroad laid a 6 ft gauge while the Buffalo and State Line Railroad laid a 4 ft 10 in gauge. Anyone or anything traveling from Buffalo to Cleveland had to change trains twice, and Erie was one of the stops.
+Some towns built their economy on these breaks. Erie, Pennsylvania, sat where a 6 ft line met a 4 ft 10 in one, so anything traveling from Buffalo to Cleveland had to change trains twice. Delayed passengers ate in Erie's restaurants and slept in its hotels, and others made a living moving freight between the trains. So when the railroads announced in 1853 that they would align the gauges, Erie rioted, tearing up the new track and destroying the bridges.
 
-Erie benefited from the stop. Delayed passengers ate in Erie's restaurants and slept in Erie's hotels. Other people made a living moving freight from one train to the next. So when the railroads announced they would align their gauges, it caused an uproar. The people of Erie tore up the new tracks and destroyed bridges to stop the work.
-
-After the Civil War, as trade grew between the North and South, transloading got in the way of that trade. In 1886, the South converted its railroads to the standard gauge the North already used. From then on, a freight train loaded in Atlanta could ride the same rail all the way to Chicago.
+After the Civil War, as trade between North and South grew, the transloading at every break of gauge got in the way of it. In 1886 the South converted its railroads to 4 ft 9 in, close enough to the standard gauge the North used to run straight through, and from then on a freight train loaded in Atlanta could ride the same rail all the way to Chicago. After decades of breaks, the country's railroads were finally one network.
 
 ## Changing the wheels in motion
 
 Not everyone moved their railroads. Spain uses a variable gauge system that lets a train move between gauges without stopping. Its older network runs on the wide Iberian gauge it shares with Portugal, while its newer high-speed lines use standard gauge to connect with France.
 
-Spain's Talgo trains ride on variable gauge axles. When a train passes over the gauge changer, guide rails take its weight while the wheels are unlocked from the axle. With the wheels free, the widening or narrowing track slides them to their new position on the axle. A second set of guide rails locks each wheel in place, and the train rolls onto the new gauge. It never stops moving while its wheels are reset. The passengers never get off.
+Spain's Talgo trains ride on variable gauge axles. When a train passes over the gauge changer, guide rails take its weight while the wheels are unlocked from the axle. With the wheels free, the widening or narrowing track slides them to their new position on the axle. A second set of guide rails locks each wheel in place, and the train rolls onto the new gauge, never once stopping while its wheels are reset beneath it. The passengers never get off.
 
-These are two very different ways to standardize. One forces everyone to move their rails, and the other makes crossing the boundary free. The dynamic weight converter in Hugging Face Transformers is the variable gauge system of AI. It standardizes the model ecosystem without asking anyone to move their rails.
+These are two very different ways to standardize. One forces everyone to move their rails, and the other makes crossing the boundary free. The dynamic weight converter in Hugging Face Transformers is the variable gauge system of AI, standardizing the model ecosystem without asking anyone to move their rails. Before it, meeting each model in its own format was a tax the whole ecosystem paid, one hand-written script at a time.
 
 ## Every lab lays its own track
 
 No model lab chooses its checkpoint format to be difficult. Some railroads picked a wider track to carry larger locomotives or bulkier goods, and others laid a narrower one because it was cheaper to build. Every gauge made sense to whoever laid it. Labs make the same kind of choice, laying out a checkpoint to fit the way the model was trained and the hardware it was born on.
 
-Mixtral-8x22B-v0.1 from Mistral is a mixture-of-experts (MoE) model. Instead of one big network, it is built from eight smaller ones called experts, and a router sends each word to just a couple of them. The eight experts trained on eight separate GPUs, so the checkpoint stores them the way they were trained, as eight separate sets of weights, one per expert. Saving the model writes one array per expert.
+Mixtral-8x22B from Mistral is a mixture-of-experts (MoE) model. Instead of one big network, it is built from eight smaller ones called experts, and a router sends each word to just a couple of them. The eight experts trained on eight separate GPUs, so the checkpoint stores them the way they were trained, as eight separate sets of weights, one per expert.
 
 Qwen2-57B-A14B, another MoE, this one from Qwen, carries 57B total parameters but activates only 14B of them. Qwen made the same per-expert choice as Mistral, but followed the Llama naming convention instead, calling its weight matrices `gate_proj`, `up_proj`, and `down_proj`. The idea is the same, but a loader built for one checkpoint can't read the other, because the names don't line up. Qwen3-VL-235B-A22B goes further still. It ships its experts pre-fused into 3D tensors and flips the last two axes on top of that, laying `(experts, hidden, ffn)` where everyone else lays `(experts, ffn, hidden)`, because its training stack wanted to read them in the opposite order. Agreeing on the idea is not the same as agreeing on the standard.
 
-DeepSeek-V4 carries the same names for its attention weights `wq_a`, `wq_b`, `wkv`, and `wo_a` in the modeling code that it used in its paper. This is convenient for anyone who read the paper, but it's a mystery to every loader that learned a different vocabulary. A generation earlier, DeepSeek-V3 shipped its weights compressed to FP8 with 128x128 block scales, because it was trained in FP8 on H800 GPUs. Shipping it in FP8 rather than bf16 halves both storage and download size.
+DeepSeek-V4 ships its attention weights under the same names it used in its paper, `wq_a`, `wq_b`, `wkv`, and `wo_a`. This is convenient for anyone who read the paper, but it's a mystery to every loader that learned a different vocabulary. A generation earlier, DeepSeek-V3 shipped its weights compressed to FP8 with 128x128 block scales, because it was trained in FP8 on H800 GPUs. Shipping it in FP8 rather than bf16 halves both storage and download size, turning what would be a 1.3TB download into 671GB.
 
 Meta's Llama models treat each query and key pair as a complex number when they apply rotary embeddings (RoPE), so the projection weights interleave the real and imaginary components. The layout is natural inside Meta's training code, but to another loader it looks like the tensor has been shuffled.
 
-Working with any of these models used to mean running a one-off conversion script to make it compatible with the framework. Conversion is transloading, lifting a checkpoint out of one format and into another. Someone has to write each script, every user pays the extra step to run it, and the pile grows with every new model. Transformers has accumulated more than 300 of them.
+Working with any of these models used to mean running a one-off conversion script to make it compatible with the framework. Conversion is transloading, lifting a checkpoint out of one format and into another. Someone has to write each script, and every user pays the extra step to run it. The pile grows with every new model, and Transformers has by now accumulated more than 300 of them.
 
-The dynamic weight converter retires the one-off script. One file, `conversion_mapping.py`, now speaks for 163 model types, and only 75 of them lay any track of their own. Each of the rest gets there on a single line, switched onto rails another model has already built. Rather than a fresh script per MoE family, many now ride in on Mixtral or Qwen2.
+The dynamic weight converter retires the one-off script. One file, `conversion_mapping.py`, now speaks for 164 model types, and only 76 of them lay any track of their own. Each of the rest gets there on a single line, switched onto rails another model has already built. Rather than a fresh script per MoE family, many now ride in on Mixtral or Qwen2.
 
 <Snippet>
 {`
@@ -57,7 +55,7 @@ The dynamic weight converter retires the one-off script. One file, `conversion_m
 `}
 </Snippet>
 
-Those scripts run to nearly 98,000 lines. The mappings do the same work in a fraction of the space, and 88 of the 163 model types arrive on a single line each. A script was a transloading crew waiting at the end of every journey. The converter is a variable gauge system instead, where the change happens in motion and nothing has to stop.
+Those scripts run to more than 100,000 lines. `conversion_mapping.py` does the same work in 1,616, and 88 of the 164 model types arrive on a single line each. A script was a transloading crew waiting at the end of every journey. The converter changes the gauge in motion instead, and nothing has to stop.
 
 ## Nobody touches the rails
 
@@ -74,11 +72,11 @@ Follow one of Mixtral's expert weights as it arrives.
 
 First, the converter translates the name. Mixtral calls this part of the model `block_sparse_moe`, and Transformers calls the same part `mlp`. Renaming it is the train crossing into a country that uses a different word for the same track.
 
-Then the train locks onto the guide rails. The converter looks at the renamed array and works out which standard array it belongs to and which of its neighbors it will join. Mixtral's eight experts arrive as eight separate arrays, and Transformers wants them as one. So this array is locked onto the rail that leads to the combined expert block, where it waits for the other seven.
+Then the converter works out which standard array the renamed one belongs to and which of its neighbors it will join. Mixtral's eight experts arrive as eight separate arrays, and Transformers wants them as one, so this array is set aside to wait for the other seven. It is the train locking onto the guide rails that lead to the combined block.
 
-The wheels come unlocked. The converter reads each array from disk only when it needs it, while the loader keep streaming over the rest, the way the side rollers carry the train's weight while its wheels are free to slide.
+The converter reads each array from disk only when it needs it, and the rest keep streaming past untouched. This is the moment the wheels come unlocked, the guide rails taking the train's weight while the wheels are free to slide along the axle.
 
-Now the gauge actually changes. A short chain of small operations (`MergeModuleList`, `Concatenate`) restacks the numbers. One stacks the eight separate experts into a single block. Another fuses two of each expert's matrices, the ones Mixtral keeps apart as `gate` and `up`, into one. The numbers are bit-for-bit what they were before, and only their arrangement has changed. Because each operation is small and they chain together in any order, a short list of them describes a new model rather than a hundred-line script.
+Then the numbers are restacked. A short chain of small operations (`MergeModulelist`, `Concatenate`) does the work, one stacking the eight separate experts into a single block, another fusing the two matrices Mixtral keeps apart, `gate` and `up`, into one. This is where the gauge actually changes, and because each operation is small and they chain together in any order, a short list of them describes a whole model where a script used to run to hundreds of lines.
 
 The finished block is mounted on the running model, and the train car rolls out onto the standard track without stopping, while the next car is already inside being changed. There is no siding where the train halts and a crew lifts the freight across to a second train.
 
@@ -88,20 +86,24 @@ The journey runs the other way too. Every operation has an inverse, so a model l
 
 Standardization means any model loads anywhere, with no conversion step between formats. The first payoff is in how fast new models arrive.
 
-Between Switch Transformers, the first mixture-of-experts model in the library, and the converter, Transformers added 31 MoE architectures over three years, about one a month, and each one arrived with its own weight-handling code. In the seven months since the converter, it has added 19 more, one every eleven days. Sixteen of those nineteen plug into a mapping that already exists, most of them pointing at Mixtral or Qwen 2, instead of carrying a script of their own. The industry's turn toward mixture-of-experts is bigger than any one library, so the converter did not start the rush. What it changed is the cost of keeping up, because a new MoE that used to take a few hundred lines of conversion now usually takes one.
+Switch Transformers was the first mixture-of-experts model in the library. Between it and the converter, Transformers added 31 MoE architectures over three years, about one a month, and each one arrived with its own weight-handling code. In the seven months since the converter, it has added 19 more, one every 11 days, and 16 of them plug into a mapping that already exists, most pointing at Mixtral or Qwen2 instead of carrying a script of their own. The industry's turn toward mixture-of-experts is bigger than any one library, so the converter did not start the rush. What it changed is the cost of keeping up, because a new MoE that used to take a few hundred lines of conversion now usually takes one, and they keep arriving faster.
 
 The deeper payoff is what the standard layout unlocks.
 
 DeepSeek-V3 is stored compressed in FP8. Each block of numbers travels with a small scale value that says how to expand it back to full precision, and that pairing is fragile. When the converter stacks the experts into one block, every scale has to ride along and stay matched to the exact numbers it belongs to, or the decompression turns to noise. Keeping them aligned used to take a dedicated script. The converter does it by slotting a decompression step into the front of the same operation chain and letting the scales travel beside their weights, so the merge that follows runs exactly as it does for any other model. The whole FP8 path is one alias in the conversion mapping, `"deepseek_v3": "qwen2_moe"`, plus that decompression step, and there is no DeepSeek-specific code anywhere.
 
-The standard layout is also what lets a model spread across many GPUs. Stacked into one block, the experts divide evenly across GPUs, each one holding either a thin slice of every expert (tensor parallelism) or a few whole experts (expert parallelism). A scattered pile of separate pieces won't divide that cleanly. The stacked block is also the shape the fastest math routines expect, the ones that multiply all the experts in a single batched step instead of looping over them one at a time.
+The standard layout is also what lets a model spread across many GPUs. Stacked into one block, the experts divide evenly, DeepSeek-V3's 256 landing 32 to a GPU across eight of them, each one holding either a few whole experts (expert parallelism) or a thin slice of every expert (tensor parallelism). A scattered pile of separate pieces won't divide that cleanly. The stacked block is also the shape the fastest math routines expect, the ones that multiply all the experts in a single batched step instead of looping over them one at a time.
 
 Every one of these comes from one fact, that the weights now share a gauge.
 
+That gauge still has to be laid by hand the first time. The 76 model types that carry conversion code of their own are the ones no existing rails fit, and a genuinely new format has to be mapped before anything can ride in behind it. The converter doesn't make the first crossing free, only every crossing after it.
+
 ## Just another progress bar
 
-The ML ecosystem is huge, full of frameworks and tools large and small. Moving a model across them usually means friction, because they don't agree on formats. Standardization connects them and lays a track of least resistance from one framework to the next. Train a Transformers model with Unsloth, and deploy it with vLLM.
+The ML ecosystem is huge, full of frameworks and tools large and small. Moving a model across them usually means friction, because they don't agree on formats. Standardization connects them, laying a track of least resistance from one framework to the next, so a model fine-tuned with Unsloth can be served by vLLM with no conversion in between.
 
-Transformers didn't force the ecosystem to standardize. Unlike the Erie Gauge War, which created winners and losers, this creates none. Nobody's rails get torn up, and no lab is forced to move. Labs still upload checkpoints in whatever format suits them, and the standardizing happens at the boundary, the moment Transformers loads the model. It costs the ecosystem nothing, and it unlocks the quantization and parallelism that large models depend on.
+Transformers didn't force the ecosystem to standardize, and unlike the Erie Gauge War, which made winners and losers, this makes no enemies. Nobody's rails get torn up, and no lab is forced to move. Labs still upload checkpoints in whatever format suits them, and the reconciling happens at the boundary, the moment Transformers loads the model. It costs almost nothing, and it unlocks the quantization and parallelism the largest models depend on.
 
-In 1886, changing the gauge took thousands of sledgehammers and a coordinated weekend across 14,000 miles of track. Load a 1T parameter FP8 MoE checkpoint across 8 GPUs, and the converter does all of it without anyone swinging a hammer or getting off the train. It is just another progress bar.
+Almost nothing is not nothing. Standardizing always puts the standard somewhere, and here the somewhere is Transformers, the place the whole ecosystem has quietly agreed to meet. There are worse things to become than the spot where everyone's work fits together.
+
+In 1886, changing the gauge took thousands of sledgehammers and a coordinated two days across 11,500 miles of track. Load a 1T-parameter FP8 MoE checkpoint across eight GPUs today, and the converter does all of it without anyone swinging a hammer or getting off the train. It is just another progress bar, and that it has become this ordinary is the measure of how far the work has come. The next model like it will cross for free.
