@@ -92,12 +92,7 @@ const useDarkMode = () => {
 
 // Hover Content Component
 function HoverContent({ title, description }: { title?: ReactNode; description: ReactNode }) {
-  const descriptionNode =
-    typeof description === "string" ? (
-      <span dangerouslySetInnerHTML={{ __html: description }} />
-    ) : (
-      description
-    );
+  const descriptionNode = description;
 
   return (
     <span className="flex items-start gap-2">

@@ -9,8 +9,3 @@ export function isPostDetailPathname(pathname: string): boolean {
   if (/^\/\d{4}\/[^/]+$/.test(p)) return true;
   return p === "/playground";
 }
-
-export function postIdFromPathname(pathname: string): string | null {
-  const segments = pathname.split("/").filter(Boolean);
-  return segments[segments.length - 1] ?? null;
-}

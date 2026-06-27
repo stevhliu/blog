@@ -1,6 +1,6 @@
 import { type ReactNode, Suspense } from "react";
-import { unstable_after as after } from "next/server";
-import { Tweet, getTweet } from "react-tweet/api";
+import { after } from "next/server";
+import { getTweet, type Tweet } from "react-tweet/api";
 import {
   EmbeddedTweet,
   TweetNotFound,
@@ -111,7 +111,6 @@ const TweetContent = async ({ id, components }: TweetProps) => {
 
 export const ReactTweet = (props: TweetProps) => (
   <Suspense fallback={<TweetSkeleton />}>
-    {/* @ts-ignore: Async components are valid in the app directory */}
     <TweetContent {...props} />
   </Suspense>
 );

@@ -24,11 +24,6 @@ import { ZeroBadge } from "./app/components/zero-badge";
 import { Blockquote as blockquote } from "./app/components/blockquote";
 
 // Lazy-load client components to reduce initial bundle size
-const FloatingTOC = dynamic(
-  () => import("./app/components/floating-toc").then(mod => mod.FloatingTOC),
-  { ssr: true }
-);
-
 const HoverWord = dynamic(
   () => import("./app/components/hover-word").then(mod => mod.HoverWord),
   { ssr: true }
@@ -73,7 +68,6 @@ export function useMDXComponents(components: {
     ProBadge,
     SpaceFan,
     ZeroBadge,
-    FloatingTOC,
     HoverWord,
     Table,
     Collapsible,

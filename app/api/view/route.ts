@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { supabase } from "@/app/supabase";
 
-const validIds = new Set(postsData.posts.map((p) => p.id));
+const validIds = new Set(
+  postsData.posts.filter((p) => !("draft" in p && p.draft)).map((p) => p.id)
+);
 
 export async function POST(req: NextRequest) {
   const id = new URL(req.url).searchParams.get("id");

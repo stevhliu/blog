@@ -1,19 +1,14 @@
-import { headers } from "next/headers";
 import { TocSidebar } from "./toc-sidebar";
 import { ViewCounter } from "./view-counter";
-import { getPosts } from "../get-posts";
-import { postIdFromPathname } from "../post-routing";
+import type { Post } from "../get-posts";
 
-export const revalidate = 60;
-
-export default async function Template({ children }: { children: React.ReactNode }) {
-  const [posts, headersList] = await Promise.all([
-    getPosts(),
-    headers(),
-  ]);
-  const postId = postIdFromPathname(headersList.get("x-pathname") ?? "");
-  const post = postId ? posts.find((p) => p.id === postId) : null;
-
+export function PostChrome({
+  post,
+  children,
+}: {
+  post: Post | null;
+  children: React.ReactNode;
+}) {
   return (
     <div className="text-[var(--color-text)]">
       <div

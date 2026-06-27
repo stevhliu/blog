@@ -1,13 +1,11 @@
 import "./globals.css";
 
-import { headers } from "next/headers";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import Script from "next/script";
 import { Analytics } from "./analytics";
-import { Header } from "./header";
 import { doge } from "./doge";
-import { isPostDetailPathname } from "./post-routing";
+
 export const metadata = {
   title: "steven liu",
   description:
@@ -27,6 +25,9 @@ export const metadata = {
     images: ["/opengraph-image"],
   },
   metadataBase: new URL("https://stevhliu.com"),
+  alternates: {
+    types: { "application/atom+xml": "/atom" },
+  },
 };
 
 export const viewport = {
@@ -36,49 +37,19 @@ export const viewport = {
   ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-  const isPost = isPostDetailPathname(pathname);
-
   return (
     <html
       lang="en"
       className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSans.className} antialiased`}
       suppressHydrationWarning={true}
     >
-      <body
-        className={
-          isPost
-            ? "min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]"
-            : "min-h-screen bg-[var(--color-page-chrome)] text-[var(--color-text)]"
-        }
-      >
-        <div
-          className={
-            isPost
-              ? "min-h-screen bg-[var(--color-bg)]"
-              : "min-h-screen overflow-clip border-t border-[var(--color-page-border)] bg-[var(--color-bg)]"
-          }
-        >
-          <a
-            href="#main"
-            className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:z-50 focus-visible:p-2 focus-visible:bg-[var(--color-bg)] focus-visible:text-[var(--color-text)]"
-          >
-            Skip to content
-          </a>
-          {/* Matches preview: 20px top, 40px bottom; 24px h-padding on mobile, 40px ≥768px. */}
-          <div className="relative z-10 mx-auto min-h-[inherit] max-w-6xl px-6 pb-10 pt-5 md:px-10">
-            <Header />
-            <main id="main">
-              {children}
-            </main>
-          </div>
-        </div>
+      <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+        {children}
         <Script id="doge-console" strategy="lazyOnload">
           {`(${doge.toString()})();`}
         </Script>

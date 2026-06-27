@@ -524,7 +524,7 @@ MLA skips this step by "absorbing" or pre-multiplying W<sup>UQ</sup> and W<sup>U
 
 Rearranging the maths like this makes it incompatible with [rotary position embeddings](https://huggingface.co/papers/2104.09864) (RoPE) though. RoPE adds a <HoverWord
   word="position-dependent rotation"
-  description="R<sub>t</sub> and R<sub>j</sub> are the rotation matrices at token positions t and j. Their product R<sub>t</sub><sup>T</sup>R<sub>j</sub> encodes the relative position between them."
+  description={<>R<sub>t</sub> and R<sub>j</sub> are the rotation matrices at token positions t and j. Their product R<sub>t</sub><sup>T</sup>R<sub>j</sub> encodes the relative position between them.</>}
 /> (R<sub>t</sub><sup>T</sup>R<sub>j</sub>) to Q and K that rotates them by their token positions (*t,j*).
 
 The term, R<sub>t</sub><sup>T</sup>R<sub>j</sub>, depends on the (*t,j*) pair. There is no single fixed matrix you can precompute that works for all (*t,j*) pairs, so it can't be folded into W<sup>combined</sup>. Using RoPE this way would require recomputing the full K from the latent during generation (increases latency) or caching the full RoPE-applied keys (increases memory).

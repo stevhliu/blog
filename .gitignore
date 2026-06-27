@@ -19,3 +19,6 @@ yarn.lock
 AGENTS.md
 CLAUDE.md
 .cursor/skills/
+.agents/
+.claude/skills/
+skills-lock.json

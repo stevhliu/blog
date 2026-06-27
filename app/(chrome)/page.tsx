@@ -1,5 +1,5 @@
-import { Posts } from "./posts";
-import { getPosts } from "./get-posts";
+import { Posts } from "../posts";
+import { getPosts } from "../get-posts";
 
 export const revalidate = 60;
 

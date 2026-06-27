@@ -1,5 +1,6 @@
 export function SpaceFan() {
   return (
+    // eslint-disable-next-line @next/next/no-img-element -- remote animated GIF; the image pipeline adds nothing
     <img
       src="https://emoji.slack-edge.com/T1RCG4490/space-fan-slow/61f0aa36fd503a3e.gif"
       alt=""
