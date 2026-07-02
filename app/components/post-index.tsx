@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Post } from "../get-posts";
 import { EnvDatetime } from "../env-datetime";
 import { PostYearColumn } from "./post-year-column";
-import { TreePineIcon } from "./tree-pine-icon";
 
 // Single index page: every year is shown, stacked newest-first.
 const PAGE_SIZE = 99;
@@ -82,7 +81,7 @@ export function PostIndex({
       </div>
 
       <footer className="mt-auto grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 pt-16 md:gap-x-6">
-        {/* Left cell: live PT datetime, in line with pagination (center) and Evergreen (right). */}
+        {/* Left cell: live PT datetime, in line with pagination (center). */}
         <div className="archive-meta !normal-case min-w-0 justify-self-start truncate whitespace-nowrap text-left text-[var(--color-text)]">
           <EnvDatetime />
         </div>
@@ -111,19 +110,7 @@ export function PostIndex({
               Next
             </PaginationLink>
           </nav>
-        ) : (
-          <div className="archive-meta !normal-case justify-self-center text-center tabular-nums text-[var(--color-text)]">
-            {String(currentPage + 1).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
-          </div>
-        )}
-        <div className="archive-meta !normal-case inline-flex shrink-0 items-center justify-end justify-self-end gap-1 text-right text-[var(--color-text)]">
-          <TreePineIcon
-            aria-hidden="true"
-            className="h-[1em] w-[1em] shrink-0"
-            strokeWidth={2}
-          />
-          <span>Evergreen</span>
-        </div>
+        ) : null}
       </footer>
     </>
   );
