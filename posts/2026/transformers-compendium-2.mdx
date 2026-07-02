@@ -32,6 +32,8 @@ The sync path is the ordinary sequential case. The main Python thread loads one 
 2. PyTorch calls [cudaMemcpy](https://developer.nvidia.com/w/compute/DevZone/docs/html/C/doc/html/group__CUDART__MEMORY_g48efa06b81cc031b2aa6fdc2e9930741.html) to copy the bytes from the CPU to GPU memory over PCIe. The thread is blocked until the copy finishes. When it does, the new GPU tensor already exists and `.to(device)` returns it directly, there's no further copy. The thread reacquires the GIL to wrap the result in a Python object, and the next line runs.
 3. Find and replace the matching parameter on the meta model with the actual tensor.
 
+<MmapLazyReadDiagram />
+
 This matters most in memory-constrained scenarios like quantization. Each conversion briefly holds both the original tensor and the converted one, freeing the original only afterward. With multiple workers running ahead, those transient pairs stack up. The weights arrive faster than the main thread can convert and release them, and memory blows past what is available.
 
 ## Async path [#async-path]
@@ -52,7 +54,7 @@ The GIL serializes actual Python bytecode, and only one thread runs the interpre
 
 safetensors releases the GIL while it reads bytes off disk, and PyTorch's `.to(device)` releases it during `cudaMemcpy`. Neither needs the interpreter for that work. This lets threads run in different stages. Thread A can be blocked on a host-device copy without holding the GIL, leaving it free for Thread B to start a disk read. When A's copy completes, it reacquires the GIL just long enough to wrap the result in a Python object.
 
-<SyncAsyncLoadingDiagram />
+<GilTimelineDiagram />
 
 Threads and jobs are managed by [ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor). It creates a pool of up to `max_workers` threads and reuses them instead of spawning a new one for each job.
 

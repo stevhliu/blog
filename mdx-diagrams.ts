@@ -97,8 +97,12 @@ const KVCacheDiagram = dynamic(
   () => import("./app/components/quantization/kv-cache-diagram").then(mod => mod.KVCacheDiagram),
   { ssr: true }
 );
-const SyncAsyncLoadingDiagram = dynamic(
-  () => import("./app/components/transformers/sync-async-loading-diagram").then(mod => mod.SyncAsyncLoadingDiagram),
+const GilTimelineDiagram = dynamic(
+  () => import("./app/components/transformers/gil-timeline-diagram").then(mod => mod.GilTimelineDiagram),
+  { ssr: true }
+);
+const MmapLazyReadDiagram = dynamic(
+  () => import("./app/components/transformers/mmap-lazy-read-diagram").then(mod => mod.MmapLazyReadDiagram),
   { ssr: true }
 );
 const CudaAllocatorDiagram = dynamic(
@@ -139,7 +143,8 @@ export const diagramComponents = {
   FP16Diagram,
   Int8Diagram,
   KVCacheDiagram,
-  SyncAsyncLoadingDiagram,
+  GilTimelineDiagram,
+  MmapLazyReadDiagram,
   CudaAllocatorDiagram,
   WorkersVsLoadTimeChart,
   MoEModelsOverTimeChart,
