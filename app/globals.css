@@ -19,6 +19,8 @@
     --color-rule: #000000;
     --color-rule-soft: rgba(0, 0, 0, 0.3);
     --color-surface: rgba(0, 0, 0, 0.05);
+    /* Inline code chip background, tuned to read on the paper background. */
+    --color-code-bg: #dad4c8;
     /* Body copy color — same as --color-text on the index, and also black on post pages. */
     --color-body: #000000;
     /* Warm-gray used on post detail for dimmed meta (sec row, date, inactive TOC, Index link). */
@@ -39,6 +41,7 @@
       --color-rule: #58a6ff;
       --color-rule-soft: rgba(88, 166, 255, 0.3);
       --color-surface: rgba(88, 166, 255, 0.08);
+      --color-code-bg: rgba(88, 166, 255, 0.12);
       --color-body: #ffffff;
       --color-dim: rgba(88, 166, 255, 0.5);
       background-color: var(--color-page-chrome);
@@ -55,6 +58,9 @@
 /* Add generous padding inside all Shiki code blocks. The scroll container
    (Snippet wrapper) owns rounding + max-height. */
 pre.shiki {
+  display: inline-block;
+  min-width: 100%;
+  box-sizing: border-box;
   padding: 1rem 1rem;
   margin: 0;
   font-family: "Geist Mono", monospace;

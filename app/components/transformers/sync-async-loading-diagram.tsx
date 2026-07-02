@@ -2,6 +2,19 @@
 
 import { useState } from "react";
 import { Caption } from "../caption";
+import {
+  CHART_FONT_SIZE,
+  chartAnnotationStyle,
+  chartInlineStyle,
+  chartLabelStyle,
+  chartTickStyle,
+} from "../chart-typography";
+import {
+  ASYNC_WORKER_OPTIONS,
+  LOAD_TIME_AXIS_MAX,
+  LOAD_TIME_TICKS,
+  LOAD_TIMES,
+} from "./loading-benchmark-data";
 
 const COLORS = {
   read: "#00ca48",
@@ -15,14 +28,20 @@ const COLORS = {
   queued: "#a8a59d",
 };
 
-const CYCLE = 14;
+const CYCLE = LOAD_TIME_AXIS_MAX + 5;
 const TASK = 0.5;
 const N_WEIGHTS = 12;
-const SYNC_TIME = N_WEIGHTS * 1.0; // 12s
-const PX_PER_S = 42;
-const W = TASK * PX_PER_S; // 21px per task
+const SYNC_TIME = LOAD_TIMES[1];
+const PX_PER_S = (604 - 100) / LOAD_TIME_AXIS_MAX;
 const X0 = 100;
-const X_END = X0 + SYNC_TIME * PX_PER_S; // 604
+const ROW_LABEL_X = 34;
+// Visual center of single-digit worker indices ("worker 0", "worker 2", …).
+const ROW_NUMBER_X = ROW_LABEL_X + 50;
+const SYNC_SCHEDULE_SPAN = N_WEIGHTS * 1.0;
+const ASYNC_SCHEDULE_SPAN = 4.5;
+const SYNC_END_X = X0 + SYNC_TIME * PX_PER_S;
+
+const X_END = X0 + LOAD_TIME_AXIS_MAX * PX_PER_S;
 
 type BarKind = "read" | "copy";
 type Task = { start: number; kind: BarKind };
@@ -32,12 +51,15 @@ function Bar({
   y,
   start,
   kind,
+  timeScale = 1,
 }: {
   x: number;
   y: number;
   start: number;
   kind: BarKind;
+  timeScale?: number;
 }) {
+  const w = TASK * timeScale * PX_PER_S;
   const s = start / CYCLE;
   const e = (start + TASK) / CYCLE;
   const fillLight = kind === "read" ? COLORS.read : COLORS.copy;
@@ -47,7 +69,7 @@ function Bar({
       <rect
         x={0}
         y={0}
-        width={W}
+        width={w}
         height={14}
         rx={3}
         className="fill-[#f1f0ec] dark:fill-[#1f1f23] stroke-[#dad4c8] dark:stroke-[#33333a]"
@@ -64,7 +86,7 @@ function Bar({
       >
         <animate
           attributeName="width"
-          values={`0;0;${W};${W};0`}
+          values={`0;0;${w};${w};0`}
           keyTimes={`0;${s};${e};0.97;1`}
           dur={`${CYCLE}s`}
           repeatCount="indefinite"
@@ -81,7 +103,7 @@ function Bar({
       >
         <animate
           attributeName="width"
-          values={`0;0;${W};${W};0`}
+          values={`0;0;${w};${w};0`}
           keyTimes={`0;${s};${e};0.97;1`}
           dur={`${CYCLE}s`}
           repeatCount="indefinite"
@@ -109,7 +131,7 @@ function QueuedBar({ x, y, width }: { x: number; y: number; width: number }) {
         y={10}
         textAnchor="middle"
         className="fill-[#7c7a72] dark:fill-[#8a8780]"
-        style={{ fontSize: "8.5px", fontWeight: 500, letterSpacing: "0.02em" }}
+        style={chartInlineStyle}
       >
         queued
       </text>
@@ -118,7 +140,7 @@ function QueuedBar({ x, y, width }: { x: number; y: number; width: number }) {
 }
 
 function TimeAxis({ y }: { y: number }) {
-  const ticks = [0, 3, 6, 9, 12];
+  const ticks = LOAD_TIME_TICKS;
   return (
     <g transform={`translate(0,${y})`}>
       <line
@@ -146,7 +168,7 @@ function TimeAxis({ y }: { y: number }) {
               y={14}
               textAnchor="middle"
               className="fill-[#555354] dark:fill-[#a8a59d]"
-              style={{ fontSize: "9px", fontWeight: 400, letterSpacing: "0.02em" }}
+              style={{ ...chartTickStyle, letterSpacing: "0.02em" }}
             >
               {t}s
             </text>
@@ -175,9 +197,7 @@ function buildSchedule(N: number) {
       });
       return { tasks, queued: false };
     });
-    const maxWeights = Math.ceil(N_WEIGHTS / N);
-    const totalTime = maxWeights * 1.0 + (N - 1) * STAGGER;
-    return { workers, totalTime };
+    return { workers, totalTime: LOAD_TIMES[N] };
   }
   // N > 4: only 4 active workers handle the work, each does N_WEIGHTS/4 weights
   const perWorker = N_WEIGHTS / 4;
@@ -193,7 +213,7 @@ function buildSchedule(N: number) {
     }
     return { tasks: [] as Task[], queued: true };
   });
-  return { workers, totalTime: perWorker * 1.0 + 3 * STAGGER };
+  return { workers, totalTime: LOAD_TIMES[N] };
 }
 
 const ROW_H = 22;
@@ -209,10 +229,13 @@ export function SyncAsyncLoadingDiagram() {
     syncTasks.push({ start: i + TASK, kind: "copy" });
   }
 
-  // Match the sync bar fill rate exactly: playhead reaches X_END at t = SYNC_TIME.
+  const syncTimeScale = SYNC_TIME / SYNC_SCHEDULE_SPAN;
+  const asyncTimeScale = totalTime / ASYNC_SCHEDULE_SPAN;
+
+  // Match the sync bar fill rate exactly: playhead reaches SYNC_END_X at t = SYNC_TIME.
   const syncEndFrac = SYNC_TIME / CYCLE;
   const playheadKeyTimes = `0;${syncEndFrac};0.97;1`;
-  const sweepValues = `${X0};${X_END};${X_END};${X0}`;
+  const sweepValues = `${X0};${SYNC_END_X};${SYNC_END_X};${X0}`;
 
   const syncDoneAppear = SYNC_TIME / CYCLE;
   const asyncDoneAppear = totalTime / CYCLE;
@@ -223,11 +246,11 @@ export function SyncAsyncLoadingDiagram() {
   const SYNC_HEIGHT = 44;
   const ASYNC_TOP = SYNC_TOP + SYNC_HEIGHT + 32;
   const TOGGLE_Y = ASYNC_TOP + asyncSectionHeight + 10;
-  const TOGGLE_HEIGHT = 30;
-  const VIEW_HEIGHT = TOGGLE_Y + TOGGLE_HEIGHT + 6;
+  const TOGGLE_HEIGHT = 36;
+  const VIEW_HEIGHT = TOGGLE_Y + TOGGLE_HEIGHT + 10;
   const VIEW_WIDTH = 690;
 
-  const workerOptions = [2, 3, 4, 5, 6];
+  const workerOptions = [...ASYNC_WORKER_OPTIONS];
 
   return (
     <figure className="my-10">
@@ -263,24 +286,24 @@ export function SyncAsyncLoadingDiagram() {
           </defs>
 
           {/* Legend — centered above the diagram */}
-          <g transform={`translate(${(VIEW_WIDTH - 160) / 2}, 14)`}>
+          <g transform={`translate(${(VIEW_WIDTH - 180) / 2}, 14)`}>
             <circle cx={5} cy={5} r={4.5} fill={COLORS.read} className="dark:hidden" />
             <circle cx={5} cy={5} r={4.5} fill={COLORS.readDark} className="hidden dark:block" />
             <text
               x={16}
               y={8}
               className="fill-black dark:fill-[#ececec]"
-              style={{ fontSize: "10px", fontWeight: 500 }}
+              style={chartLabelStyle}
             >
               disk → CPU
             </text>
-            <circle cx={95} cy={5} r={4.5} fill={COLORS.copy} className="dark:hidden" />
-            <circle cx={95} cy={5} r={4.5} fill={COLORS.copyDark} className="hidden dark:block" />
+            <circle cx={115} cy={5} r={4.5} fill={COLORS.copy} className="dark:hidden" />
+            <circle cx={115} cy={5} r={4.5} fill={COLORS.copyDark} className="hidden dark:block" />
             <text
-              x={106}
+              x={126}
               y={8}
               className="fill-black dark:fill-[#ececec]"
-              style={{ fontSize: "10px", fontWeight: 500 }}
+              style={chartLabelStyle}
             >
               CPU → GPU
             </text>
@@ -289,21 +312,22 @@ export function SyncAsyncLoadingDiagram() {
           {/* ---------- Sync section ---------- */}
           <g transform={`translate(0, ${SYNC_TOP})`}>
             <text
-              x={88}
+              x={ROW_LABEL_X}
               y={10}
-              textAnchor="end"
+              textAnchor="start"
               className="fill-[#555354] dark:fill-[#a8a59d]"
-              style={{ fontSize: "10px", fontWeight: 500 }}
+              style={chartLabelStyle}
             >
               thread
             </text>
             {syncTasks.map((t, i) => (
               <Bar
                 key={i}
-                x={X0 + t.start * PX_PER_S}
+                x={X0 + t.start * syncTimeScale * PX_PER_S}
                 y={0}
                 start={t.start}
                 kind={t.kind}
+                timeScale={syncTimeScale}
               />
             ))}
 
@@ -333,15 +357,15 @@ export function SyncAsyncLoadingDiagram() {
               />
             </line>
 
-            <g transform={`translate(${X_END + 8}, 0)`} opacity={0}>
+            <g transform={`translate(${SYNC_END_X + 8}, 0)`} opacity={0}>
               <text
                 x={0}
                 y={10}
                 textAnchor="start"
                 fill={COLORS.playhead}
-                style={{ fontSize: "9px", fontWeight: 600 }}
+                style={chartAnnotationStyle}
               >
-                12s
+                {SYNC_TIME.toFixed(1)}s
               </text>
               <animate
                 attributeName="opacity"
@@ -369,7 +393,7 @@ export function SyncAsyncLoadingDiagram() {
               {...({ xmlns: "http://www.w3.org/1999/xhtml" } as object)}
             >
               <span
-                style={{ fontSize: "10px", fontWeight: 500 }}
+                style={chartLabelStyle}
                 className="text-[#555354] dark:text-[#a8a59d]"
               >
                 workers
@@ -394,7 +418,7 @@ export function SyncAsyncLoadingDiagram() {
                           : "rounded-full px-3 py-[3px] font-medium text-[#555354] dark:text-[#a8a59d] hover:text-black dark:hover:text-white"
                       }
                       style={{
-                        fontSize: "11px",
+                        fontSize: CHART_FONT_SIZE.control,
                         background: active ? COLORS.toggleAccent : "transparent",
                         border: "none",
                         cursor: "pointer",
@@ -419,13 +443,20 @@ export function SyncAsyncLoadingDiagram() {
               return (
                 <g key={wi}>
                   <text
-                    x={88}
                     y={y + 10}
-                    textAnchor="end"
                     className="fill-[#555354] dark:fill-[#a8a59d]"
-                    style={{ fontSize: "10px", fontWeight: 500 }}
+                    style={chartLabelStyle}
                   >
-                    worker {wi}
+                    <tspan x={ROW_LABEL_X} textAnchor="start">
+                      worker{" "}
+                    </tspan>
+                    <tspan
+                      x={ROW_NUMBER_X}
+                      textAnchor="middle"
+                      style={{ fontVariantNumeric: "tabular-nums" }}
+                    >
+                      {wi}
+                    </tspan>
                   </text>
                   {w.queued ? (
                     <QueuedBar x={X0} y={y} width={totalTime * PX_PER_S} />
@@ -433,10 +464,11 @@ export function SyncAsyncLoadingDiagram() {
                     w.tasks.map((t, i) => (
                       <Bar
                         key={i}
-                        x={X0 + t.start * PX_PER_S}
+                        x={X0 + t.start * asyncTimeScale * PX_PER_S}
                         y={y}
                         start={t.start}
                         kind={t.kind}
+                        timeScale={asyncTimeScale}
                       />
                     ))
                   )}
@@ -484,7 +516,7 @@ export function SyncAsyncLoadingDiagram() {
                       y={10}
                       textAnchor="start"
                       fill={COLORS.done}
-                      style={{ fontSize: "9px", fontWeight: 600 }}
+                      style={chartAnnotationStyle}
                     >
                       {doneLabel}
                     </text>

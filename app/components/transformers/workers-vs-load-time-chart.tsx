@@ -1,15 +1,31 @@
+import {
+  buildTrimmedLinePath,
+  pointLineGap,
+} from "../chart-line-segments";
+import {
+  chartAnnotationStyle,
+  chartLabelStyle,
+  chartTickTabularStyle,
+} from "../chart-typography";
 import { Caption } from "../caption";
+import {
+  LOAD_TIME_AXIS_MAX,
+  LOAD_TIME_DATA,
+  LOAD_TIME_TICKS,
+} from "./loading-benchmark-data";
 
 const COLORS = {
   line: "#00ca48",
-  lineEdge: "#00a23a",
   dot: "#00ca48",
-  dotEdge: "#00a23a",
-  highlight: "#474645", // saturation marker
   highlightSoft: "rgba(71, 70, 69, 0.12)",
 };
 
-const CYCLE = 9;
+const DOT_RADIUS = 7;
+const DOT_STROKE_WIDTH = 4.5;
+
+function dotGap(_index: number) {
+  return pointLineGap(DOT_RADIUS, DOT_STROKE_WIDTH);
+}
 
 const VIEW_WIDTH = 700;
 const VIEW_HEIGHT = 300;
@@ -22,34 +38,25 @@ const X_END = CHART_X + CHART_W;
 const Y_END = CHART_Y + CHART_H;
 
 const X_MIN = 1;
-const X_MAX = 8;
-const Y_MAX = 9; // seconds
+const X_MAX = 16;
+const Y_MAX = LOAD_TIME_AXIS_MAX;
 
 const xScale = (n: number) =>
   CHART_X + ((n - X_MIN) / (X_MAX - X_MIN)) * CHART_W;
 const yScale = (t: number) => Y_END - (t / Y_MAX) * CHART_H;
 
-const DATA = [
-  { n: 1, t: 8.0 },
-  { n: 2, t: 5.5 },
-  { n: 3, t: 5.0 },
-  { n: 4, t: 4.5 },
-  { n: 5, t: 4.55 },
-  { n: 6, t: 4.65 },
-  { n: 7, t: 4.8 },
-  { n: 8, t: 5.0 },
-];
+const DATA = LOAD_TIME_DATA;
 
 const SATURATION_N = 4;
-const Y_TICKS = [0, 2, 4, 6, 8];
+const Y_TICKS = LOAD_TIME_TICKS;
 const X_TICKS = DATA.map((d) => d.n);
 
-const linePath = DATA.map(
-  (d, i) => `${i === 0 ? "M" : "L"} ${xScale(d.n)} ${yScale(d.t)}`,
-).join(" ");
+const chartPoints = DATA.map(d => ({
+  x: xScale(d.n),
+  y: yScale(d.t),
+}));
 
-// Approximate path length for dash animation
-const pathLengthFraction = 0.7; // draw-in lasts 70% of cycle
+const linePath = buildTrimmedLinePath(chartPoints, dotGap);
 
 export function WorkersVsLoadTimeChart() {
   return (
@@ -72,7 +79,7 @@ export function WorkersVsLoadTimeChart() {
             textAnchor="middle"
             transform={`rotate(-90, 20, ${CHART_Y + CHART_H / 2})`}
             className="fill-[#555354] dark:fill-[#a8a59d]"
-            style={{ fontSize: "10px", fontWeight: 500 }}
+            style={chartLabelStyle}
           >
             load time (s)
           </text>
@@ -96,11 +103,7 @@ export function WorkersVsLoadTimeChart() {
                   y={y + 3}
                   textAnchor="end"
                   className="fill-[#555354] dark:fill-[#a8a59d]"
-                  style={{
-                    fontSize: "9.5px",
-                    fontWeight: 400,
-                    fontVariantNumeric: "tabular-nums",
-                  }}
+                  style={chartTickTabularStyle}
                 >
                   {t}s
                 </text>
@@ -136,11 +139,7 @@ export function WorkersVsLoadTimeChart() {
                   y={Y_END + 16}
                   textAnchor="middle"
                   className="fill-[#555354] dark:fill-[#a8a59d]"
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: 400,
-                    fontVariantNumeric: "tabular-nums",
-                  }}
+                  style={chartTickTabularStyle}
                 >
                   {n}
                 </text>
@@ -154,74 +153,57 @@ export function WorkersVsLoadTimeChart() {
             y={Y_END + 36}
             textAnchor="middle"
             className="fill-[#555354] dark:fill-[#a8a59d]"
-            style={{ fontSize: "10px", fontWeight: 500 }}
+            style={chartLabelStyle}
           >
             workers
           </text>
 
-          {/* The curve — drawn in via stroke-dashoffset */}
+          {/* The curve */}
           <path
             d={linePath}
             fill="none"
-            stroke={COLORS.lineEdge}
-            strokeWidth={2}
+            stroke={COLORS.line}
+            strokeWidth={1.5}
             strokeLinecap="round"
             strokeLinejoin="round"
-            pathLength={100}
-            strokeDasharray={100}
-            strokeDashoffset={100}
-          >
-            <animate
-              attributeName="stroke-dashoffset"
-              values="100;100;0;0;100"
-              keyTimes={`0;0.04;${pathLengthFraction};0.97;1`}
-              dur={`${CYCLE}s`}
-              repeatCount="indefinite"
-            />
-          </path>
+          />
 
-          {/* Data points — appear sequentially as the line passes */}
-          {DATA.map((d, i) => {
+          {/* Data points */}
+          {DATA.map((d) => {
             const isSaturation = d.n === SATURATION_N;
-            const appearAt = 0.04 + (i / (DATA.length - 1)) * (pathLengthFraction - 0.04);
             return (
-              <g key={d.n} opacity={0}>
+              <g key={d.n}>
                 <circle
                   cx={xScale(d.n)}
                   cy={yScale(d.t)}
-                  r={isSaturation ? 5 : 3.6}
-                  fill={isSaturation ? COLORS.highlight : COLORS.dot}
-                  stroke={isSaturation ? COLORS.highlight : COLORS.dotEdge}
-                  strokeWidth={1.2}
+                  r={DOT_RADIUS}
+                  fill={COLORS.dot}
+                  className="stroke-[var(--color-bg)]"
+                  strokeWidth={DOT_STROKE_WIDTH}
                 />
                 {/* Value label above the saturation dot */}
                 {isSaturation && (
                   <text
                     x={xScale(d.n)}
-                    y={yScale(d.t) - 10}
+                    y={yScale(d.t) - 13}
                     textAnchor="middle"
-                    fill={COLORS.highlight}
+                    fill="#0090ff"
                     style={{
-                      fontSize: "9.5px",
-                      fontWeight: 600,
+                      ...chartAnnotationStyle,
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
                     {d.t.toFixed(1)}s
                   </text>
                 )}
-                <animate
-                  attributeName="opacity"
-                  values="0;0;1;1;0"
-                  keyTimes={`0;${appearAt};${appearAt + 0.005};0.97;1`}
-                  dur={`${CYCLE}s`}
-                  repeatCount="indefinite"
-                />
               </g>
             );
           })}
         </svg>
       </div>
+      <Caption>
+        Tested loading Mixtral-8x7B-v0.1 on a cluster of H100s.
+      </Caption>
     </figure>
   );
 }

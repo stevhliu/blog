@@ -1,4 +1,11 @@
 import { Caption } from "../caption";
+import {
+  chartAnnotationStyle,
+  chartInlineStyle,
+  chartInlineTextClassName,
+  chartLabelStyle,
+  chartTextClassName,
+} from "../chart-typography";
 
 const COLORS = {
   malloc: "#474645",
@@ -198,10 +205,9 @@ function Counter({
             key={i}
             x={16}
             y={0}
-            className="fill-black dark:fill-[#ececec]"
+            className={chartTextClassName}
             style={{
-              fontSize: "13px",
-              fontWeight: 600,
+              ...chartAnnotationStyle,
               fontVariantNumeric: "tabular-nums",
             }}
             opacity={0}
@@ -220,8 +226,8 @@ function Counter({
       <text
         x={32}
         y={0}
-        className="fill-[#555354] dark:fill-[#a8a59d]"
-        style={{ fontSize: "11px", fontWeight: 500 }}
+        className={chartInlineTextClassName}
+        style={chartInlineStyle}
       >
         {totalLabel}
       </text>
@@ -268,8 +274,8 @@ export function CudaAllocatorDiagram() {
               x={SIDE_WIDTH / 2}
               y={SECTION_HEADER_Y}
               textAnchor="middle"
-              className="fill-black dark:fill-[#ececec]"
-              style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "-0.01em" }}
+              className={chartTextClassName}
+              style={{ ...chartLabelStyle, letterSpacing: "-0.01em" }}
             >
               cold
             </text>
@@ -315,8 +321,8 @@ export function CudaAllocatorDiagram() {
               x={SIDE_WIDTH / 2}
               y={SECTION_HEADER_Y}
               textAnchor="middle"
-              className="fill-black dark:fill-[#ececec]"
-              style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "-0.01em" }}
+              className={chartTextClassName}
+              style={{ ...chartLabelStyle, letterSpacing: "-0.01em" }}
             >
               warmed
             </text>

@@ -109,6 +109,10 @@ const WorkersVsLoadTimeChart = dynamic(
   () => import("./app/components/transformers/workers-vs-load-time-chart").then(mod => mod.WorkersVsLoadTimeChart),
   { ssr: true }
 );
+const MoEModelsOverTimeChart = dynamic(
+  () => import("./app/components/transformers/moe-models-over-time-chart").then(mod => mod.MoEModelsOverTimeChart),
+  { ssr: true }
+);
 
 export const diagramComponents = {
   CausalDiagram,
@@ -138,4 +142,5 @@ export const diagramComponents = {
   SyncAsyncLoadingDiagram,
   CudaAllocatorDiagram,
   WorkersVsLoadTimeChart,
+  MoEModelsOverTimeChart,
 };

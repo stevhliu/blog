@@ -6,7 +6,7 @@ export const Code = ({ children }) => {
         [:is(p,li)_&]:px-1
         [:is(p,li)_&]:py-0.5
         [:is(p,li)_&]:rounded-sm
-        [:is(p,li)_&]:bg-[#dad4c8]
+        [:is(p,li)_&]:bg-[var(--color-code-bg)]
       `}
     >
       {children}
