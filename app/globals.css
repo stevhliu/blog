@@ -120,9 +120,15 @@ button:focus-visible,
 
 .archive-meta {
   font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, Menlo, monospace;
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+@media (min-width: 640px) {
+  .archive-meta {
+    font-size: 12px;
+  }
 }
 
 .archive-col-header {

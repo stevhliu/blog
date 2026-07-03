@@ -1,6 +1,6 @@
 export const metadata = {
   title: "How Hugging Face Transformers is quietly standardizing the model ecosystem",
-  description: 'How the dynamic weight converter standardizes model formats',
+  description: 'Every AI lab ships its models in its own format, the way early railroads each picked their own gauge. Transformers standardized them the way Spain did, by changing the wheels in motion.',
 };
 
 ## Three inches east
@@ -13,7 +13,7 @@ Railroads with different gauges could not connect. At a break of gauge, where on
 
 Some towns built their economy on these breaks. Erie, Pennsylvania, sat where a 6 ft line met a 4 ft 10 in one, so anything traveling from Buffalo to Cleveland had to change trains twice. Delayed passengers ate in Erie's restaurants and slept in its hotels. Local crews made a living moving freight between the trains. So in 1853, when the railroads announced they would align the gauges, Erie rioted. The townspeople tore up the new track and destroyed the bridges.
 
-After the Civil War, as trade between North and South grew, so did the cost of transloading at every break of gauge. In 1886 the South converted its railroads to 4 ft 9 in, close enough to the standard gauge the North used that trains could run straight through, and from then on a freight train loaded in Atlanta could ride the same rail all the way to Chicago. After decades of breaks, the country's railroads were finally one network.
+After the Civil War, as trade between North and South grew, so did the cost of transloading at every break of gauge. In 1886 the South converted its railroads to 4 ft 9 in, close enough to the standard gauge the North used that trains could run straight through, and from then on a freight train loaded in Atlanta could ride the same rail all the way to Chicago. After decades of breaks, the country's railroads were finally one network. That was one way to get there.
 
 ## Changing the wheels in motion
 
@@ -21,7 +21,7 @@ Not everyone moved their railroads. Spain uses a variable gauge system that lets
 
 Spain's Talgo trains ride on variable gauge axles. When a train passes over the gauge changer, guide rails take its weight while the wheels are unlocked from the axle. With the wheels free, the widening or narrowing track slides them to their new position on the axle. A second set of guide rails locks each wheel in place, and the train rolls onto the new gauge, never once stopping while its wheels are reset beneath its passengers.
 
-These are two different ways to standardize. One forces everyone to move their rails, and the other makes crossing the boundary free. Machine learning has the same break of gauge, because every lab ships its models in its own format, and Hugging Face Transformers is the library much of the open-model world loads those models through. Its dynamic weight converter took the second way across, standardizing the model ecosystem without asking anyone to move their rails. Before it, meeting each model in its own format was a tax the whole ecosystem paid, one hand-written script at a time.
+These are two different ways to standardize. One forces everyone to move their rails, and the other makes crossing the boundary free. Machine learning has the same break of gauge, because every lab ships its models in its own format, and Hugging Face Transformers is the library much of the open-model world loads those models through. Its dynamic weight converter took the second way across, standardizing the model ecosystem without asking anyone to move their rails. Before it, meeting each model in its own format was a tax the whole ecosystem paid, one hand-written script at a time. Someone still has to map a genuinely new format by hand the first time, but once is the whole price now.
 
 ## Every lab lays its own track
 
@@ -39,7 +39,7 @@ The weights can also arrive at a different precision. DeepSeek-V3 ships its weig
 
 Working with any of these models used to mean running a one-off conversion script, lifting a checkpoint out of its native format and into the one Transformers expects. The script ran once, and the converted weights went up on the Hugging Face Hub, the public repository the ecosystem downloads its models from. That copy became, in effect, the Transformers format. Every other tool in the ecosystem then adapted to that shape, and the places it didn't are where the ecosystem fragmented. That was standardization of the first kind, the kind that makes everyone move their rails. Someone still had to write each script, and the pile grew with every new model. Transformers accumulated more than 300 of them.
 
-The dynamic weight converter retires the one-off script, and with it the idea that any one format has to be canonical. One file, `conversion_mapping.py`, now speaks for 164 model types, and only 76 of them lay any track of their own. The other 88 take a single line each. The line points the model at an existing one whose format it already matches, so it reuses that conversion instead of carrying its own. Most new mixture-of-experts models just declare that they load like Mixtral or Qwen2.
+The dynamic weight converter retires the one-off script, and with it the idea that any one format has to be canonical. Arthur Zucker, one of the library's core maintainers, landed it in November 2025. One file, `conversion_mapping.py`, now speaks for 164 model types, and only 76 of them lay any track of their own. The other 88 take a single line each. The line points the model at an existing one whose format it already matches, so it reuses that conversion instead of carrying its own. Most new mixture-of-experts models just declare that they load like Mixtral or Qwen2.
 
 <Snippet>
 {`
@@ -80,13 +80,13 @@ Once the last of the eight is in hand, the numbers are restacked. A short chain 
 
 The finished block is mounted on the running model, and the converter moves straight on to the next array. The model is built in the act of loading it, with no separate conversion pass and no intermediate copy written to disk and read back in.
 
-The journey runs the other way too. Every operation has an inverse, so a model loaded into the standard layout can be saved back in its native one. The stack becomes a split, and the merge becomes a cut. Because it works in both directions, no lab is ever forced to re-lay its rails.
+The journey runs the other way too. Two weeks after the converter landed, Cyril Vallez, another of the library's maintainers, gave every operation an inverse, so a model loaded into the standard layout can be saved back in its native one. The stack becomes a split, and the merge becomes a cut. Because it works in both directions, no lab is ever forced to re-lay its rails.
 
 ## The freight that follows
 
 Standardization means any model loads anywhere, with no conversion step between formats. The most immediate gain is how fast new models arrive.
 
-Switch Transformers was the first mixture-of-experts model in the library. Between it and the converter, Transformers added 31 more over three years, about one a month, each with its own weight-handling code. In the seven months since, it has added 19 more, one every 11 days. Of those, 16 needed no new code, most just a line pointing at Mixtral or Qwen2. The industry's turn toward mixture-of-experts is bigger than any one library, so the converter did not start the rush. What it changed is the cost of keeping up, and a new MoE that once took a few hundred lines now usually takes one. They keep arriving faster.
+Switch Transformers was the first mixture-of-experts model in the library. Between it and the converter, Transformers added 31 more over three years, about one a month, each with its own weight-handling code. In the seven months since, it has added 19 more, one every 11 days. Of those, 13 needed no new code, most just a line pointing at Mixtral or Qwen2. The industry's turn toward mixture-of-experts is bigger than any one library, so the converter did not start the rush. What it changed is the cost of keeping up, and a new MoE that once took a few hundred lines now usually takes one. They keep arriving faster.
 
 <MoEModelsOverTimeChart />
 
