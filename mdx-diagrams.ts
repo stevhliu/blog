@@ -117,6 +117,22 @@ const MoEModelsOverTimeChart = dynamic(
   () => import("./app/components/transformers/moe-models-over-time-chart").then(mod => mod.MoEModelsOverTimeChart),
   { ssr: true }
 );
+const MixtralConversionDiagram = dynamic(
+  () => import("./app/components/transformers/conversion-pipeline-diagrams").then(mod => mod.MixtralConversionDiagram),
+  { ssr: true }
+);
+const Qwen2ConversionDiagram = dynamic(
+  () => import("./app/components/transformers/conversion-pipeline-diagrams").then(mod => mod.Qwen2ConversionDiagram),
+  { ssr: true }
+);
+const Qwen3VLConversionDiagram = dynamic(
+  () => import("./app/components/transformers/conversion-pipeline-diagrams").then(mod => mod.Qwen3VLConversionDiagram),
+  { ssr: true }
+);
+const DeepSeekV3ConversionDiagram = dynamic(
+  () => import("./app/components/transformers/conversion-pipeline-diagrams").then(mod => mod.DeepSeekV3ConversionDiagram),
+  { ssr: true }
+);
 
 export const diagramComponents = {
   CausalDiagram,
@@ -148,4 +164,8 @@ export const diagramComponents = {
   CudaAllocatorDiagram,
   WorkersVsLoadTimeChart,
   MoEModelsOverTimeChart,
+  MixtralConversionDiagram,
+  Qwen2ConversionDiagram,
+  Qwen3VLConversionDiagram,
+  DeepSeekV3ConversionDiagram,
 };

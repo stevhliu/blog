@@ -1,8 +1,9 @@
-import {
-  buildTrimmedLinePath,
-  pointLineGap,
-} from "../chart-line-segments";
+import { buildTrimmedLinePath, pointLineGap } from "../chart-line-segments";
 import { Caption } from "../caption";
+import {
+  chartAnnotationStyle,
+  chartTickTabularStyle,
+} from "../chart-typography";
 
 const DATA = [
   { date: "2022-11-15", name: "Switch Transformers", cumulative: 1 },
@@ -82,7 +83,7 @@ const COLORS = {
   marker: "#474645",
 };
 
-const DOT_RADIUS = 2.5;
+const DOT_RADIUS = 3.5;
 const DOT_STROKE_WIDTH = 3;
 const DOT_LINE_GAP = pointLineGap(DOT_RADIUS, DOT_STROKE_WIDTH);
 
@@ -193,11 +194,7 @@ export function MoEModelsOverTimeChart() {
                   y={y + 3}
                   textAnchor="end"
                   className="fill-[#555354] dark:fill-[#a8a59d]"
-                  style={{
-                    fontSize: "9.5px",
-                    fontWeight: 400,
-                    fontVariantNumeric: "tabular-nums",
-                  }}
+                  style={chartTickTabularStyle}
                 >
                   {tick}
                 </text>
@@ -223,11 +220,7 @@ export function MoEModelsOverTimeChart() {
                   y={Y_END + 20}
                   textAnchor="middle"
                   className="fill-[#555354] dark:fill-[#a8a59d]"
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: 400,
-                    fontVariantNumeric: "tabular-nums",
-                  }}
+                  style={chartTickTabularStyle}
                 >
                   {tick.label}
                 </text>
@@ -249,7 +242,7 @@ export function MoEModelsOverTimeChart() {
               x={xScale(converterTime) + 8}
               y={CHART_Y + 12}
               className="fill-[#0090ff]"
-              style={{ fontSize: "10px", fontWeight: 650 }}
+              style={chartAnnotationStyle}
             >
               dynamic weight converter
             </text>
@@ -278,7 +271,7 @@ export function MoEModelsOverTimeChart() {
                 className="moe-point"
                 tabIndex={0}
                 aria-label={`${d.name}: ${d.cumulative} by ${formatDate(
-                  d.date,
+                  d.date
                 )}`}
               >
                 <line
@@ -314,10 +307,7 @@ export function MoEModelsOverTimeChart() {
                     y={labelY}
                     textAnchor={isNearRightEdge ? "end" : "start"}
                     className="fill-[#00a23a] dark:fill-[#00ca48]"
-                    style={{
-                      fontSize: "10px",
-                      fontWeight: 650,
-                    }}
+                    style={chartAnnotationStyle}
                   >
                     {d.name}
                   </text>
@@ -327,6 +317,10 @@ export function MoEModelsOverTimeChart() {
           })}
         </svg>
       </div>
+      <Caption>
+        Cumulative mixture-of-experts architectures added to Transformers. Dates
+        are support-merge dates through July 1, 2026.
+      </Caption>
     </figure>
   );
 }

@@ -6,6 +6,18 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
       "port": 3030
+    },
+    {
+      "name": "scratchpad-static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "3033",
+        "--directory",
+        "/private/tmp/claude-501/-Users-steven-blog/39e7ffd2-4ad3-4eca-bd83-9f9a5db6091c/scratchpad"
+      ],
+      "port": 3033
     }
   ]
 }
