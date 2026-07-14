@@ -1,11 +1,12 @@
 export const metadata = {
-  title: 'Transformers Compendium - Part 1',
-  description: 'A collection of engineering details and design in Transformers.',
+  title: 'The Transformers loading pipeline',
+  description: 'Transformers lowers peak memory by building models on the meta device, keeping checkpoint tensors lazy, and releasing temporary copies. It speeds loading by overlapping disk reads with GPU transfers and warming the CUDA allocator.',
 };
 
-*Science is made up of so many things that appear obvious after they are explained. - Kynes, Dune*
+> ~~America~~ Transformers is all about speed. Hot, nasty, badass speed.
+> - Ricky Bobby, Talladega Nights
 
-A collection of working notes on how Transformers loads large models without doubling peak memory.
+A collection of working notes on how Transformers builds large models without doubling peak memory and speeds their loading from disk, from meta-device skeletons to overlapping disk reads and GPU transfers.
 
 ## PyTorch meta device [#pytorch-meta-device]
 
@@ -237,6 +238,115 @@ The memory benefit appears when the source and target dtype differs. Splitting t
 
 Combining device and dtype lets PyTorch produce the destination tensor directly in the requested dtype on the requested device.
 
+## Overlapping disk reads with GPU transfers [#overlapping-disk-reads-with-GPU-transfers]
+
+Transformers has two paths for loading weights, a synchronous and asynchronous version, designed for different loading scenarios.
+
+<Snippet>
+{`
+# conceptual loop
+model = ModelClass(config)                             # empty skeleton, weights on "meta"
+with safe_open("model.safetensors") as f:
+    for name in f.keys():
+        tensor = f.get_tensor(name)                      # 1. read bytes off disk into CPU RAM
+        tensor = tensor.to("cuda", dtype=torch.float16)  # 2. host → device copy over PCIe
+        set_module_tensor(model, name, tensor)           # 3. attach to the right param
+`}
+</Snippet>
+
+The sync path is the ordinary sequential case. The main Python thread loads one weight at a time, working through each fully before moving to the next. There are no worker threads, so a transfer that's in progress leaves the thread with nothing to do but wait for it to finish.
+
+1. The thread reads the tensor out of the safetensors file. safetensors memory-maps the file rather than eagerly copying it, so this doesn't move any bytes yet. It hands back a view backed by the mapped file, and the actual disk-to-RAM transfer is deferred until something reads the data. What forces that read depends on the destination.
+    - CPU: nothing reads the bytes here. The transfer is postponed until an operation actually touches the tensor, like one of the conversion ops or the model's forward pass if there's no conversion.
+    - GPU: the `.to(device)` in the next step forces it. The pages are faulted into CPU RAM first, then copied over PCIe to the GPU. So for GPU loading, the disk read effectively happens as part of step 2, and the thread still stalls waiting for it.
+2. PyTorch calls [cudaMemcpy](https://developer.nvidia.com/w/compute/DevZone/docs/html/C/doc/html/group__CUDART__MEMORY_g48efa06b81cc031b2aa6fdc2e9930741.html) to copy the bytes from the CPU to GPU memory over PCIe. The thread is blocked until the copy finishes. When it does, the new GPU tensor already exists and `.to(device)` returns it directly, there's no further copy. The thread reacquires the GIL to wrap the result in a Python object, and the next line runs.
+3. Find and replace the matching parameter on the meta model with the actual tensor.
+
+<MmapLazyReadDiagram />
+
+This matters most in memory-constrained scenarios like quantization. Each conversion briefly holds both the original tensor and the converted one, freeing the original only afterward. With multiple workers running ahead, those transient pairs stack up. The weights arrive faster than the main thread can convert and release them, and memory blows past what is available.
+
+## Async path [#async-path]
+
+The async path raises the thread count to 4. Each worker takes a job, a disk read plus the copy from CPU to GPU, so the main thread can keep moving through the state dict handing out work instead of stalling on each transfer itself.
+
+<Snippet>
+{`
+  def _materialize_copy(tensor: torch.Tensor, device=None, dtype=None):
+      tensor = tensor[...]                               # 1. slice the mmmap'd tensor (bytes read lazily on access)
+      if dtype is not None or device is not None:
+          tensor = tensor.to(device=device, dtype=dtype) # 2. host → device copy (releases GIL)
+      return tensor
+`}
+</Snippet>
+
+The GIL serializes actual Python bytecode, and only one thread runs the interpreter at a time. But the expensive work here isn't Python. safetensors reads the bytes in native code, and most PyTorch operations run in C++.
+
+safetensors releases the GIL while it reads bytes off disk, and PyTorch's `.to(device)` releases it during `cudaMemcpy`. Neither needs the interpreter for that work. This lets threads run in different stages. Thread A can be blocked on a host-device copy without holding the GIL, leaving it free for Thread B to start a disk read. When A's copy completes, it reacquires the GIL just long enough to wrap the result in a Python object.
+
+<GilTimelineDiagram />
+
+Threads and jobs are managed by [ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor). It creates a pool of up to `max_workers` threads and reuses them instead of spawning a new one for each job.
+
+<Snippet>
+{`
+  def spawn_materialize(thread_pool, tensor, device=None, dtype=None) -> Future | Callable:
+      def _job():
+          return _materialize_copy(tensor, device, dtype)
+      if thread_pool is not None:
+          return thread_pool.submit(_job)      # async path (Future)
+      else:
+          return _job                          # sync path: (Callable)
+`}
+</Snippet>
+
+Loading happens in two passes.
+
+1. In the first pass, Transformers walks the entire state dict and submits a job for every weight to the pool, stashing each as a `Future`, a handle to a result that isn't ready yet. This detaches submitting work from performing it. The instant a job is submitted, any free worker can start its disk read and host-to-device copy while the main thread keeps submitting the rest.
+
+2. In the second pass, the main thread walks the weights in order, calls `.result()` on each `Future` to block until that weight is ready, and attaches it to the model. Because every job was queued up front, the workers run far ahead. By the time the main thread asks for a given weight, many later weights are already copied or inflight, so it rarely has to wait.
+
+Intuitively, it may seem like adding more workers will keep reducing the loading time, but 4 workers wasn't chosen arbitrarily. During testing, 16 workers can take twice as long and was worse than using only 1 worker (see results [here](https://github.com/huggingface/transformers/pull/42324)), whereas 4 workers offered the best tradeoff. Past a certain point, extra workers stop helping, and can make loading slower.
+
+<WorkersVsLoadTimeChart />
+
+Loading weights is I/O-bound, and there are only a few shared physical resources to go around. The storage device, CPU memory for staging buffers, and the PCIe copy to the GPU. 2-3 workers are enough to keep the disk and PCIe transfers busy, plus a 4th to fill in any gaps. At that point, hardware utilization is typically already close to 100%.
+
+Adding more workers past saturation introduces drag because the work is I/O-bound, piling on threads overloads the OS kernel, which spends more of its time switching between threads than moving data. This compounds with contention for the shared resources. With 16 workers making concurrent `cudaMemcpy` calls, the GPU's one or two copy engines queues most of these calls.
+
+## CUDA caching allocator warmup [#CUDA-caching-allocator-warmup]
+
+When PyTorch moves a tensor to the GPU, it uses a caching allocator on top of [cudaMalloc](https://developer.download.nvidia.com/compute/DevZone/docs/html/C/doc/html/group__CUDART__MEMORY_gc63ffd93e344b939d6399199d8b12fef.html), because otherwise, it'd be very slow to assign memory on every call. `cudaMalloc` is synchronous and it has to find a free region in GPU memory that's big enough.
+
+1. The allocator requests `cudaMalloc` to assign a block of memory that's at least as large as tensor size N.
+2. When the tensor is freed, the allocator holds on to that block in a cache.
+3. The next request that fits is served straight from the cache, with no separate `cudaMalloc` call. And because the allocator splits a larger free block into smaller pieces as needed (and merges them back when freed), a single big block can cover many differently-sized allocations. The precise behavior here is configurable and hardware-dependent, so it may vary.
+
+Once the allocator's cache is warm, most allocations are cheap. They're served from blocks it already holds. But anything not yet in the cache still costs a cold, synchronous `cudaMalloc`. Loading a model from scratch starts with an empty pool that has to grow through many of these cold calls, and for a 70B model that adds up to a real bottleneck.
+
+Transformers performs one big allocation per device upfront and then discards it.
+
+<Snippet>
+{`
+for device, byte_count in total_byte_count.items():
+    # ... memory accounting to pick the right byte_count ...
+    # We divide by 2 here as we allocate in fp16
+    _ = torch.empty(int(byte_count // 2), dtype=torch.float16,
+                    device=device, requires_grad=False)
+`}
+</Snippet>
+
+`torch.empty()` does two important things.
+
+- Make one large `cudaMalloc` call. The block covers roughly the model's footprint on that device. Transformers first subtracts memory PyTorch already holds in reserve, and caps the request below the device's total so that a large final parameter can't trigger an OOM.
+- The throwaway tensor is bound to `_`. As soon as `_` goes out of scope, reassigned on the next device or dropped when the function returns, nothing references the tensor and its block is freed.
+
+<CudaAllocatorDiagram />
+
+Crucially, when that tensor is freed, PyTorch doesn't return the block of memory to the driver. It keeps it for reuse, so this way, Transformers only pays the slow `cudaMalloc` cost once upfront. `torch.empty()` allocates the memory but never writes to it, unlike `torch.zeros()`, there's no data pass to fill the buffer. The allocation call without the data call forces `cudaMalloc` and warms up the allocator. When a real weight is loaded, PyTorch uses this block without calling `cudaMalloc` again. Every subsequent `.to(device)` uses small pieces of memory from the large pre-fetched block.
+
+Pre-allocating more memory than the model size doesn't help. After making the single big `cudaMalloc` call, subsequent loading is dominated by data movement and not available memory.
+
 ---
 
-Thanks to [Cyril Vallez](https://huggingface.co/cyrilvallez) for the feedback and adding clarity to some of the mechanisms I was fuzzy on.
+Thanks to [Anton Vlasjuk](https://huggingface.co/AntonV) and [Cyril Vallez](https://huggingface.co/cyrilvallez) for the review and feedback.

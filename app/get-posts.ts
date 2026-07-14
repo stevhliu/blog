@@ -18,6 +18,22 @@ type Views = {
   [key: string]: number;
 };
 
+// Legacy post IDs remain in Supabase so their historical views can be
+// displayed on the merged canonical post.
+export const VIEW_ALIASES: Record<string, string[]> = {
+  "transformers-loading-pipeline": [
+    "transformers-compendium-1",
+    "transformers-compendium-2",
+  ],
+};
+
+export function getAggregatedViews(postId: string, viewsMap: Views): number {
+  return [postId, ...(VIEW_ALIASES[postId] ?? [])].reduce(
+    (total, id) => total + (viewsMap[id] ?? 0),
+    0
+  );
+}
+
 // Wrapped with React.cache() to deduplicate requests within the same render pass
 export const getPosts = cache(async () => {
   // Drafts are kept in posts.json but excluded from the public index and feed.
@@ -52,7 +68,7 @@ export const getPosts = cache(async () => {
   );
 
   return publishedPosts.map((post): Post => {
-    const views = viewsMap[post.id] ?? 0;
+    const views = getAggregatedViews(post.id, viewsMap);
     return {
       ...post,
       views,

@@ -44,6 +44,16 @@ module.exports = withMDX({
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/2026/transformers-compendium-1",
+        destination: "/2026/transformers-loading-pipeline",
+        permanent: true,
+      },
+      {
+        source: "/2026/transformers-compendium-2",
+        destination: "/2026/transformers-loading-pipeline",
+        permanent: true,
+      },
     ];
   },
 });

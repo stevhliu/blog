@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { getPosts } from "@/app/get-posts";
+import { getAggregatedViews, getPosts } from "@/app/get-posts";
 import postsData from "@/app/posts.json";
 
 describe("getPosts (no Supabase env)", () => {
+  it("aggregates legacy views into the canonical loading pipeline", () => {
+    expect(
+      getAggregatedViews("transformers-loading-pipeline", {
+        "transformers-loading-pipeline": 12,
+        "transformers-compendium-1": 34,
+        "transformers-compendium-2": 56,
+      })
+    ).toBe(102);
+  });
+
   it("drops drafts and matches the published count", async () => {
     const posts = await getPosts();
     const publishedCount = postsData.posts.filter(
