@@ -5,7 +5,7 @@ export function ZeroBadge() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="ZeroGPU (opens in new tab)"
-      className="inline-block align-middle transition-transform duration-150 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 active:scale-[0.97] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
+      className="inline-block align-middle transition-transform duration-150 ease-[var(--ease-out)] [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 active:scale-[0.97] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
     >
       <svg
         viewBox="0 0 32 11"

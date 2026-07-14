@@ -6,6 +6,7 @@ import {
   chartLabelStyle,
   chartTextClassName,
 } from "../chart-typography";
+import { FreezeSmilOnReducedMotion } from "../freeze-smil";
 
 const COLORS = {
   malloc: "#474645",
@@ -257,131 +258,133 @@ export function CudaAllocatorDiagram() {
 
   return (
     <figure className="my-10">
-      <div className="mx-auto w-full">
-        <svg
-          viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-          className="w-full"
-          role="img"
-          aria-label="Animated diagram comparing CUDA allocator with and without warmup"
-          style={{
-            fontFamily:
-              "'Roobert', ui-sans-serif, system-ui, -apple-system, sans-serif",
-          }}
-        >
-          {/* ---------- Cold (left) ---------- */}
-          <g transform={`translate(${COLD_X}, 0)`}>
-            <text
-              x={SIDE_WIDTH / 2}
-              y={SECTION_HEADER_Y}
-              textAnchor="middle"
-              className={chartTextClassName}
-              style={{ ...chartLabelStyle, letterSpacing: "-0.01em" }}
-            >
-              cold
-            </text>
+      <FreezeSmilOnReducedMotion freezeAt={9}>
+        <div className="mx-auto w-full">
+          <svg
+            viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+            className="w-full"
+            role="img"
+            aria-label="Animated diagram comparing CUDA allocator with and without warmup"
+            style={{
+              fontFamily:
+                "'Roobert', ui-sans-serif, system-ui, -apple-system, sans-serif",
+            }}
+          >
+            {/* ---------- Cold (left) ---------- */}
+            <g transform={`translate(${COLD_X}, 0)`}>
+              <text
+                x={SIDE_WIDTH / 2}
+                y={SECTION_HEADER_Y}
+                textAnchor="middle"
+                className={chartTextClassName}
+                style={{ ...chartLabelStyle, letterSpacing: "-0.01em" }}
+              >
+                cold
+              </text>
 
-            <CellGrid x={GRID_OFFSET_X} y={GRID_TOP_Y} />
+              <CellGrid x={GRID_OFFSET_X} y={GRID_TOP_Y} />
 
-            {/* Every tensor sits inside an allocated region — outline every
+              {/* Every tensor sits inside an allocated region — outline every
                 one. The counter only ticks for tensors that triggered a real
                 cudaMalloc (new shapes); cache-hit tensors reuse memory but
                 still live within a cudaMalloc'd block. */}
-            <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`}>
-              {TENSORS.map((spec, i) => (
-                <MallocOutline
-                  key={i}
-                  spec={spec}
-                  appearAt={COLD_TENSOR_AT(i)}
-                />
-              ))}
+              <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`}>
+                {TENSORS.map((spec, i) => (
+                  <MallocOutline
+                    key={i}
+                    spec={spec}
+                    appearAt={COLD_TENSOR_AT(i)}
+                  />
+                ))}
+              </g>
+
+              {/* Tensors */}
+              <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`}>
+                {TENSORS.map((spec, i) => (
+                  <TensorBlock
+                    key={i}
+                    spec={spec}
+                    appearAt={COLD_TENSOR_AT(i)}
+                  />
+                ))}
+              </g>
+
+              <Counter
+                x={GRID_OFFSET_X + (GRID_W - 145) / 2}
+                y={COUNTER_Y}
+                steps={coldSteps}
+                totalLabel={`cudaMalloc · ${N} tensors`}
+              />
             </g>
 
-            {/* Tensors */}
-            <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`}>
-              {TENSORS.map((spec, i) => (
-                <TensorBlock
-                  key={i}
-                  spec={spec}
-                  appearAt={COLD_TENSOR_AT(i)}
-                />
-              ))}
-            </g>
+            {/* ---------- Warmed (right) ---------- */}
+            <g transform={`translate(${WARM_X}, 0)`}>
+              <text
+                x={SIDE_WIDTH / 2}
+                y={SECTION_HEADER_Y}
+                textAnchor="middle"
+                className={chartTextClassName}
+                style={{ ...chartLabelStyle, letterSpacing: "-0.01em" }}
+              >
+                warmed
+              </text>
 
-            <Counter
-              x={GRID_OFFSET_X + (GRID_W - 145) / 2}
-              y={COUNTER_Y}
-              steps={coldSteps}
-              totalLabel={`cudaMalloc · ${N} tensors`}
-            />
-          </g>
+              <CellGrid x={GRID_OFFSET_X} y={GRID_TOP_Y} />
 
-          {/* ---------- Warmed (right) ---------- */}
-          <g transform={`translate(${WARM_X}, 0)`}>
-            <text
-              x={SIDE_WIDTH / 2}
-              y={SECTION_HEADER_Y}
-              textAnchor="middle"
-              className={chartTextClassName}
-              style={{ ...chartLabelStyle, letterSpacing: "-0.01em" }}
-            >
-              warmed
-            </text>
-
-            <CellGrid x={GRID_OFFSET_X} y={GRID_TOP_Y} />
-
-            {/* Warmup block — dashed outline covering the whole memory region */}
+              {/* Warmup block — dashed outline covering the whole memory region */}
             <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`} opacity={0}>
-              <rect
-                x={-4}
-                y={-4}
-                width={GRID_W + 8}
-                height={GRID_H + 8}
-                rx={6}
-                fill={COLORS.mallocSofter}
-                stroke={COLORS.malloc}
-                strokeWidth={1.1}
-                strokeDasharray="4,3"
-              />
-              <animate
-                attributeName="opacity"
-                values={`0;0;1;1;0`}
-                keyTimes={`0;${WARMUP_START / CYCLE};${(WARMUP_START + WARMUP_DUR) / CYCLE};0.97;1`}
-                dur={`${CYCLE}s`}
-                repeatCount="indefinite"
-              />
-            </g>
-
-            {/* Tensors fill the warmed block */}
-            <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`}>
-              {TENSORS.map((spec, i) => (
-                <TensorBlock
-                  key={i}
-                  spec={spec}
-                  appearAt={WARM_TENSOR_AT(i)}
+                <rect
+                  x={-4}
+                  y={-4}
+                  width={GRID_W + 8}
+                  height={GRID_H + 8}
+                  rx={6}
+                  fill={COLORS.mallocSofter}
+                  stroke={COLORS.malloc}
+                  strokeWidth={1.1}
+                  strokeDasharray="4,3"
                 />
-              ))}
+                <animate
+                  attributeName="opacity"
+                  values={`0;0;1;1;0`}
+                keyTimes={`0;${WARMUP_START / CYCLE};${(WARMUP_START + WARMUP_DUR) / CYCLE};0.97;1`}
+                  dur={`${CYCLE}s`}
+                  repeatCount="indefinite"
+                />
+              </g>
+
+              {/* Tensors fill the warmed block */}
+              <g transform={`translate(${GRID_OFFSET_X},${GRID_TOP_Y})`}>
+                {TENSORS.map((spec, i) => (
+                  <TensorBlock
+                    key={i}
+                    spec={spec}
+                    appearAt={WARM_TENSOR_AT(i)}
+                  />
+                ))}
+              </g>
+
+              <Counter
+                x={GRID_OFFSET_X + (GRID_W - 145) / 2}
+                y={COUNTER_Y}
+                steps={warmSteps}
+                totalLabel={`cudaMalloc · ${N} tensors`}
+              />
             </g>
 
-            <Counter
-              x={GRID_OFFSET_X + (GRID_W - 145) / 2}
-              y={COUNTER_Y}
-              steps={warmSteps}
-              totalLabel={`cudaMalloc · ${N} tensors`}
+            {/* Subtle divider between the two paths */}
+            <line
+              x1={VIEW_WIDTH / 2}
+              y1={SECTION_HEADER_Y - 14}
+              x2={VIEW_WIDTH / 2}
+              y2={COUNTER_Y + 4}
+              className="stroke-[#dad4c8] dark:stroke-[#2e2e33]"
+              strokeWidth={0.6}
+              strokeDasharray="3,4"
             />
-          </g>
-
-          {/* Subtle divider between the two paths */}
-          <line
-            x1={VIEW_WIDTH / 2}
-            y1={SECTION_HEADER_Y - 14}
-            x2={VIEW_WIDTH / 2}
-            y2={COUNTER_Y + 4}
-            className="stroke-[#dad4c8] dark:stroke-[#2e2e33]"
-            strokeWidth={0.6}
-            strokeDasharray="3,4"
-          />
-        </svg>
-      </div>
+          </svg>
+        </div>
+      </FreezeSmilOnReducedMotion>
     </figure>
   );
 }

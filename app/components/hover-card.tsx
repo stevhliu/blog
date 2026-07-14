@@ -181,7 +181,7 @@ function HoverContent({
         transformOrigin: transformOriginForSide(side),
         transition: prefersReducedMotion || isInstant
           ? "opacity 0ms, transform 0ms"
-          : "opacity 150ms cubic-bezier(0.23, 1, 0.32, 1), transform 150ms cubic-bezier(0.23, 1, 0.32, 1)",
+          : "opacity 150ms var(--ease-out), transform 150ms var(--ease-out)",
         opacity: isOpen ? 1 : 0,
         transform: isOpen ? "scale(1)" : "scale(0.95)",
         pointerEvents: isOpen ? "auto" : "none",
@@ -279,7 +279,7 @@ export function HoverCard({
       ref={triggerRef}
       tabIndex={0}
       aria-describedby={isOpen ? contentId : undefined}
-      className={`inline-block rounded-sm transition-[opacity,transform] duration-150 ease-out active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] ${className}`}
+      className={`inline-block rounded-sm transition-[opacity,transform] duration-150 ease-[var(--ease-out)] active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}

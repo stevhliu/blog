@@ -2,6 +2,7 @@ import {
   chartLabelStyle,
   chartTextClassName,
 } from "../chart-typography";
+import { FreezeSmilOnReducedMotion } from "../freeze-smil";
 
 const COLORS = {
   read: "#00ca48",
@@ -119,144 +120,146 @@ export function GilTimelineDiagram() {
 
   return (
     <figure className="my-10">
-      <div className="mx-auto w-full">
-        <svg
-          viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-          className="w-full"
-          role="img"
-          aria-label="Animated timeline of four loader threads and a GIL lane that stays mostly empty"
-          style={{
-            fontFamily:
-              "'Roobert', ui-sans-serif, system-ui, -apple-system, sans-serif",
-          }}
-        >
-          {/* Legend */}
-          <g transform={`translate(168, 14)`}>
-            <circle cx={5} cy={5} r={4.5} fill={COLORS.read} />
-            <text
-              x={16}
-              y={8}
-              className="fill-black dark:fill-[#ececec]"
-              style={chartLabelStyle}
-            >
-              disk → CPU
-            </text>
-            <circle cx={120} cy={5} r={4.5} fill={COLORS.copy} />
-            <text
-              x={131}
-              y={8}
-              className="fill-black dark:fill-[#ececec]"
-              style={chartLabelStyle}
-            >
-              CPU → GPU
-            </text>
-            <rect
-              x={255}
-              y={0.5}
-              width={9}
-              height={9}
-              rx={1.5}
-              className={GIL_FILL_CLASS}
-            />
-            <text
-              x={270}
-              y={8}
-              className="fill-black dark:fill-[#ececec]"
-              style={chartLabelStyle}
-            >
-              GIL held
-            </text>
-          </g>
-
-          {/* Thread lanes */}
-          {SCHEDULE.map((thread, i) => {
-            const y = LANES_TOP + i * ROW_H;
-            return (
-              <g key={i}>
-                <text
-                  x={ROW_LABEL_X}
-                  y={y + 10}
-                  textAnchor="start"
-                  className={chartTextClassName}
-                  style={chartLabelStyle}
-                >
-                  thread {THREADS[i]}
-                </text>
-                {thread.spans.map((span, j) => (
-                  <SpanBar
-                    key={j}
-                    x={X0 + span.start * PX_PER_S}
-                    y={y}
-                    span={span}
-                  />
-                ))}
-                {thread.slivers.map((at, j) => (
-                  <GilSliver key={j} x={X0 + at * PX_PER_S} y={y} at={at} />
-                ))}
-              </g>
-            );
-          })}
-
-          {/* GIL lane — one interpreter, shared by every thread */}
-          <g>
-            <text
-              x={ROW_LABEL_X}
-              y={GIL_Y + 10}
-              textAnchor="start"
-              className={chartTextClassName}
-              style={chartLabelStyle}
-            >
-              GIL
-            </text>
-            <rect
-              x={X0}
-              y={GIL_Y}
-              width={X_END - X0}
-              height={BAR_H}
-              rx={3}
-              className="fill-[#f1f0ec] dark:fill-[#1f1f23] stroke-[#dad4c8] dark:stroke-[#33333a]"
-              strokeWidth={0.6}
-            />
-            {SCHEDULE.flatMap((thread, i) =>
-              thread.slivers.map((at, j) => (
-                <GilSliver
-                  key={`${i}-${j}`}
-                  x={X0 + at * PX_PER_S}
-                  y={GIL_Y}
-                  at={at}
-                />
-              )),
-            )}
-          </g>
-
-          {/* Playhead sweeping across all lanes */}
-          <line
-            x1={X0}
-            y1={LANES_TOP - 6}
-            x2={X0}
-            y2={GIL_Y + BAR_H + 4}
-            stroke={COLORS.playhead}
-            strokeWidth={1.2}
-            strokeDasharray="2,3"
-            strokeLinecap="round"
+      <FreezeSmilOnReducedMotion freezeAt={7.2}>
+        <div className="mx-auto w-full">
+          <svg
+            viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+            className="w-full"
+            role="img"
+            aria-label="Animated timeline of four loader threads and a GIL lane that stays mostly empty"
+            style={{
+              fontFamily:
+                "'Roobert', ui-sans-serif, system-ui, -apple-system, sans-serif",
+            }}
           >
-            <animate
-              attributeName="x1"
-              values={sweepValues}
-              keyTimes={sweepKeyTimes}
-              dur={`${CYCLE}s`}
-              repeatCount="indefinite"
-            />
-            <animate
-              attributeName="x2"
-              values={sweepValues}
-              keyTimes={sweepKeyTimes}
-              dur={`${CYCLE}s`}
-              repeatCount="indefinite"
-            />
-          </line>
-        </svg>
-      </div>
+            {/* Legend */}
+            <g transform={`translate(168, 14)`}>
+              <circle cx={5} cy={5} r={4.5} fill={COLORS.read} />
+              <text
+                x={16}
+                y={8}
+                className="fill-black dark:fill-[#ececec]"
+                style={chartLabelStyle}
+              >
+                disk → CPU
+              </text>
+              <circle cx={120} cy={5} r={4.5} fill={COLORS.copy} />
+              <text
+                x={131}
+                y={8}
+                className="fill-black dark:fill-[#ececec]"
+                style={chartLabelStyle}
+              >
+                CPU → GPU
+              </text>
+              <rect
+                x={255}
+                y={0.5}
+                width={9}
+                height={9}
+                rx={1.5}
+                className={GIL_FILL_CLASS}
+              />
+              <text
+                x={270}
+                y={8}
+                className="fill-black dark:fill-[#ececec]"
+                style={chartLabelStyle}
+              >
+                GIL held
+              </text>
+            </g>
+
+            {/* Thread lanes */}
+            {SCHEDULE.map((thread, i) => {
+              const y = LANES_TOP + i * ROW_H;
+              return (
+                <g key={i}>
+                  <text
+                    x={ROW_LABEL_X}
+                    y={y + 10}
+                    textAnchor="start"
+                    className={chartTextClassName}
+                    style={chartLabelStyle}
+                  >
+                    thread {THREADS[i]}
+                  </text>
+                  {thread.spans.map((span, j) => (
+                    <SpanBar
+                      key={j}
+                      x={X0 + span.start * PX_PER_S}
+                      y={y}
+                      span={span}
+                    />
+                  ))}
+                  {thread.slivers.map((at, j) => (
+                    <GilSliver key={j} x={X0 + at * PX_PER_S} y={y} at={at} />
+                  ))}
+                </g>
+              );
+            })}
+
+            {/* GIL lane — one interpreter, shared by every thread */}
+            <g>
+              <text
+                x={ROW_LABEL_X}
+                y={GIL_Y + 10}
+                textAnchor="start"
+                className={chartTextClassName}
+                style={chartLabelStyle}
+              >
+                GIL
+              </text>
+              <rect
+                x={X0}
+                y={GIL_Y}
+                width={X_END - X0}
+                height={BAR_H}
+                rx={3}
+                className="fill-[#f1f0ec] dark:fill-[#1f1f23] stroke-[#dad4c8] dark:stroke-[#33333a]"
+                strokeWidth={0.6}
+              />
+              {SCHEDULE.flatMap((thread, i) =>
+                thread.slivers.map((at, j) => (
+                  <GilSliver
+                    key={`${i}-${j}`}
+                    x={X0 + at * PX_PER_S}
+                    y={GIL_Y}
+                    at={at}
+                  />
+              )),
+              )}
+            </g>
+
+            {/* Playhead sweeping across all lanes */}
+            <line
+              x1={X0}
+              y1={LANES_TOP - 6}
+              x2={X0}
+              y2={GIL_Y + BAR_H + 4}
+              stroke={COLORS.playhead}
+              strokeWidth={1.2}
+              strokeDasharray="2,3"
+              strokeLinecap="round"
+            >
+              <animate
+                attributeName="x1"
+                values={sweepValues}
+                keyTimes={sweepKeyTimes}
+                dur={`${CYCLE}s`}
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="x2"
+                values={sweepValues}
+                keyTimes={sweepKeyTimes}
+                dur={`${CYCLE}s`}
+                repeatCount="indefinite"
+              />
+            </line>
+          </svg>
+        </div>
+      </FreezeSmilOnReducedMotion>
     </figure>
   );
 }
