@@ -51,6 +51,8 @@ When a tensor is materialized, the [safetensors slice](#lazy-safetensor-slices) 
 
 At any given moment, only a small number of parameters occupies the CPU allocation. Peak transient memory comes from the in-flight tensors and any conversion temporaries, not from loading an entire shard at once.
 
+<MetaDeviceDiagram />
+
 ## Lazy safetensor slices [#lazy-safetensor-slices]
 
 Tensors in a safetensors file have a unique name or key like `model.layers.0.self_attn.q_proj.weight`. This lets the loader know which weight block in the file corresponds to which parameter.
@@ -82,6 +84,8 @@ A slice is very lightweight, so Transformers can walk through every entry - sort
 When the loader is ready to materialize a checkpoint entry, it indexes the slice with `tensor[...]`, which reads the tensor bytes from disk. The resulting real `torch.Tensor` is assigned into the parameter slot, overwriting the placeholder on the meta device. Parameters assigned to `"disk"` are indexed or offloaded instead and remain lazily loadable through [Accelerate](https://huggingface.co/docs/transformers/main/en/accelerate) hooks.
 
 Any parameter the model expects, but the checkpoint doesn't contain, remains on the meta device until finalization, where tied weights are handled and truly missing parameters are initialized.
+
+<SafetensorSliceDiagram />
 
 ## Releasing conversion temporaries [#releasing-conversion-temporaries]
 
@@ -119,6 +123,8 @@ When Transformers is ready to convert a bucket of collected source tensors, `mat
 </Snippet>
 
 `convert()` renames, reshapes, or transforms the collected source tensors into the realized target tensors. An outer loading loop writes each realized tensor into the model, or offloads it if the device map assigned that parameter to `"disk"`. The local results are deleted to release memory that is no longer required.
+
+<ConversionBucketsDiagram />
 
 ## Disabling async loading [#disabling-async-loading]
 
@@ -163,6 +169,8 @@ The loader stores `_job` in `collected_tensors[...]`. When `materialize_tensors(
 
 If the sync path loaded tensors immediately instead, every matched weight becomes a real `torch.Tensor` during collection and stays in `collected_tensors` until `convert()` processes them. Returning a callable avoids buildup by deferring each read until the conversion step is ready to consume it.
 
+<AsyncVsSyncDiagram />
+
 ## Disk offloading [#disk-offloading]
 
 <Snippet>
@@ -179,6 +187,8 @@ For safetensors files, Transformers builds an index for each parameter that maps
 Tensors mapped to `"disk"` are either re-saved to `disk_offload_folder` or, if they're already present in the offload index, left in their original safetensors file.
 
 Accelerate installs hooks that load those parameters on demand, such as during a forward pass. This avoids keeping disk-offloaded parameters on the CPU or GPU and avoids extra writes when the original safetensors file can be reused.
+
+<DiskOffloadDiagram />
 
 Transformers uses the sync path when parameters are offloaded to disk to keep loading sequential under disk-offload memory constraints.
 

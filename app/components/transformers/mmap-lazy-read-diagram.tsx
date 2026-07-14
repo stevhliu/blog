@@ -1,233 +1,18 @@
-const PCIE_ARROW = "#0090ff";
+import {
+  BranchRail,
+  COPY_COLOR,
+  FlowArrow,
+  FlowNode,
+  GroupRegion,
+  NODE_H,
+  NoteLines,
+} from "./flow-primitives";
 
 const VIEW_WIDTH = 690;
 const MID_X = VIEW_WIDTH / 2;
 const COL_L_X = 180;
 const COL_R_X = 510;
-
-const NODE_RX = 4;
-const NODE_H = 34;
 const GROUP_PAD = 14;
-const GROUP_LABEL_Y = 10;
-const RAIL_CORNER_R = 8;
-
-const railStrokeClass = "stroke-[#b7b2a6] dark:stroke-[#4a4a50]";
-const railHeadClass = "fill-[#b7b2a6] dark:fill-[#4a4a50]";
-
-const diagramMono = {
-  fontFamily:
-    'var(--font-geist-mono), "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace',
-} as const;
-
-const nodeTitleStyle = {
-  ...diagramMono,
-  fontSize: "10.5px",
-  fontWeight: 500,
-  letterSpacing: "0.03em",
-} as const;
-
-const nodeSubStyle = {
-  ...diagramMono,
-  fontSize: "9px",
-  fontWeight: 400,
-  letterSpacing: "0.02em",
-} as const;
-
-const groupLabelStyle = {
-  ...diagramMono,
-  fontSize: "8.5px",
-  fontWeight: 500,
-  letterSpacing: "0.08em",
-} as const;
-
-const noteStyle = {
-  ...diagramMono,
-  fontSize: "9px",
-  fontWeight: 400,
-  letterSpacing: "0.02em",
-} as const;
-
-type BoxVariant = "solid" | "deferred" | "read" | "copy";
-
-const BOX_CLASS: Record<BoxVariant, string> = {
-  solid:
-    "fill-[var(--color-bg)] stroke-[#cbc5bc] dark:stroke-[#33333a]",
-  deferred:
-    "fill-[var(--color-bg)] stroke-[#cbc5bc] dark:stroke-[#33333a]",
-  read: "fill-[#00ca48]/[0.12] stroke-[#00ca48]",
-  copy: "fill-[#0090ff]/[0.12] stroke-[#0090ff]",
-};
-
-function FlowNode({
-  cx,
-  y,
-  width,
-  title,
-  sub,
-  variant,
-}: {
-  cx: number;
-  y: number;
-  width: number;
-  title: string;
-  sub: string;
-  variant: BoxVariant;
-}) {
-  return (
-    <g transform={`translate(${cx - width / 2},${y})`}>
-      <rect
-        x={0}
-        y={0}
-        width={width}
-        height={NODE_H}
-        rx={NODE_RX}
-        className={BOX_CLASS[variant]}
-        strokeWidth={1}
-        strokeDasharray={variant === "deferred" ? "3,3" : undefined}
-      />
-      <text
-        x={width / 2}
-        y={15}
-        textAnchor="middle"
-        className="fill-black dark:fill-[#ececec]"
-        style={nodeTitleStyle}
-      >
-        {title}
-      </text>
-      <text
-        x={width / 2}
-        y={27}
-        textAnchor="middle"
-        className="fill-[#7c7a72] dark:fill-[#8a8780]"
-        style={nodeSubStyle}
-      >
-        {sub}
-      </text>
-    </g>
-  );
-}
-
-function branchRailPath(
-  midX: number,
-  forkY: number,
-  railY: number,
-  endX: number,
-  endY: number,
-) {
-  const r = RAIL_CORNER_R;
-  if (endX < midX) {
-    return `M ${midX} ${forkY} V ${railY} H ${endX + r} A ${r} ${r} 0 0 0 ${endX} ${railY + r} V ${endY - 5}`;
-  }
-  return `M ${midX} ${forkY} V ${railY} H ${endX - r} A ${r} ${r} 0 0 1 ${endX} ${railY + r} V ${endY - 5}`;
-}
-
-function BranchRail({
-  midX,
-  forkY,
-  railY,
-  endX,
-  endY,
-}: {
-  midX: number;
-  forkY: number;
-  railY: number;
-  endX: number;
-  endY: number;
-}) {
-  return (
-    <g>
-      <path
-        d={branchRailPath(midX, forkY, railY, endX, endY)}
-        fill="none"
-        className={railStrokeClass}
-        strokeWidth={1}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <polygon
-        points={`${endX - 3},${endY - 5} ${endX + 3},${endY - 5} ${endX},${endY}`}
-        className={railHeadClass}
-      />
-    </g>
-  );
-}
-
-function FlowArrow({
-  x,
-  y1,
-  y2,
-  color,
-  dashed,
-}: {
-  x: number;
-  y1: number;
-  y2: number;
-  color?: string;
-  dashed?: boolean;
-}) {
-  const lineClass = color
-    ? undefined
-    : "stroke-[#b7b2a6] dark:stroke-[#4a4a50]";
-  const headClass = color ? undefined : "fill-[#b7b2a6] dark:fill-[#4a4a50]";
-  return (
-    <g>
-      <line
-        x1={x}
-        y1={y1}
-        x2={x}
-        y2={y2 - 5}
-        className={lineClass}
-        stroke={color}
-        strokeWidth={1}
-        strokeDasharray={dashed ? "3,3" : undefined}
-        strokeLinecap="square"
-      />
-      <polygon
-        points={`${x - 3},${y2 - 5} ${x + 3},${y2 - 5} ${x},${y2}`}
-        className={headClass}
-        fill={color}
-      />
-    </g>
-  );
-}
-
-function GroupRegion({
-  x,
-  y,
-  width,
-  height,
-  label,
-}: {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  label: string;
-}) {
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        rx={NODE_RX}
-        fill="none"
-        className="stroke-[#dad4c8] dark:stroke-[#2a2a30]"
-        strokeWidth={1}
-        strokeDasharray="4,4"
-      />
-      <text
-        x={x + 10}
-        y={y + GROUP_LABEL_Y}
-        className="fill-[#7c7a72] dark:fill-[#8a8780]"
-        style={groupLabelStyle}
-      >
-        {label}
-      </text>
-    </g>
-  );
-}
 
 export function MmapLazyReadDiagram() {
   const DISK_Y = 18;
@@ -330,24 +115,14 @@ export function MmapLazyReadDiagram() {
             sub="disk read happens here"
             variant="read"
           />
-          <text
-            x={COL_L_X}
+          <NoteLines
+            cx={COL_L_X}
             y={NOTE_Y}
-            textAnchor="middle"
-            className="fill-[#7c7a72] dark:fill-[#8a8780]"
-            style={noteStyle}
-          >
-            deferred until an op touches the tensor,
-          </text>
-          <text
-            x={COL_L_X}
-            y={NOTE_Y + 12}
-            textAnchor="middle"
-            className="fill-[#7c7a72] dark:fill-[#8a8780]"
-            style={noteStyle}
-          >
-            like a conversion or the forward pass
-          </text>
+            lines={[
+              "deferred until an op touches the tensor,",
+              "like a conversion or the forward pass",
+            ]}
+          />
 
           <FlowNode
             cx={COL_R_X}
@@ -361,7 +136,7 @@ export function MmapLazyReadDiagram() {
             x={COL_R_X}
             y1={STAGE1_Y + NODE_H}
             y2={STAGE2_Y}
-            color={PCIE_ARROW}
+            color={COPY_COLOR}
           />
           <FlowNode
             cx={COL_R_X}
@@ -371,24 +146,11 @@ export function MmapLazyReadDiagram() {
             sub="tensor on device"
             variant="copy"
           />
-          <text
-            x={COL_R_X}
+          <NoteLines
+            cx={COL_R_X}
             y={NOTE_Y}
-            textAnchor="middle"
-            className="fill-[#7c7a72] dark:fill-[#8a8780]"
-            style={noteStyle}
-          >
-            forced now, both steps happen
-          </text>
-          <text
-            x={COL_R_X}
-            y={NOTE_Y + 12}
-            textAnchor="middle"
-            className="fill-[#7c7a72] dark:fill-[#8a8780]"
-            style={noteStyle}
-          >
-            inside .to(device)
-          </text>
+            lines={["forced now, both steps happen", "inside .to(device)"]}
+          />
         </svg>
       </div>
     </figure>

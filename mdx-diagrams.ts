@@ -109,6 +109,26 @@ const CudaAllocatorDiagram = dynamic(
   () => import("./app/components/transformers/cuda-allocator-diagram").then(mod => mod.CudaAllocatorDiagram),
   { ssr: true }
 );
+const MetaDeviceDiagram = dynamic(
+  () => import("./app/components/transformers/meta-device-diagram").then(mod => mod.MetaDeviceDiagram),
+  { ssr: true }
+);
+const SafetensorSliceDiagram = dynamic(
+  () => import("./app/components/transformers/safetensor-slice-diagram").then(mod => mod.SafetensorSliceDiagram),
+  { ssr: true }
+);
+const ConversionBucketsDiagram = dynamic(
+  () => import("./app/components/transformers/conversion-buckets-diagram").then(mod => mod.ConversionBucketsDiagram),
+  { ssr: true }
+);
+const AsyncVsSyncDiagram = dynamic(
+  () => import("./app/components/transformers/async-vs-sync-diagram").then(mod => mod.AsyncVsSyncDiagram),
+  { ssr: true }
+);
+const DiskOffloadDiagram = dynamic(
+  () => import("./app/components/transformers/disk-offload-diagram").then(mod => mod.DiskOffloadDiagram),
+  { ssr: true }
+);
 const WorkersVsLoadTimeChart = dynamic(
   () => import("./app/components/transformers/workers-vs-load-time-chart").then(mod => mod.WorkersVsLoadTimeChart),
   { ssr: true }
@@ -160,6 +180,11 @@ export const diagramComponents = {
   Int8Diagram,
   KVCacheDiagram,
   GilTimelineDiagram,
+  MetaDeviceDiagram,
+  SafetensorSliceDiagram,
+  ConversionBucketsDiagram,
+  AsyncVsSyncDiagram,
+  DiskOffloadDiagram,
   MmapLazyReadDiagram,
   CudaAllocatorDiagram,
   WorkersVsLoadTimeChart,
