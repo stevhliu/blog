@@ -2,6 +2,9 @@
   "name": "stevhliu-blog",
   "license": "MIT",
   "description": "stevhliu.com (blog)",
+  "engines": {
+    "node": "24.x"
+  },
   "dependencies": {
     "@next/mdx": "15.5.19",
     "@supabase/supabase-js": "^2.89.0",

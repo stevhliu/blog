@@ -583,7 +583,7 @@ export function DeepSeekV3ConversionDiagram() {
           Concatenate(dim=1)
         </Chip>
         <text className={labelClass} style={argsStyle} x={500} y={112} textAnchor="middle">
-          "deepseek_v3": "qwen2_moe"
+          {'"deepseek_v3": "qwen2_moe"'}
         </text>
         <FlowArrow x1={404} x2={588} />
       </g>
