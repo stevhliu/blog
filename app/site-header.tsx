@@ -27,7 +27,7 @@ export function SiteHeader() {
         </h1>
 
         <aside className="font-mono text-[var(--color-text)]">
-          <p className="m-0 text-[13px] leading-[1.7]">
+          <p className="m-0 text-[14px] leading-[1.7]">
             <span className="block">Steven Liu</span>
             <span className="mt-3 block">
             <span className="opacity-70">

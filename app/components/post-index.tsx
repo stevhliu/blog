@@ -82,7 +82,7 @@ export function PostIndex({
 
       <footer className="mt-auto grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 pt-16 md:gap-x-6">
         {/* Left cell: live PT datetime, in line with pagination (center). */}
-        <div className="archive-meta !normal-case min-w-0 justify-self-start truncate whitespace-nowrap text-left text-[var(--color-text)]">
+        <div className="archive-meta !text-[13px] !normal-case opacity-70 min-w-0 justify-self-start truncate whitespace-nowrap text-left text-[var(--color-text)]">
           <EnvDatetime />
         </div>
         {totalPages > 1 ? (

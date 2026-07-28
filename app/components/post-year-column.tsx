@@ -12,7 +12,7 @@ export function PostYearColumn({
 }) {
   return (
     <div className="flex flex-col">
-      <div className="archive-col-header flex justify-between text-[11px] sm:text-xs text-[var(--color-text)] font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
+      <div className="archive-col-header flex justify-between text-[14px] text-[var(--color-text)] font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
         <span>{year}</span>
       </div>
       {posts.map((post) => (
@@ -21,11 +21,11 @@ export function PostYearColumn({
           href={`/${year}/${post.id}`}
           className="post-link archive-entry text-[var(--color-text)] no-underline"
         >
-          <span className="flex min-w-0 max-w-[72%] items-baseline gap-2">
-            <span className="shrink-0 text-[10px] sm:text-[11px] opacity-70 min-w-[48px] tabular-nums font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
+          <span className="flex min-w-0 max-w-[72%] items-baseline gap-6">
+            <span className="shrink-0 text-[14px] opacity-70 min-w-[48px] tabular-nums font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
               {formatShortPostDate(post.date)}
             </span>
-            <span className="post-title min-w-0 break-words text-[11px] sm:text-xs tracking-[0.01em] leading-[1.3] font-normal font-[var(--font-geist-mono),monospace]">
+            <span className="post-title min-w-0 break-words text-[14px] tracking-[0.01em] leading-[1.3] font-normal font-[var(--font-geist-mono),monospace]">
               {post.title}
               {post.evergreen ? (
                 <span className="ml-1.5 inline-flex align-[-0.1em] opacity-70">
@@ -40,7 +40,7 @@ export function PostYearColumn({
             </span>
           </span>
           <span className="flex flex-col gap-[2px] text-right">
-            <span className="text-[9px] sm:text-[10px] opacity-60 tabular-nums font-[var(--font-geist-mono),monospace]">
+            <span className="text-[14px] opacity-60 tabular-nums font-[var(--font-geist-mono),monospace]">
               {post.viewsFormatted}
             </span>
           </span>
