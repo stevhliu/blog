@@ -279,7 +279,7 @@ export function MoEModelsOverTimeChart() {
                   y1={y}
                   x2={x}
                   y2={y}
-                  className="moe-point-guide stroke-[#00a23a] dark:stroke-[#00ca48]"
+                  className="moe-point-guide stroke-[#00ca48]"
                   strokeWidth={0.8}
                   strokeDasharray="2,3"
                 />
@@ -288,7 +288,7 @@ export function MoEModelsOverTimeChart() {
                   y1={y}
                   x2={x}
                   y2={Y_END}
-                  className="moe-point-guide stroke-[#00a23a] dark:stroke-[#00ca48]"
+                  className="moe-point-guide stroke-[#00ca48]"
                   strokeWidth={0.8}
                   strokeDasharray="2,3"
                 />
@@ -306,7 +306,7 @@ export function MoEModelsOverTimeChart() {
                     x={labelX}
                     y={labelY}
                     textAnchor={isNearRightEdge ? "end" : "start"}
-                    className="fill-[#00a23a] dark:fill-[#00ca48]"
+                    className="fill-[#00ca48]"
                     style={chartAnnotationStyle}
                   >
                     {d.name}
@@ -318,8 +318,7 @@ export function MoEModelsOverTimeChart() {
         </svg>
       </div>
       <Caption>
-        Cumulative mixture-of-experts architectures added to Transformers. Dates
-        are support-merge dates through July 1, 2026.
+        Cumulative mixture-of-experts architectures added to Transformers through July 1, 2026.
       </Caption>
     </figure>
   );

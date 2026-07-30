@@ -1,15 +1,17 @@
 import type { ReactNode } from "react";
 import { chartLabelStyle } from "../chart-typography";
 
-// Palette matches moe-models-over-time-chart.tsx: green #00a23a/#00ca48,
+// Palette matches moe-models-over-time-chart.tsx: green #00ca48 in both themes,
 // grid #dad4c8/#2e2e33, text #555354/#a8a59d, converter blue #0090ff.
 const blockClass = "fill-[#edeae1] dark:fill-[#1f1f23] stroke-[#c4bdae] dark:stroke-[#3a3a41]";
 const divisionClass = "stroke-[#dad4c8] dark:stroke-[#2e2e33]";
 const targetBlockClass =
-  "fill-[rgba(0,162,58,0.08)] dark:fill-[rgba(0,202,72,0.10)] stroke-[#00a23a] dark:stroke-[#00ca48]";
+  "fill-[rgba(0,202,72,0.08)] dark:fill-[rgba(0,202,72,0.10)] stroke-[#00ca48]";
 const targetDivisionClass =
-  "stroke-[rgba(0,162,58,0.30)] dark:stroke-[rgba(0,202,72,0.32)]";
-const targetTextClass = "fill-[#00a23a] dark:fill-[#00ca48]";
+  "stroke-[rgba(0,202,72,0.30)] dark:stroke-[rgba(0,202,72,0.32)]";
+const targetSeamClass = "stroke-[#00ca48]";
+const halfLabelBgClass = "fill-[var(--color-bg)]";
+const targetTextClass = "fill-[#00ca48]";
 const labelClass = "fill-[#555354] dark:fill-[#a8a59d]";
 const strongClass = "fill-[#474645] dark:fill-[#eee7db]";
 const arrowLineClass = "stroke-[#555354] dark:stroke-[#a8a59d]";
@@ -31,6 +33,7 @@ const labelStyle = { ...diagramMono, fontSize: "11px", fontWeight: 400 } as cons
 const argsStyle = { ...diagramMono, fontSize: "10.5px", fontWeight: 400 } as const;
 const chipStyle = { ...diagramMono, fontSize: "11px", fontWeight: 650 } as const;
 const targetLabelStyle = { ...diagramMono, fontSize: "12px", fontWeight: 650 } as const;
+const halfLabelStyle = { ...diagramMono, fontSize: "11px", fontWeight: 650 } as const;
 
 const STAGE_Y = 116;
 const STAGE_H = 124;
@@ -118,6 +121,7 @@ function Slab({ x, w = 64 }: { x: number; w?: number }) {
 
 function TargetBlock({ x, w }: { x: number; w: number }) {
   const cx = x + w / 2;
+  const seam = STAGE_Y + STAGE_H / 2;
   return (
     <>
       <rect
@@ -130,14 +134,84 @@ function TargetBlock({ x, w }: { x: number; w: number }) {
         rx={3}
       />
       <DivisionsH x={x} w={w} className={targetDivisionClass} />
+      {/* Concatenate runs on dim 1, so gate sits above up rather than beside
+          it. The seam is drawn heavier than the dim-1 divisions so it doesn't
+          read as one more band. */}
+      <line
+        className={targetSeamClass}
+        strokeWidth={1.25}
+        x1={x + 1}
+        y1={seam}
+        x2={x + w - 1}
+        y2={seam}
+      />
+      {[
+        { cy: STAGE_Y + STAGE_H / 4, label: "gate" },
+        { cy: STAGE_Y + (3 * STAGE_H) / 4, label: "up" },
+      ].map(half => (
+        <g key={half.label}>
+          <rect
+            className={halfLabelBgClass}
+            x={cx - 19}
+            y={half.cy - 9}
+            width={38}
+            height={18}
+            rx={3}
+          />
+          <text
+            className={targetTextClass}
+            style={halfLabelStyle}
+            x={cx}
+            y={half.cy + 4}
+            textAnchor="middle"
+          >
+            {half.label}
+          </text>
+        </g>
+      ))}
+      <AxisArrows x={x} w={w} vertical="gate + up (dim 1)" horizontal="hidden (dim 2)" />
+    </>
+  );
+}
+
+// Matches the axis treatment on the Qwen3-VL diagram: two axes drawn, the
+// expert axis left to the shape label underneath.
+function AxisArrows({
+  x,
+  w,
+  vertical,
+  horizontal,
+}: {
+  x: number;
+  w: number;
+  vertical: string;
+  horizontal: string;
+}) {
+  const vx = x - 14;
+  const hy = STAGE_Y + STAGE_H + 12;
+  return (
+    <>
+      <line className={axisLineClass} strokeWidth={1} x1={vx} y1={STAGE_Y + 14} x2={vx} y2={STAGE_Y + STAGE_H - 14} />
+      <polygon className={arrowHeadClass} points={`${vx - 3},${STAGE_Y + 14} ${vx},${STAGE_Y + 7} ${vx + 3},${STAGE_Y + 14}`} />
+      <polygon
+        className={arrowHeadClass}
+        points={`${vx - 3},${STAGE_Y + STAGE_H - 14} ${vx},${STAGE_Y + STAGE_H - 7} ${vx + 3},${STAGE_Y + STAGE_H - 14}`}
+      />
       <text
-        className={targetTextClass}
-        style={targetLabelStyle}
-        x={cx}
-        y={ARROW_Y + 4}
+        className={labelClass}
+        style={headerStyle}
+        transform={`rotate(-90 ${vx - 14} ${ARROW_Y})`}
+        x={vx - 14}
+        y={ARROW_Y}
         textAnchor="middle"
       >
-        gate_up_proj
+        {vertical}
+      </text>
+      <line className={axisLineClass} strokeWidth={1} x1={x + 16} y1={hy} x2={x + w - 16} y2={hy} />
+      <polygon className={arrowHeadClass} points={`${x + w - 16},${hy - 3} ${x + w - 9},${hy} ${x + w - 16},${hy + 3}`} />
+      <polygon className={arrowHeadClass} points={`${x + 16},${hy - 3} ${x + 9},${hy} ${x + 16},${hy + 3}`} />
+      <text className={labelClass} style={headerStyle} x={x + w / 2} y={hy + 15} textAnchor="middle">
+        {horizontal}
       </text>
     </>
   );
@@ -209,7 +283,7 @@ function StackHeader({ cx, children }: { cx: number; children: ReactNode }) {
   );
 }
 
-function StageLabel({ cx, lines }: { cx: number; lines: ReactNode[] }) {
+function StageLabel({ cx, lines, y = 262 }: { cx: number; lines: ReactNode[]; y?: number }) {
   return (
     <>
       {lines.map((line, i) => (
@@ -218,7 +292,7 @@ function StageLabel({ cx, lines }: { cx: number; lines: ReactNode[] }) {
           className={labelClass}
           style={labelStyle}
           x={cx}
-          y={262 + i * 16}
+          y={y + i * 16}
           textAnchor="middle"
         >
           {line}
@@ -265,8 +339,9 @@ function DiagramFigure({
 export function MixtralConversionDiagram() {
   return (
     <DiagramFigure
+      viewHeight={332}
       rootClass="cvd-mixtral"
-      ariaLabel="Mixtral conversion pipeline: WeightRenaming moves the experts from block_sparse_moe to mlp, MergeModulelist stacks the eight experts, and Concatenate fuses gate with up"
+      ariaLabel="Mixtral conversion pipeline: WeightRenaming moves the experts from block_sparse_moe to mlp, MergeModulelist stacks the eight experts, and Concatenate fuses gate above up on dim 1"
       css={spotlightCss("cvd-mixtral", [
         { chip: "c1", keep: ["s0", "a1", "s1"] },
         { chip: "c2", keep: ["s1", "a2", "s2"] },
@@ -281,6 +356,7 @@ export function MixtralConversionDiagram() {
         <ExpertStack x={84} w={56} />
         <StageLabel
           cx={80}
+          y={288}
           lines={["block_sparse_moe.", "experts.*.{w1,w3}.weight"]}
         />
       </g>
@@ -298,7 +374,7 @@ export function MixtralConversionDiagram() {
         <StackHeader cx={300}>w3</StackHeader>
         <ExpertStack x={208} w={56} />
         <ExpertStack x={272} w={56} />
-        <StageLabel cx={268} lines={["mlp.", "experts.*.{w1,w3}.weight"]} />
+        <StageLabel cx={268} y={288} lines={["mlp.", "experts.*.{w1,w3}.weight"]} />
       </g>
 
       <g className="cvd-step a2">
@@ -314,20 +390,24 @@ export function MixtralConversionDiagram() {
         <StackHeader cx={520}>w3</StackHeader>
         <Slab x={416} />
         <Slab x={488} />
-        <StageLabel cx={484} lines={["2 × (8, 6144, 16384)"]} />
+        <StageLabel cx={484} y={288} lines={["2 × (8, 16384, 6144)"]} />
       </g>
 
       <g className="cvd-step a3">
-        <Chip cx={586} w={141} cls="c3">
+        <Chip cx={570} w={141} cls="c3">
           Concatenate(dim=1)
         </Chip>
-        <FlowArrow x1={558} x2={604} />
+        <FlowArrow x1={558} x2={584} />
       </g>
 
       <g className="cvd-step s3">
-        <Caption cx={674}>standard</Caption>
-        <TargetBlock x={616} w={116} />
-        <StageLabel cx={674} lines={["mlp.experts.gate_up_proj", "(8, 6144, 32768)"]} />
+        <Caption cx={690}>standard</Caption>
+        <TargetBlock x={632} w={116} />
+        <StageLabel
+          cx={690}
+          y={288}
+          lines={["mlp.experts.gate_up_proj", "(8, 32768, 6144)"]}
+        />
       </g>
     </DiagramFigure>
   );
@@ -336,8 +416,9 @@ export function MixtralConversionDiagram() {
 export function Qwen2ConversionDiagram() {
   return (
     <DiagramFigure
+      viewHeight={332}
       rootClass="cvd-qwen2"
-      ariaLabel="Qwen2 conversion pipeline: no rename is needed, MergeModulelist stacks the experts and Concatenate fuses gate with up"
+      ariaLabel="Qwen2 conversion pipeline: no rename is needed, MergeModulelist stacks the experts and Concatenate fuses gate above up on dim 1"
       css={spotlightCss("cvd-qwen2", [
         { chip: "c1", keep: ["s0", "a1", "s1"] },
         { chip: "c2", keep: ["s1", "a2", "s2"] },
@@ -360,6 +441,7 @@ export function Qwen2ConversionDiagram() {
         <ExpertStack x={112} w={56} />
         <StageLabel
           cx={108}
+          y={288}
           lines={["mlp.experts.*.", "{gate_proj,up_proj}.weight", "(64 experts)"]}
         />
       </g>
@@ -377,20 +459,24 @@ export function Qwen2ConversionDiagram() {
         <StackHeader cx={440}>up_proj</StackHeader>
         <Slab x={336} />
         <Slab x={408} />
-        <StageLabel cx={404} lines={["2 × (64, 3584, 2560)"]} />
+        <StageLabel cx={404} y={288} lines={["2 × (64, 2560, 3584)"]} />
       </g>
 
       <g className="cvd-step a2">
-        <Chip cx={540} w={141} cls="c2">
+        <Chip cx={532} w={141} cls="c2">
           Concatenate(dim=1)
         </Chip>
-        <FlowArrow x1={488} x2={588} />
+        <FlowArrow x1={488} x2={584} />
       </g>
 
       <g className="cvd-step s2">
-        <Caption cx={676}>standard</Caption>
-        <TargetBlock x={616} w={120} />
-        <StageLabel cx={676} lines={["mlp.experts.gate_up_proj", "(64, 3584, 5120)"]} />
+        <Caption cx={692}>standard</Caption>
+        <TargetBlock x={632} w={120} />
+        <StageLabel
+          cx={692}
+          y={288}
+          lines={["mlp.experts.gate_up_proj", "(64, 5120, 3584)"]}
+        />
       </g>
     </DiagramFigure>
   );
@@ -532,6 +618,7 @@ export function Qwen3VLConversionDiagram() {
 export function DeepSeekV3ConversionDiagram() {
   return (
     <DiagramFigure
+      viewHeight={332}
       rootClass="cvd-deepseek"
       ariaLabel="DeepSeek-V3 conversion pipeline: Fp8Dequantize expands the FP8 weights with their block scales, then the same MergeModulelist and Concatenate as Qwen2"
       css={spotlightCss("cvd-deepseek", [
@@ -557,6 +644,7 @@ export function DeepSeekV3ConversionDiagram() {
         ))}
         <StageLabel
           cx={100}
+          y={288}
           lines={["mlp.experts.*.gate_proj", "+ weight_scale_inv", "(256 experts)"]}
         />
       </g>
@@ -572,26 +660,30 @@ export function DeepSeekV3ConversionDiagram() {
         <Caption cx={344}>dequantized</Caption>
         <StackHeader cx={344}>gate_proj (bf16)</StackHeader>
         <ExpertStack x={300} w={88} />
-        <StageLabel cx={344} lines={["(2048, 7168) each"]} />
+        <StageLabel cx={344} y={288} lines={["(2048, 7168) each"]} />
       </g>
 
       <g className="cvd-step a2">
-        <Chip cx={500} w={163} cy={58} cls="c2">
+        <Chip cx={494} w={163} cy={58} cls="c2">
           MergeModulelist(dim=0)
         </Chip>
-        <Chip cx={500} w={141} cy={86} cls="c2">
+        <Chip cx={494} w={141} cy={86} cls="c2">
           Concatenate(dim=1)
         </Chip>
-        <text className={labelClass} style={argsStyle} x={500} y={112} textAnchor="middle">
+        <text className={labelClass} style={argsStyle} x={494} y={112} textAnchor="middle">
           {'"deepseek_v3": "qwen2_moe"'}
         </text>
-        <FlowArrow x1={404} x2={588} />
+        <FlowArrow x1={404} x2={584} />
       </g>
 
       <g className="cvd-step s2">
-        <Caption cx={676}>standard</Caption>
-        <TargetBlock x={616} w={120} />
-        <StageLabel cx={676} lines={["mlp.experts.gate_up_proj", "(256, 7168, 4096)"]} />
+        <Caption cx={692}>standard</Caption>
+        <TargetBlock x={632} w={120} />
+        <StageLabel
+          cx={692}
+          y={288}
+          lines={["mlp.experts.gate_up_proj", "(256, 4096, 7168)"]}
+        />
       </g>
     </DiagramFigure>
   );

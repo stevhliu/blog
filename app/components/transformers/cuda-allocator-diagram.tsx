@@ -13,7 +13,6 @@ const COLORS = {
   mallocSoft: "rgba(71, 70, 69, 0.16)",
   mallocSofter: "rgba(71, 70, 69, 0.08)",
   tensor: "#00ca48",
-  tensorEdge: "#00a23a",
   done: "#474645",
   doneAccent: "#474645",
 };
