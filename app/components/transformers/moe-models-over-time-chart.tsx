@@ -87,7 +87,7 @@ const DOT_RADIUS = 3.5;
 const DOT_STROKE_WIDTH = 3;
 const DOT_LINE_GAP = pointLineGap(DOT_RADIUS, DOT_STROKE_WIDTH);
 
-const minTime = Date.parse("2025-01-01T00:00:00Z");
+const minTime = Date.parse("2022-11-01T00:00:00Z");
 const maxTime = DATA[DATA.length - 1].time;
 
 const xScale = (time: number) =>
@@ -97,6 +97,8 @@ const yScale = (value: number) => Y_END - (value / Y_MAX) * CHART_H;
 
 const Y_TICKS = [0, 15, 30, 45, 60];
 const X_TICKS = [
+  { label: "2023", time: Date.parse("2023-01-01T00:00:00Z") },
+  { label: "2024", time: Date.parse("2024-01-01T00:00:00Z") },
   { label: "2025", time: Date.parse("2025-01-01T00:00:00Z") },
   { label: "2026", time: Date.parse("2026-01-01T00:00:00Z") },
 ];
@@ -111,9 +113,6 @@ const chartPoints = chartData.map(d => ({
 }));
 
 const linePath = buildTrimmedLinePath(chartPoints, () => DOT_LINE_GAP);
-
-const first2025 = DATA.find(d => d.date.startsWith("2025"))!;
-const finalPoint = DATA[DATA.length - 1];
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en", {
