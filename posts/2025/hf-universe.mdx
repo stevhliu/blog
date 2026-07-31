@@ -3,11 +3,6 @@ export const metadata = {
   description: 'A quick guide to what Hugging Face is',
 }
 
-
-<Figure>
-  <Image src="/images/hf-universe.png" alt="The Hugging-Verse" width={672} height={378} className="rounded-xl" />
-</Figure>
-
 I often see people ask, *what is Hugging Face*? The answer is usually some variant of "Hugging Face is the GitHub of machine learning".
 
 It's not a bad answer, but it hides a lot of depth. The Hugging Face ecosystem, or Hugging-Verse, is expansive and encompasses nearly every aspect of machine learning. For this reason, it can be overwhelming if you're just getting started.
@@ -29,7 +24,7 @@ But I've also had to look certain things up in guides because I was overwhelmed.
   </Collapsible>
 </div>
 
-## starting classes [#starting-classes]
+## Starting classes [#starting-classes]
 
 There are many libraries in the Hugging-Verse, each dedicated to a specific topic like transformer models, diffusion models, pretraining/finetuning, robotics, evaluation, and more.
 
@@ -37,7 +32,7 @@ Choose a starter class, [Transformers](https://huggingface.co/docs/transformers)
 
 As an example, TRL trainers extend the Transformers Trainer. If you're already familiar with Trainer, then you'll get a +x% faster learning bonus.
 
-### skill tree [#skill-tree]
+### Skill tree [#skill-tree]
 
 As you level up, you can start exploring the skill tree and decide *whether* and *where* you want to spend your points on more specialized skills.
 
@@ -47,23 +42,23 @@ The reason you should consider *whether* you want to invest in these skills is t
 
 This isn't to say you shouldn't learn a specialized library, because not *all* abilities are integrated into Transformers. You may find that you need something in TRL that isn't available in Transformers.
 
-## the hub [#the-hub]
+## The Hub [#the-hub]
 
 The [Hub](https://huggingface.co) is where you go for shops and services to get things done. Most of these services are free to use, but a <ProBadge /> subscription unlocks access to higher limits and more features.
 
-### storage [#storage]
+### Storage [#storage]
 
 One of the main services the Hub offers is storage for models and datasets you create. It pairs the Git workflow with [Xet's](https://huggingface.co/docs/hub/xet/index) storage system. Xet is faster and more efficient than Git LFS because it uses content-defined chunking (CDC) to deduplicate data. Only the parts of a file that changed are uploaded, unlike Git LFS, which uploads the entire file again.
 
 The starter storage is pretty generous and comes with around 8TB of public storage and 100GB of private storage.
 
-### buckets [#buckets]
+### Buckets [#buckets]
 
 [Buckets](https://huggingface.co/docs/huggingface_hub/en/guides/buckets) are a type of storage container designed for storing intermediate stuff, like checkpoints from a training run or processed data from a data pipeline. These files can be overwritten, deleted, and don't require versioning. When you're ready, publish these artifacts to [storage](#storage). Buckets is backed by the same Xet storage system for faster transfers and lower costs.
 
 This is useful for working environments and keeping the entire ML training loop in one place without leaving the Hub.
 
-### spaces [#spaces]
+### Spaces [#spaces]
 
 [Spaces](https://huggingface.co/docs/hub/spaces) lets you turn your models into ML apps with frameworks like [Gradio](https://huggingface.co/docs/hub/spaces-sdks-gradio), [Docker](https://huggingface.co/docs/hub/spaces-sdks-docker), and [React](https://huggingface.co/docs/hub/spaces-sdks-static). You can even turn your ML app into a [callable tool](https://huggingface.co/docs/hub/spaces-mcp-servers) for agents with MCP to integrate a Space into a workflow.
 
@@ -71,7 +66,7 @@ This is useful for working environments and keeping the entire ML training loop 
 
 A free Space runs on a CPU with 16GB of RAM, and you can upgrade to bigger GPUs if you need additional compute. For a more unique and powerful hardware option, try <ZeroBadge />, a shared cluster of H200s. The H200s are dynamically allocated to a Space to complete a workload, then released for the next Space. This ensures you only use compute when you need it and aren't leaving GPUs idle.
 
-### inference providers and endpoints [#inference-providers]
+### Inference Providers and Endpoints [#inference-providers]
 
 Serverless inference lets you run your model through an API without having to manage the infrastructure on your own. This is designed to help you deploy models to production. There are two options:
 
@@ -79,7 +74,7 @@ Serverless inference lets you run your model through an API without having to ma
 
 - [Inference Endpoints](https://huggingface.co/docs/inference-endpoints/index) is Hugging Face's dedicated and managed inference infrastructure ("endpoint") that runs continuously. There are more choices to make about the deployment, such as hardware (AWS/GCP/Azure), inference engine (vLLM/SGLang), and autoscaling.
 
-### jobs [#jobs]
+### Jobs [#jobs]
 
 [Jobs](https://huggingface.co/docs/hub/jobs-overview) provides access to Hugging Face's hardware (CPUs/GPUs) for *temporary* compute. It stops once the task is complete, or you can [schedule](https://huggingface.co/docs/hub/jobs-schedule) a task to run periodically.
 
@@ -90,7 +85,7 @@ Serverless inference lets you run your model through an API without having to ma
 
 This is useful for one-off or scheduled workloads like finetuning and data processing.
 
-### data studio [#data-studio]
+### Data Studio [#data-studio]
 
 [Data Studio](https://huggingface.co/docs/hub/data-studio) is available in dataset repositories for exploring data in the browser without downloading it. Ask the agent questions about a dataset or use the built-in SQL console to query it.
 
@@ -102,21 +97,21 @@ This is useful for one-off or scheduled workloads like finetuning and data proce
   loading="lazy"
 ></iframe>
 
-## buffs [#buffs]
+## Buffs [#buffs]
 
 Acquire these permanent buffs to increase your research and knowledge skills.
 
-### courses [#courses]
+### Courses [#courses]
 
 Take the courses at [hf.co/learn](https://hf.co/learn), which cover topics like agents, reinforcement learning, diffusion, and more.
 
 This is a good early-game buff because you get more in-depth explanations about how things work.
 
-### papers [#papers]
+### Papers [#papers]
 
 Browse [Papers](https://huggingface.co/papers/trending), a curated daily selection to help you stay on top of the latest research.
 
-### research [#research]
+### Research [#research]
 
 Follow the [science team](https://huggingface.co/science), which produces and shares research you can learn from and build on.
 
@@ -134,11 +129,11 @@ This is a good late-game buff.
 	loading="lazy"
 ></iframe>
 
-## companions [#companions]
+## Companions [#companions]
 
 Add a companion to your party to help you out.
 
-### reachy [#reachy]
+### Reachy [#reachy]
 
 [Reachy](https://huggingface.co/spaces/pollen-robotics/Reachy_Mini) is a desktop robot for experimenting with human-robot interactions. The robot is built on open-source software, so you can program new "behaviors" for it.
 
@@ -146,7 +141,7 @@ Add a companion to your party to help you out.
     id="2008319790868201795"
 />
 
-### huggingchat [#huggingchat]
+### HuggingChat [#huggingchat]
 
 [HuggingChat](https://huggingface.co/chat/) is an open version of ChatGPT with support for many models like Kimi-K2.5 and gpt-oss-120B. If you don't know which model to use, its Omni router automatically selects the best model for your message.
 

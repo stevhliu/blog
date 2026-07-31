@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Post } from "../get-posts";
 import { formatShortPostDate } from "../post-format";
-import { TreePineIcon } from "./tree-pine-icon";
 
 export function PostYearColumn({
   year,
@@ -12,7 +11,7 @@ export function PostYearColumn({
 }) {
   return (
     <div className="flex flex-col">
-      <div className="archive-col-header flex justify-between text-[14px] text-[var(--color-text)] font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
+      <div className="archive-col-header flex justify-between text-[14px] text-[var(--color-text)] uppercase tracking-[0.04em]">
         <span>{year}</span>
       </div>
       {posts.map((post) => (
@@ -22,25 +21,15 @@ export function PostYearColumn({
           className="post-link archive-entry text-[var(--color-text)] no-underline"
         >
           <span className="flex min-w-0 max-w-[72%] items-baseline gap-6">
-            <span className="shrink-0 text-[14px] opacity-70 min-w-[48px] tabular-nums font-[var(--font-geist-mono),monospace] uppercase tracking-[0.04em]">
+            <span className="shrink-0 text-[14px] opacity-70 min-w-[48px] tabular-nums uppercase tracking-[0.04em]">
               {formatShortPostDate(post.date)}
             </span>
-            <span className="post-title min-w-0 break-words text-[14px] tracking-[0.01em] leading-[1.3] font-normal font-[var(--font-geist-mono),monospace]">
+            <span className="post-title min-w-0 break-words text-[14px] tracking-[0.01em] leading-[1.3] font-normal ">
               {post.title}
-              {post.evergreen ? (
-                <span className="ml-1.5 inline-flex align-[-0.1em] opacity-70">
-                  <TreePineIcon
-                    aria-hidden="true"
-                    className="h-[1em] w-[1em] shrink-0"
-                    strokeWidth={2}
-                  />
-                  <span className="sr-only">Evergreen</span>
-                </span>
-              ) : null}
             </span>
           </span>
           <span className="flex flex-col gap-[2px] text-right">
-            <span className="text-[14px] opacity-60 tabular-nums font-[var(--font-geist-mono),monospace]">
+            <span className="text-[14px] opacity-60 tabular-nums ">
               {post.viewsFormatted}
             </span>
           </span>

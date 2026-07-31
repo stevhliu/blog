@@ -5,7 +5,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        mono: ["var(--font-geist-mono)"],
+        sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "SFMono-Regular", "Consolas", "Menlo", "monospace"],
       },
     },
   },

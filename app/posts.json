@@ -14,8 +14,7 @@
     {
       "id": "attention-please",
       "date": "Aug 10, 2025",
-      "title": "Attention please",
-      "evergreen": true
+      "title": "Attention please"
     },
     {
       "id": "sonoma-in-ai",
@@ -25,8 +24,7 @@
     {
       "id": "hf-universe",
       "date": "Mar 10, 2025",
-      "title": "Welcome to the Hugging-Verse",
-      "evergreen": true
+      "title": "Welcome to the Hugging-Verse"
     },
     {
       "id": "model-docs-design",

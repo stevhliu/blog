@@ -5,45 +5,27 @@ export function ZeroBadge() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="ZeroGPU (opens in new tab)"
-      className="inline-block align-middle transition-transform duration-150 ease-[var(--ease-out)] [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 active:scale-[0.97] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
+      className="inline-flex h-5 -skew-x-12 items-center rounded-lg border border-gray-200 bg-gray-100 px-2 align-middle text-sm font-bold leading-none text-black no-underline shadow-lg shadow-gray-500/10 transition-transform duration-150 ease-[var(--ease-out)] [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 active:scale-[0.97] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:shadow-gray-500/20"
     >
-      <svg
-        viewBox="0 0 32 11"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="block h-5 w-auto"
-        aria-hidden="true"
-      >
-        <rect
-          width="29.28"
-          height="9.85"
-          rx="3"
-          transform="matrix(1 0 -.27564 .96126 3.33 .47)"
-          fill="currentColor"
-          className="text-gray-200 dark:text-gray-800"
-        />
-        <path
-          d="M7.6 2.8c1.3 0 1.3 1 .6 1.3-.3.1-.4.4-.5.7.1.1.3.1.3.2 1-.5 2.1-.3 2.1.7 0 1.2-1 1.3-1.3.6-.1-.3-.4-.4-.7-.5a.9.9 0 0 1-.3.3c.6 1 .3 2.1-.7 2.1-1.2 0-1.3-1-.6-1.3.3-.1.4-.4.5-.7a.9.9 0 0 1-.4-.3c-1 .6-2.1.3-2.1-.7 0-1.2 1-1.3 1.3-.6.1.3.4.4.7.5a.8.8 0 0 1 .3-.3c-.6-1-.3-2.1.6-2.1Z"
-          fill="currentColor"
-          className="text-black dark:text-gray-200"
-        />
-        <text
-          x="28.5"
-          y="5.5"
-          dominantBaseline="central"
-          textAnchor="end"
-          textLength="17"
-          lengthAdjust="spacingAndGlyphs"
-          fontSize="7"
-          fontWeight="800"
-          fontStyle="italic"
-          fontFamily="system-ui, sans-serif"
-          fill="currentColor"
-          className="text-black dark:text-gray-200"
+      <span className="inline-flex skew-x-12 items-center gap-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 15 15"
+          width="1em"
+          height="1em"
+          preserveAspectRatio="xMidYMid meet"
+          className="shrink-0"
+          aria-hidden="true"
+          focusable="false"
+          role="img"
         >
-          ZERO
-        </text>
-      </svg>
+          <path
+            d="M7.48877 6.75C7.29015 6.75 7.09967 6.82902 6.95923 6.96967C6.81879 7.11032 6.73989 7.30109 6.73989 7.5C6.73989 7.69891 6.81879 7.88968 6.95923 8.03033C7.09967 8.17098 7.29015 8.25 7.48877 8.25C7.68738 8.25 7.87786 8.17098 8.0183 8.03033C8.15874 7.88968 8.23764 7.69891 8.23764 7.5C8.23764 7.30109 8.15874 7.11032 8.0183 6.96967C7.87786 6.82902 7.68738 6.75 7.48877 6.75ZM7.8632 0C11.2331 0 11.3155 2.6775 9.54818 3.5625C8.80679 3.93 8.47728 4.7175 8.335 5.415C8.69446 5.565 9.00899 5.7975 9.24863 6.0975C12.0195 4.5975 15 5.19 15 7.875C15 11.25 12.3265 11.325 11.4428 9.5475C11.0684 8.805 10.2746 8.475 9.57813 8.3325C9.42836 8.6925 9.19621 9 8.89665 9.255C10.3869 12.0225 9.79531 15 7.11433 15C3.74438 15 3.67698 12.315 5.44433 11.43C6.17823 11.0625 6.50774 10.2825 6.65751 9.5925C6.29056 9.4425 5.96855 9.2025 5.72891 8.9025C2.96555 10.3875 0 9.8025 0 7.125C0 3.75 2.666 3.6675 3.54967 5.445C3.92411 6.1875 4.71043 6.51 5.40689 6.6525C5.54918 6.2925 5.78882 5.9775 6.09586 5.7375C4.60559 2.97 5.1972 0 7.8632 0Z"
+            fill="currentColor"
+          />
+        </svg>
+        Zero
+      </span>
     </a>
   );
 }

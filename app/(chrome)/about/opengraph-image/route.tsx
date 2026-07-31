@@ -8,7 +8,6 @@ import { formatInteger } from "@/app/post-format";
 const stevhliuPhoto = loadPublicImageDataUrl("images/stevhliu.PNG", "image/png");
 const geistSans = loadGeistFont("geist-light.ttf");
 const geistSansMedium = loadGeistFont("geist-medium.ttf");
-const geistMono = loadGeistFont("geist-mono-regular.ttf");
 
 export async function GET() {
   const posts = await getPosts();
@@ -35,13 +34,13 @@ export async function GET() {
               <div tw="text-[64px] mb-7" style={font("Geist Medium")}>
                 Steven Liu
               </div>
-              <div tw="flex mb-5" style={font("Geist Mono")}>
+              <div tw="flex mb-5" style={font("Geist")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> developer docs at Hugging Face
               </div>
-              <div tw="flex mb-5" style={font("Geist Mono")}>
+              <div tw="flex mb-5" style={font("Geist")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Transformers
               </div>
-              <div tw="flex" style={font("Geist Mono")}>
+              <div tw="flex" style={font("Geist")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Bay Area, CA
               </div>
             </div>
@@ -50,7 +49,7 @@ export async function GET() {
 
         <footer
           tw="flex w-full justify-center text-2xl text-gray-500"
-          style={font("Geist Mono")}
+          style={font("Geist")}
         >
           {posts.length} posts / {formatInteger(viewsSum)} views
         </footer>
@@ -69,11 +68,6 @@ export async function GET() {
           name: "Geist Medium",
           data: geistSansMedium,
           weight: 500,
-        },
-        {
-          name: "Geist Mono",
-          data: geistMono,
-          weight: 400,
         },
       ],
     }

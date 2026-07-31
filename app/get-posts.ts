@@ -9,7 +9,6 @@ export type Post = {
   title: string;
   views: number;
   viewsFormatted: string;
-  evergreen?: boolean;
   draft?: boolean;
 };
 

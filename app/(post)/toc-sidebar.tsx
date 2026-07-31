@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-type TocItem = { id: string; text: string };
+type TocItem = { id: string; text: string; level: 2 | 3 };
 
 function shouldReduceMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -37,7 +37,13 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
       const article = document.querySelector("article");
       if (!article) return;
       headerElRef.current = article.querySelector(":scope > header");
-      const hs = Array.from(article.querySelectorAll<HTMLHeadingElement>("h2"));
+      // Only prose headings: MDX renders them as direct children of .post-body.
+      // Component-generated headings (e.g. <Table title>) sit deeper and can repeat.
+      const root = article.querySelector(".post-body") ?? article;
+      const hs = Array.from(
+        root.querySelectorAll<HTMLHeadingElement>(":scope > h2, :scope > h3"),
+      );
+      const seenIds = new Set<string>();
       const nextItems: TocItem[] = [];
       const nextHeadingEls: Array<{ id: string; element: HTMLElement }> = [];
 
@@ -54,13 +60,17 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
         }
         h.style.scrollMarginTop = "40px";
         const id = fromSpan || h.id;
+        if (!id || seenIds.has(id)) continue;
+        seenIds.add(id);
         const text = (h.textContent ?? "").replace(/^\s*#\s*/m, "").replace(/\s+/g, " ").trim();
-        nextItems.push({ id, text });
+        nextItems.push({ id, text, level: h.tagName === "H3" ? 3 : 2 });
         nextHeadingEls.push({ id, element: span ?? h });
       }
 
       headingElsRef.current = nextHeadingEls;
-      const nextKey = nextItems.map(item => `${item.id}:${item.text}`).join("\n");
+      const nextKey = nextItems
+        .map(item => `${item.level}:${item.id}:${item.text}`)
+        .join("\n");
       if (nextKey !== itemsKeyRef.current) {
         itemsKeyRef.current = nextKey;
         setItems(nextItems);
@@ -142,7 +152,7 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
       <Link
         href="/"
         aria-label="Back to index"
-        className="inline-flex items-center gap-2 font-mono text-[11px] leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-200 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
+        className="inline-flex items-center gap-2 text-[11px] leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-200 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +181,7 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
         {postTitle ? (
           <h2
             className={[
-              "side-section font-mono text-[11px] font-medium tracking-[0.04em] leading-tight m-0 mb-2.5 transition-[color] duration-200 motion-reduce:transition-none",
+              "side-section text-[11px] font-medium tracking-[0.04em] leading-tight m-0 mb-2.5 transition-[color] duration-200 motion-reduce:transition-none",
               titleActive ? "text-[var(--color-body)]" : "text-[var(--color-dim)]",
             ].join(" ")}
           >
@@ -181,7 +191,7 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
         {items.length > 0 ? (
           <ul
             className={[
-              "list-none p-0 m-0 font-mono leading-[1.9] [scrollbar-gutter:stable]",
+              "list-none p-0 m-0 leading-[1.9] [scrollbar-gutter:stable]",
               "text-[11px]",
               "max-md:max-h-[min(50dvh,22rem)] max-md:overflow-y-auto max-md:overscroll-y-contain max-md:pr-0.5",
               "md:max-h-[min(28rem,calc(100dvh-7rem))] md:overflow-y-auto md:overflow-x-hidden md:overscroll-y-contain",
@@ -191,7 +201,12 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
             {items.map((it) => {
               const active = it.id === activeId;
               return (
-                <li key={it.id} data-active={active ? "true" : "false"}>
+                <li
+                  key={it.id}
+                  data-active={active ? "true" : "false"}
+                  data-level={it.level}
+                  className={it.level === 3 ? "pl-3" : undefined}
+                >
                   <a
                     href={`#${it.id}`}
                     onClick={(e) => {

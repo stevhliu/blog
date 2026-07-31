@@ -30,7 +30,7 @@ export function PostChrome({
                 {post.title}
               </h1>
               {post.date ? (
-                <p className="m-0 mt-3 font-mono text-[11px] leading-none tracking-[0.04em] text-[var(--color-dim)]">
+                <p className="m-0 mt-3 text-[11px] leading-none tracking-[0.04em] text-[var(--color-dim)]">
                   <time className="tabular-nums">{post.date}</time>
                 </p>
               ) : null}

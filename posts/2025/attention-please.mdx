@@ -11,7 +11,7 @@ It's amazing that an idea so simple has such a tremendous and lasting impact. Th
 
 This post tries to very simply and very plainly explain how attention, and variants of it, work.
 
-## self-attention [#self-attention]
+## Self-attention [#self-attention]
 
 Self-attention (scaled dot-product attention) computes how much attention each word in a sequence assigns to every other word in that same sequence. It's what makes transformers contextually aware.
 
@@ -81,7 +81,7 @@ Try calculating the self-attention score by hand in the following sequence to re
 This is the final self-attention score for `Fear`.
 </Collapsible>
 
-## causal self-attention [#causal-self-attention]
+## Causal self-attention [#causal-self-attention]
 
 Causal self-attention is used in decoder models like [GPT](https://huggingface.co/openai-community/gpt2). Decoder models predict the next word in a sequence, so it is important to mask the next words to prevent the model from seeing them.
 
@@ -124,7 +124,7 @@ Try calculating the causal self-attention score by hand in the following sequenc
     The rest of the calculation is the same as self-attention.
 </Collapsible>
 
-## multi-head attention [#multi-head-attention]
+## Multi-head attention [#multi-head-attention]
 
 Multi-head attention (MHA) adds more heads to learn from different perspectives.
 
@@ -242,7 +242,7 @@ This is the final multi-head attention score for `Fear`.
 
 </Collapsible>
 
-## multi-query attention [#multi-query-attention]
+## Multi-query attention [#multi-query-attention]
 
 [Multi-query attention](https://huggingface.co/papers/1911.02150) (MQA) is the same as MHA except every Q shares the same K, V.
 
@@ -354,7 +354,7 @@ This is the final multi-query attention score for `Fear`.
 
 </Collapsible>
 
-## grouped-query attention [#grouped-query-attention]
+## Grouped-query attention [#grouped-query-attention]
 
 [Grouped-query attention](https://huggingface.co/papers/2305.13245) (GQA) is similar to MHA and MQA except *groups* of Q share the same K, V. K, V is different for each group.
 
@@ -502,7 +502,7 @@ This is the final grouped-query attention score for `Fear`.
 
 </Collapsible>
 
-## multi-head latent attention [#multi-head-latent-attention]
+## Multi-head latent attention [#multi-head-latent-attention]
 
 <MLADiagram />
 
@@ -535,7 +535,7 @@ Decoupling the *positional information* from the *content* solves this. The *con
 
 k<sup>R</sup> is cached, and the content and positional scores are summed when computing attention. This way, positional information flows through small decoupled vectors and content information can still flow through the latents.
 
-## flashattention [#flashattention]
+## FlashAttention [#flashattention]
 
 [FlashAttention](https://huggingface.co/papers/2205.14135) changes how the attention calculation is executed to minimize memory traffic to and from the GPU's slower high-bandwidth global memory (HBM). The calculation is done on the faster on-chip shared memory (SRAM) and registers, without fully materializing the entire attention score matrix in HBM.
 
@@ -552,7 +552,7 @@ The backward pass uses the same idea to avoid storing the attention probabilitie
 
 Speed ups increase with sequence length. But for short sequences, attention is less memory-bound and there's less benefit.
 
-## flashattention-2 [#flashattention-2]
+## FlashAttention-2 [#flashattention-2]
 
 [FlashAttention-2](https://huggingface.co/papers/2307.08691) improves FlashAttention by reducing non-matmul FLOPs and scheduling more work on the GPU.
 
@@ -572,7 +572,7 @@ Speed ups increase with sequence length. But for short sequences, attention is l
 
    FlashAttention-2 splits the work on Q and K, V is accessible by all warps. Each warp computes a partial result that doesn't require synchronization until the end. Assigning different Q blocks to different warps minimizes shared memory traffic.
 
-## flashattention-3 [#flashattention-3]
+## FlashAttention-3 [#flashattention-3]
 
 [FlashAttention-3](https://huggingface.co/papers/2407.08608) optimizes for newer hardware, like H100 GPUs, that support asynchrony. Specialized compute units run in parallel. Tensor cores can do fast matmuls, Tensor Memory Accelerator (TMA) loads data from HBM, and CUDA cores can perform slower computations like softmax.
 
@@ -598,13 +598,13 @@ Speed ups increase with sequence length. But for short sequences, attention is l
 
    If an outlier is in a normal block, FlashAttention-3 fixes this by spreading the outlier across all dimensions before quantization. It multiplies Q, K by a random orthogonal matrix to redistribute the outlier. This way, no single dimension dominates a block.
 
-## summary [#summary]
+## Summary [#summary]
 
 Self-attention is a weighted sum of contextual information of all words. The weights reflect each surrounding word's relevance to the current word.
 
 But attention is memory-bound. New attention algorithms optimize *how* the attention calculation is executed, whether it's sharing the same K, V or streaming the attention function.
 
-## resources [#resources]
+## Resources [#resources]
 
 - [Attention Is All You Need](https://huggingface.co/papers/1706.03762)
 - [Fast Transformer Decoding: One Write-Head is All You Need](https://huggingface.co/papers/1911.02150)

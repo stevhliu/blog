@@ -108,7 +108,7 @@ button:focus-visible,
 }
 
 .archive-mono {
-  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 /* Observation Log title: Geist sans, medium weight, tight tracking. The hero is the ASCII cat;
@@ -121,7 +121,7 @@ button:focus-visible,
 }
 
 .archive-meta {
-  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, Menlo, monospace;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;

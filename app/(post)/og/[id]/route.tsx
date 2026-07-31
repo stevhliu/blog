@@ -2,24 +2,52 @@ export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
-import { loadGeistFont } from "@/app/og-assets";
-import { formatShortPostDate, getPostYear } from "@/app/post-format";
+import { loadGeistFont, loadPublicImageDataUrl } from "@/app/og-assets";
 
 export async function generateStaticParams() {
   return (await getPosts()).map(post => ({ id: post.id }));
 }
 
 const geistSansMedium = loadGeistFont("geist-medium.ttf");
-const geistMono = loadGeistFont("geist-mono-regular.ttf");
 
-// Pose A of the dancing ASCII cat, rendered as rows instead of one <pre>.
-const CAT_LINES = [
-  "*",
-  "     /\\_/\\   *",
-  "   ( o.o )/",
-  "     > ^ <",
-  "    /     \\",
-  "*  /_/   \\_\\",
+// Pose A of the home page's dancing cat, captured from the live page
+// (scripts/shoot-dancing-cat.mjs) so the card shows the real thing.
+const dancingCat = loadPublicImageDataUrl("images/dancing-cat.png", "image/png");
+
+// The capture is cropped to the cat, and CAT_SCALE keeps it at the size it drew
+// at when the source was the full 831px-wide screenshot (300px across).
+const CAT_SRC_WIDTH = 373;
+const CAT_SRC_HEIGHT = 368;
+const CAT_SCALE = 300 / 831;
+const CAT_WIDTH = Math.round(CAT_SRC_WIDTH * CAT_SCALE);
+const CAT_HEIGHT = Math.round(CAT_SRC_HEIGHT * CAT_SCALE);
+
+// Six cats zigzag along the bottom, evenly spread across the inset row with
+// every other one dropped by ZIGZAG.
+const SIDE_INSET = 64;
+const BOTTOM_INSET = 40;
+const TILE_COUNT = 6;
+const ZIGZAG = 34;
+const ROW_WIDTH = 1200 - SIDE_INSET * 2;
+
+// The ♪ notes are images for the same reason the cat is: Satori has no system
+// font fallback and Geist carries no ♪ glyph.
+const NOTE_ASPECT = 254 / 174;
+const notes = {
+  blue: loadPublicImageDataUrl("images/note-blue.png", "image/png"),
+  green: loadPublicImageDataUrl("images/note-green.png", "image/png"),
+  pink: loadPublicImageDataUrl("images/note-pink.png", "image/png"),
+};
+
+// Scattered above the row: x is measured from the row's left edge, y up from
+// the row's top, and width sets the note's size.
+const FLOATING_NOTES = [
+  { src: notes.blue, x: 96, y: 52, width: 20 },
+  { src: notes.pink, x: 268, y: 18, width: 15 },
+  { src: notes.green, x: 430, y: 60, width: 18 },
+  { src: notes.blue, x: 636, y: 26, width: 14 },
+  { src: notes.pink, x: 812, y: 56, width: 19 },
+  { src: notes.green, x: 984, y: 22, width: 16 },
 ];
 
 export async function GET(
@@ -32,10 +60,6 @@ export async function GET(
 
   const post = posts[idx];
 
-  // Section number = newest-first index + 1 (matches the home page's SEC. NN label).
-  const section = String(posts.length - idx).padStart(2, "0");
-  const year = getPostYear(post.date);
-
   return new ImageResponse(
     (
       <div
@@ -47,38 +71,9 @@ export async function GET(
           padding: "48px 64px 40px",
         }}
       >
-        {/* Body: cat + title */}
-        <div tw="flex flex-1 items-start" style={{ gap: 36 }}>
-          <div
-            tw="flex flex-col"
-            style={{
-              fontFamily: "Geist Mono",
-              fontSize: 24,
-              lineHeight: 1.08,
-              flexShrink: 0,
-              opacity: 0.9,
-              whiteSpace: "pre",
-            }}
-          >
-            {CAT_LINES.map((line, i) => (
-              <div key={i} style={{ whiteSpace: "pre" }}>{line}</div>
-            ))}
-          </div>
-
+        {/* Body: title */}
+        <div tw="flex flex-1 items-start">
           <div tw="flex flex-1 flex-col">
-            <div
-              tw="flex"
-              style={{
-                fontFamily: "Geist Mono",
-                fontSize: 18,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                opacity: 0.65,
-              }}
-            >
-              ENTRY&nbsp;·&nbsp;{formatShortPostDate(post.date)}&nbsp;·&nbsp;{year}
-            </div>
-            <div style={{ height: 18 }} />
             <div
               style={{
                 fontFamily: "Geist Medium",
@@ -93,32 +88,59 @@ export async function GET(
           </div>
         </div>
 
-        {/* Footer meta row */}
+        {/* A few ♪ notes floating above the cats */}
         <div
-          tw="flex items-end justify-between"
+          tw="flex"
           style={{
-            borderTop: "1px solid #000000",
-            paddingTop: 20,
-            marginTop: 24,
-            fontFamily: "Geist Mono",
-            fontSize: 18,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
+            position: "absolute",
+            bottom: BOTTOM_INSET + CAT_HEIGHT + ZIGZAG,
+            left: SIDE_INSET,
+            width: ROW_WIDTH,
+            height: 90,
           }}
         >
-          <div tw="flex">STEVHLIU.COM</div>
-          <div tw="flex">SEC.&nbsp;{section}&nbsp;/&nbsp;{year}</div>
-          <div tw="flex">{post.viewsFormatted}&nbsp;VIEWS</div>
+          {FLOATING_NOTES.map((note, i) => (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              key={i}
+              alt=""
+              src={note.src}
+              width={note.width}
+              height={Math.round(note.width * NOTE_ASPECT)}
+              style={{ position: "absolute", left: note.x, bottom: note.y }}
+            />
+          ))}
+        </div>
+
+        {/* Repeated cats zigzagging along the bottom, inset from the card edges */}
+        <div
+          tw="flex items-start justify-between"
+          style={{
+            position: "absolute",
+            bottom: BOTTOM_INSET,
+            left: SIDE_INSET,
+            width: ROW_WIDTH,
+            height: CAT_HEIGHT + ZIGZAG,
+          }}
+        >
+          {Array.from({ length: TILE_COUNT }, (_, i) => (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              key={i}
+              alt=""
+              src={dancingCat}
+              width={CAT_WIDTH}
+              height={CAT_HEIGHT}
+              style={{ flexShrink: 0, marginTop: i % 2 === 0 ? 0 : ZIGZAG }}
+            />
+          ))}
         </div>
       </div>
     ),
     {
       width: 1200,
       height: 630,
-      fonts: [
-        { name: "Geist Medium", data: geistSansMedium },
-        { name: "Geist Mono", data: geistMono },
-      ],
+      fonts: [{ name: "Geist Medium", data: geistSansMedium }],
     }
   );
 }

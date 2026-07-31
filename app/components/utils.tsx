@@ -21,7 +21,6 @@ export function withHeadingId(children) {
                 transition-opacity
                 duration-100
                 ease-out
-                font-mono
                 font-normal
                 text-[var(--color-subtext)]
                 [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-text)]
