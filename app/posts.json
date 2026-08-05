@@ -2,9 +2,8 @@
   "posts": [
     {
       "id": "how-transformers-standardize-models",
-      "date": "Aug 03, 2026",
-      "title": "How Hugging Face Transformers is quietly standardizing the model ecosystem",
-      "draft": true
+      "date": "Aug 05, 2026",
+      "title": "How Hugging Face Transformers is quietly standardizing the model ecosystem"
     },
     {
       "id": "transformers-loading-pipeline",
