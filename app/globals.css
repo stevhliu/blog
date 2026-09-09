@@ -590,6 +590,19 @@ li a:active,
   color: inherit;
 }
 
+/* The arrow sits on the text baseline rather than centred on the line
+   box, so it reads as part of the word instead of floating beside it. */
+.tl-open {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tl-open svg {
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
 /* The clay reads as a light object, so the dark theme rebuilds the light
    source the way the chip does rather than keeping the cream fill. */
 @media (prefers-color-scheme: dark) {

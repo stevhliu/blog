@@ -146,10 +146,27 @@ export function ModelTimelineTile() {
 
         <div className="tl-face tl-face-back">
           <div className="tl-blurb">
-            Every architecture ever added to Transformers, by the month it
-            landed. About one a week, for six years.
+            Every model added to Transformers.
           </div>
-          <div className="tl-label">Model timeline</div>
+          {/* The back is the face you can actually click, so it says what
+              clicking does rather than repeating the title. */}
+          <div className="tl-label tl-open">
+            Open
+            <svg
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M7 17 17 7" />
+              <path d="M8 7h9v9" />
+            </svg>
+          </div>
         </div>
       </a>
     </div>

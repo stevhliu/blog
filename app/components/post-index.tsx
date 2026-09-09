@@ -79,9 +79,18 @@ export function PostIndex({
         ))}
       </div>
 
-      <div className="mt-14">
+      {/* Set like the header's own type rather than as a heading face the
+          page does not otherwise have: the metrics of the "Steven Liu"
+          line, dimmed to the 0.70 the bio copy runs at. */}
+      <section className="mt-14 flex flex-col gap-5" aria-labelledby="projects-heading">
+        <h2
+          id="projects-heading"
+          className="m-0 text-[14px] font-normal leading-[1.7] opacity-70 text-[var(--color-text)]"
+        >
+          Projects
+        </h2>
         <ModelTimelineTile />
-      </div>
+      </section>
 
       {/* The 3-column grid exists only to hold pagination in the centre, so it
           is used only when there are pages to show. With a single page the
