@@ -133,27 +133,89 @@ button:focus-visible,
   }
 }
 
-.archive-col-header {
-  border-bottom: 1px solid var(--color-rule);
-  padding-bottom: 4px;
-  margin-bottom: 8px;
-}
-
+/* Archive row: year gutter, title, date, views. Every row shares one
+   grid template so the columns line up across the whole list, and the
+   groups run continuously with no rules or headings between them. The
+   year in the gutter is what marks where a group starts. */
 .archive-entry {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto 2ch;
+  column-gap: 12px;
+  align-items: baseline;
   min-height: 2.75rem;
   padding: 6px 0;
-  border-bottom: 1px dotted var(--color-rule-soft);
   transition: background-color 120ms var(--ease-out);
 }
 
 @media (min-width: 768px) {
   .archive-entry {
-    align-items: flex-start;
     min-height: 0;
   }
+}
+
+.archive-year,
+.archive-date,
+.archive-views {
+  font-size: 14px;
+  opacity: 0.55;
+}
+
+/* The year prints once per group. Later rows keep the element (so the
+   columns stay aligned) but hide it, which also keeps screen readers
+   from repeating the year on every entry. */
+.archive-year[data-repeated="true"] {
+  visibility: hidden;
+}
+
+/* Hairline between entries. It is a grid item spanning from the title
+   column to the right edge, so it starts where the title starts and the
+   year gutter stays clear. The last entry in the list has no rule under
+   it, since there is nothing below to separate it from. */
+.archive-entry::after {
+  content: "";
+  grid-column: 2 / -1;
+  align-self: end;
+  margin-top: 8px;
+  border-bottom: 1px dotted color-mix(in srgb, var(--color-rule) 25%, transparent);
+}
+
+.post-list:last-child li:last-child .archive-entry::after {
+  border-bottom: 0;
+}
+
+/* Spotlight hover, matching benji.org: pointing at the list dims every
+   title and date, and the row under the cursor stays lit. The year in the
+   gutter is left alone so the grouping stays readable while dimmed.
+   Pointer devices only, since there is no hover state to leave on touch. */
+.post-title,
+.archive-date,
+.archive-views {
+  transition: opacity 140ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 520px) {
+  .post-lists:hover .post-title,
+  .post-lists:hover .archive-date,
+  .post-lists:hover .archive-views {
+    opacity: 0.3;
+  }
+
+  .post-lists .archive-entry:hover .post-title {
+    opacity: 1;
+  }
+
+  .post-lists .archive-entry:hover .archive-date,
+  .post-lists .archive-entry:hover .archive-views {
+    opacity: 0.55;
+  }
+}
+
+.archive-date {
+  text-align: right;
+}
+
+.archive-views {
+  text-align: right;
 }
 
 .post-title {
@@ -176,21 +238,15 @@ li a:active,
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .archive-entry:hover {
-    background: var(--color-surface);
-  }
-
-  .post-link:hover .post-title {
-    transform: translateX(2px);
-  }
-
   .nav-link:hover {
     opacity: 0.8;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .post-title {
+  .post-title,
+  .archive-date,
+  .archive-views {
     transition: none;
   }
 
@@ -199,10 +255,6 @@ li a:active,
   .nav-link,
   .post-link {
     transition: opacity 100ms var(--ease-out);
-  }
-
-  .post-link:hover .post-title {
-    transform: none;
   }
 
   nav a:active,
@@ -227,6 +279,12 @@ li a:active,
   white-space: pre;
   display: inline-block;
   will-change: contents;
+  /* The two poses are not the same width (pose A is the wider one), so a
+     shrink-to-fit box changes size on every 500ms swap. That went unnoticed
+     while the cat was flush left, but now that it is centred a changing
+     width would rock it from side to side. Pinning the box to the wider
+     pose, in em so it holds at both font sizes, keeps it still. */
+  width: 11.6em;
 }
 
 @media (min-width: 768px) {
@@ -243,5 +301,351 @@ li a:active,
 
   .scrollbar-hidden::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* ─── Hugging Face chip ──────────────────────────────────
+   Inline pill for the logo + wordmark in the site header. "Floating
+   clay": a soft raised object rather than a flat tag, built from three
+   inset shadows and one cast shadow, with no wall and no tilt.
+
+   The three insets do the modelling. A white line along the top edge is
+   the lit face, a dark blur along the bottom is the shaded underside,
+   and a hairline ring keeps the silhouette from dissolving into the
+   page. The single offset shadow underneath is what lifts it.
+
+   This deliberately breaks the Family guide's "never exceed
+   rgba(0,0,0,0.04) for drops" rule, which assumes flat surfaces defined
+   by hairlines. A raised object needs a real shadow to read as raised.
+   Sizing stays scaled down from the guide's button padding, since this
+   pill sits inline in 14px body copy rather than standing alone. */
+/* inline-block, not inline-flex: an inline-flex box takes its baseline from
+   its first flex item (the logo box), which floats the chip's text above the
+   line it sits on. inline-block takes its baseline from its own last line box,
+   so the chip text shares a baseline with the copy around it, and the logo's
+   vertical-align works again because it is an inline child rather than a flex
+   item. */
+.hf-chip {
+  /* The four shadow layers live in variables so the hover and press
+     states can swap one layer at a time, and so the dark theme only has
+     to redefine the values rather than repeat every state rule. */
+  --chip-face: inset 0 2px 1px 0 rgba(255, 255, 255, 1);
+  --chip-under: inset 0 -2px 2px 0 rgba(18, 18, 18, 0.07);
+  --chip-ring: inset 0 0 0 1px rgba(18, 18, 18, 0.06);
+  --chip-cast: 0 4px 6px -2px rgba(18, 18, 18, 0.16);
+
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: #f4f1ec;
+  box-shadow: var(--chip-face), var(--chip-under), var(--chip-ring), var(--chip-cast);
+  color: #121212;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: baseline;
+  /* box-shadow is added to the transform/opacity transition the chip
+     inherits from .nav-link, so the shadow travels with the movement. */
+  transition:
+    transform 140ms var(--ease-out),
+    box-shadow 140ms var(--ease-out);
+}
+
+.hf-chip:hover {
+  text-decoration: none;
+}
+
+/* Hover: the object lifts. Only 1px of travel and a slightly deeper cast
+   shadow, because a hover on a persistent header element is seen often
+   enough that anything larger would wear out fast. This also cancels the
+   opacity fade the chip inherits from .nav-link, which made a solid
+   object go translucent. */
+@media (hover: hover) and (pointer: fine) {
+  .nav-link.hf-chip:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+    --chip-cast: 0 6px 10px -3px rgba(18, 18, 18, 0.20);
+  }
+}
+
+/* Press: the object goes down into the page. The cast shadow collapses
+   as the gap to the page closes and the lit top face dims, which is what
+   selling the press depends on. This overrides the scale(0.97) inherited
+   from .nav-link, where shrinking read as receding rather than pressing. */
+.nav-link.hf-chip:active {
+  transform: translateY(2px);
+  --chip-face: inset 0 2px 1px 0 rgba(255, 255, 255, 0.75);
+  --chip-cast: 0 1px 2px -1px rgba(18, 18, 18, 0.16);
+}
+
+.hf-chip svg {
+  margin-right: 4px;
+}
+
+/* Same modelling in dark mode, with the light source rebuilt for a dark
+   ground. The top face lifts with a faint white line rather than a solid
+   one, the underside shades with black, and the cast shadow goes much
+   deeper since a 16% shadow is invisible on a near-black page. */
+@media (prefers-color-scheme: dark) {
+  .hf-chip {
+    --chip-face: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    --chip-under: inset 0 -2px 2px 0 rgba(0, 0, 0, 0.30);
+    --chip-ring: inset 0 0 0 1px var(--color-code-border);
+    --chip-cast: 0 4px 8px -2px rgba(0, 0, 0, 0.55);
+
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .nav-link.hf-chip:active {
+    --chip-face: inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+    --chip-cast: 0 1px 3px -1px rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* The dark hover shadow needs the pointer gate too, so it is a combined
+   query rather than a rule nested in the block above. */
+@media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
+  .nav-link.hf-chip:hover {
+    --chip-cast: 0 7px 12px -3px rgba(0, 0, 0, 0.65);
+  }
+}
+
+/* Reduced motion keeps the states, minus the travel. The shadow still
+   deepens on hover and collapses on press, so the feedback survives
+   without anything sliding. */
+@media (prefers-reduced-motion: reduce) {
+  .hf-chip {
+    transition: box-shadow 140ms var(--ease-out);
+  }
+
+  .nav-link.hf-chip:hover,
+  .nav-link.hf-chip:active {
+    transform: none;
+  }
+}
+
+/* ─── Model timeline tile ────────────────────────────────
+   A 168px clay square at the foot of the index that turns over on hover.
+   Names roll on the front, the description sits on the back, and the
+   whole card is the link to the Space.
+
+   The stage never transforms, only the card inside it. That keeps the
+   hit area exactly where the reader aimed while the card is mid-turn. */
+.tl-stage {
+  width: 168px;
+  height: 168px;
+  perspective: 620px;
+}
+
+.tl-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Hover turns it. Focus does the same, so the description is reachable
+   from the keyboard rather than being pointer-only. */
+@media (hover: hover) and (pointer: fine) {
+  .tl-stage:hover .tl-card {
+    transform: rotateY(180deg);
+  }
+}
+
+.tl-card:focus-visible {
+  outline: none;
+  transform: rotateY(180deg);
+}
+
+/* Press pushes the card away from the reader. Written twice because the
+   pressed transform has to carry the flip with it when the card is
+   already turned, and must not introduce a flip when it is not. */
+.tl-card:active {
+  transform: translateZ(-10px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tl-stage:hover .tl-card:active {
+    transform: rotateY(180deg) translateZ(-10px);
+  }
+}
+
+/* Each face carries the clay material, in the same four layers the chip
+   uses so hover and press can swap one at a time. */
+.tl-face {
+  --tile-face: inset 0 2px 1px 0 rgba(255, 255, 255, 1);
+  --tile-under: inset 0 -2px 2px 0 rgba(18, 18, 18, 0.07);
+  --tile-ring: inset 0 0 0 1px rgba(18, 18, 18, 0.06);
+  --tile-cast: 0 4px 6px -2px rgba(18, 18, 18, 0.16);
+
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: var(--tile-face), var(--tile-under), var(--tile-ring), var(--tile-cast);
+  color: #121212;
+}
+
+.tl-face-front {
+  background: #f4f1ec;
+}
+
+.tl-face-back {
+  background: #efece6;
+  transform: rotateY(180deg);
+}
+
+.tl-card:focus-visible .tl-face {
+  --tile-ring: inset 0 0 0 2px #121212;
+}
+
+.tl-blurb {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-body);
+  padding-top: 2px;
+}
+
+/* The drum is a cylinder, not a scrolling list. Each name is rotated to
+   its own facet and pushed out to the radius, the drum is pulled back by
+   that same radius so the front facet sits at z=0, and stepping the
+   drum's rotateX rolls the next name into place. The radius is computed
+   from the line height in the component, so the facets always meet. */
+.tl-wheel {
+  position: relative;
+  height: 108px;
+  overflow: clip;
+  /* Only the name at the centre reads at full strength; the rest fall
+     away by how far they sit from it. The falloff lives in the mask
+     rather than on the spans because the centred facet changes every
+     beat, so a per-name opacity would have to be recomputed on each
+     step and would jump rather than fade through the rotation. The
+     flat stop from 43% to 57% is one 15px line box, so the selected
+     name is evenly lit top to bottom. */
+  -webkit-mask-image: linear-gradient(
+      transparent 0%,
+      rgba(0, 0, 0, 0.14) 16%,
+      rgba(0, 0, 0, 0.45) 30%,
+      #000 43%,
+      #000 57%,
+      rgba(0, 0, 0, 0.45) 70%,
+      rgba(0, 0, 0, 0.14) 84%,
+      transparent 100%
+    );
+  mask-image: linear-gradient(
+      transparent 0%,
+      rgba(0, 0, 0, 0.14) 16%,
+      rgba(0, 0, 0, 0.45) 30%,
+      #000 43%,
+      #000 57%,
+      rgba(0, 0, 0, 0.45) 70%,
+      rgba(0, 0, 0, 0.14) 84%,
+      transparent 100%
+    );
+}
+
+/* The drum's own perspective, separate from the card's. */
+.tl-drum-stage {
+  height: 100%;
+  perspective: 300px;
+}
+
+.tl-drum {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The facet spacing sets the cylinder's radius, so it is also what decides
+   how much vertical space the drum can ever fill. Keep it in step with
+   ITEM_HEIGHT in model-timeline-tile.tsx, where the list runs twice around
+   the drum so the spacing can stay tight. */
+.tl-drum span {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  margin-top: -7.5px;
+  height: 15px;
+  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, Menlo, monospace;
+  font-size: 11px;
+  line-height: 15px;
+  white-space: nowrap;
+  color: var(--color-body);
+  backface-visibility: hidden;
+}
+
+.tl-label {
+  font-size: 13px;
+  color: inherit;
+}
+
+/* The clay reads as a light object, so the dark theme rebuilds the light
+   source the way the chip does rather than keeping the cream fill. */
+@media (prefers-color-scheme: dark) {
+  .tl-face {
+    --tile-face: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    --tile-under: inset 0 -2px 2px 0 rgba(0, 0, 0, 0.30);
+    --tile-ring: inset 0 0 0 1px var(--color-code-border);
+    --tile-cast: 0 4px 8px -2px rgba(0, 0, 0, 0.55);
+
+    color: var(--color-text);
+  }
+
+  .tl-face-front {
+    background: var(--color-surface);
+  }
+
+  /* The back reads as the far side of the same object, so it sits a
+     shade deeper than the front rather than matching it. */
+  .tl-face-back {
+    background: color-mix(in srgb, var(--color-surface) 70%, #000);
+  }
+
+  .tl-card:focus-visible .tl-face {
+    --tile-ring: inset 0 0 0 2px var(--color-text);
+  }
+}
+
+/* Reduced motion keeps the tile and its first name, minus the rolling. */
+/* Reduced motion keeps the swap, minus the turn. The card jumps between
+   faces instead of rotating, and the drum stops stepping. */
+@media (prefers-reduced-motion: reduce) {
+  .tl-card {
+    transition: none;
+  }
+
+  .tl-card:active {
+    transform: none;
+  }
+
+  .tl-drum {
+    transition: none;
+  }
+}
+
+/* ─── Underlined inline links ────────────────────────────
+   Keep the underline quieter than the word it sits under. The rule
+   is drawn from the link's own color so it still works in both
+   themes, just at reduced strength and hairline thickness, and it
+   firms up on hover to confirm the target. */
+.nav-link.underline {
+  text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);
+  text-decoration-thickness: 1px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link.underline:hover {
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
   }
 }

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AsciiCat } from "./ascii-cat";
 import { HuggingFaceLogo } from "./components/hugging-face-logo";
-import { SocialLinks } from "./components/social-links";
 import { isPostDetailPathname } from "./post-routing";
 
 /**
@@ -19,8 +18,14 @@ export function SiteHeader() {
 
   return (
     <header className="mb-8">
-      <section className="mt-20 md:mt-28 pb-6 grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-7 md:items-start">
-        <h1 className="archive-title text-[var(--color-text)] text-[56px] md:text-[96px] m-0">
+      {/* One column at every width: the cat sits above the bio rather than
+          beside it, so the header reads down the same centred measure the
+          archive and footer use. */}
+      <section className="mt-20 md:mt-24 pb-6 flex flex-col gap-8">
+        {/* The cat is centred across the text column rather than set flush
+            left. Its art carries leading whitespace on most lines, so flush
+            left reads as an accidental indent against the bio below it. */}
+        <h1 className="archive-title text-[var(--color-text)] text-[56px] md:text-[96px] m-0 mx-auto w-fit">
           <Link href="/" className="nav-link no-underline text-inherit">
             <AsciiCat />
           </Link>
@@ -31,19 +36,22 @@ export function SiteHeader() {
             <span className="block">Steven Liu</span>
             <span className="mt-3 block">
             <span className="opacity-70">
-            I maintain the developer docs at{" "}
+            I work on developer docs at{" "}
             </span>
-            <HuggingFaceLogo className="mr-1" />
+            <span className="whitespace-nowrap">
+              <a
+                href="https://huggingface.co"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-link hf-chip"
+              >
+                <HuggingFaceLogo decorative />
+                Hugging Face
+              </a>
+              <span className="opacity-70">,</span>
+            </span>
             <span className="opacity-70">
-            <a
-              href="https://huggingface.co"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nav-link underline underline-offset-2"
-            >
-              Hugging Face
-            </a>
-            , an open-source ML platform. Most of my work is on{" "}
+            {" "}the open-source ML platform. Most of my work is on{" "}
             <a
               href="https://huggingface.co/docs/transformers"
               target="_blank"
@@ -51,21 +59,21 @@ export function SiteHeader() {
               className="nav-link underline underline-offset-2"
             >
               Transformers
-            </a>, the ecosystem standard for models,
-            and I occasionally dabble in{" "}
-            <a
-              href="https://huggingface.co/docs/diffusers"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nav-link underline underline-offset-2"
-            >
-              Diffusers
-            </a>
-            .
+            </a>, the standard model definition of the ecosystem.
             </span>
+            </span>
+            <span className="mt-3 block opacity-70">
+              Feel free to holla at me on{" "}
+              <a
+                href="https://x.com/stevhliu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-link underline underline-offset-2"
+              >
+                X
+              </a>{" "}.
             </span>
           </p>
-          <SocialLinks className="mt-3 text-[var(--color-text)]" />
         </aside>
       </section>
     </header>

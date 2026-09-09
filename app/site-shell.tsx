@@ -27,8 +27,16 @@ export function SiteShell({
       >
         Skip to content
       </a>
-      {/* Matches preview: 20px top, 40px bottom; 24px h-padding on mobile, 40px ≥768px. */}
-      <div className="relative z-10 mx-auto min-h-[inherit] max-w-6xl px-6 pb-10 pt-5 md:px-10">
+      {/* 20px top, 40px bottom; 24px h-padding on mobile, 40px ≥768px.
+          The chrome pages (home, about) run as one centred column about 550px
+          wide, so the reading measure stays constant no matter how wide the
+          window is. Post pages keep the full width, since their content
+          template sets its own measure. */}
+      <div
+        className={`relative z-10 mx-auto min-h-[inherit] px-6 pb-10 pt-5 md:px-10 ${
+          variant === "chrome" ? "max-w-[630px]" : "max-w-6xl"
+        }`}
+      >
         <Header />
         <main id="main">{children}</main>
       </div>

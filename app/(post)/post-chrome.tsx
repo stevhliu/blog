@@ -21,7 +21,7 @@ export function PostChrome({
           "2xl:grid-cols-[16rem_minmax(0,35rem)] 2xl:gap-x-20",
         ].join(" ")}
       >
-        <TocSidebar postTitle={post?.title ?? null} />
+        <TocSidebar />
         <article className="min-w-0">
           {post?.title ? (
             <header className="mb-7">

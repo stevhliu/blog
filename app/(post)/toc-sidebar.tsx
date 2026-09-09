@@ -15,12 +15,11 @@ function shouldReduceMotion() {
  * Changes from the previous design:
  *   • "INDEX" back link uses a real SVG arrow-left (not the `←` glyph) and
  *     sits in warm-gray (#b8b0a2) until hover.
- *   • The sidebar's heading is the POST TITLE (passed in as a prop), not a
- *     generic "Contents" label. It stays dim until the reader scrolls past
- *     the article header, then fades to --color-body via data-scrolled=true.
+ *   • No heading above the list. The post title is already the h1 beside it,
+ *     so repeating it here only pushed the headings down.
  *   • Inactive TOC items are warm-gray (#b8b0a2); active is --color-body.
  */
-export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
+export function TocSidebar() {
   const [items, setItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -29,7 +28,6 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
   const itemsKeyRef = useRef("");
   const activeIdRef = useRef<string | null>(null);
   const scrolledRef = useRef(false);
-  const titleActive = scrolled && activeId === null;
 
   // Collect h2s from the article body after mount
   useEffect(() => {
@@ -152,7 +150,7 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
       <Link
         href="/"
         aria-label="Back to index"
-        className="inline-flex items-center gap-2 text-[11px] leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-200 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
+        className="inline-flex items-center gap-2 text-[13px] leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-200 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -178,21 +176,11 @@ export function TocSidebar({ postTitle }: { postTitle?: string | null }) {
         aria-label="On this page"
         className="side-nav block"
       >
-        {postTitle ? (
-          <h2
-            className={[
-              "side-section text-[11px] font-medium tracking-[0.04em] leading-tight m-0 mb-2.5 transition-[color] duration-200 motion-reduce:transition-none",
-              titleActive ? "text-[var(--color-body)]" : "text-[var(--color-dim)]",
-            ].join(" ")}
-          >
-            {postTitle}
-          </h2>
-        ) : null}
         {items.length > 0 ? (
           <ul
             className={[
               "list-none p-0 m-0 leading-[1.9] [scrollbar-gutter:stable]",
-              "text-[11px]",
+              "text-[13px]",
               "max-md:max-h-[min(50dvh,22rem)] max-md:overflow-y-auto max-md:overscroll-y-contain max-md:pr-0.5",
               "md:max-h-[min(28rem,calc(100dvh-7rem))] md:overflow-y-auto md:overflow-x-hidden md:overscroll-y-contain",
               "lg:max-h-[min(32rem,calc(100dvh-8rem))] xl:max-h-[min(36rem,calc(100dvh-8.5rem))]",

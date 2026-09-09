@@ -10,10 +10,10 @@ import { useEffect, useRef } from "react";
  * Pauses entirely under prefers-reduced-motion.
  */
 const POSE_A =
-  "♪\n　　　　 ∧＿＿∧　　　♪\n　　　 （´・ω・｀∩\n　　 　　o　　　,ﾉ\n　　　　Ｏ＿　.ﾉ\n♪　　　 　 (ノ";
+  "♪\n　　   ∧＿＿∧　　   ♪\n　   （´・ω・｀∩\n　　   o　　　,ﾉ\n　　  Ｏ＿　.ﾉ\n♪　　    (ノ";
 
 const POSE_B =
-  "\n　　　　∧＿＿∧　♪\n　　　 ∩・ω・｀）\n　　　 |　　   ⊂ﾉ\n　　　｜　　 _⊃　　♪\n　　　 し ⌒";
+  "\n　　   ∧＿＿∧　　   ♪\n　    ∩・ω・｀）\n　    |　　   ⊂ﾉ\n　   ｜　　 _⊃　　  ♪\n　    し ⌒";
 
 const POSES = [POSE_A, POSE_B];
 

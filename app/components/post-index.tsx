@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Post } from "../get-posts";
 import { EnvDatetime } from "../env-datetime";
-import { PostYearColumn } from "./post-year-column";
+import { PostYearGroup } from "./post-year-group";
+import { ModelTimelineTile } from "./model-timeline-tile";
 
 // Single index page: every year is shown, stacked newest-first.
 const PAGE_SIZE = 99;
@@ -68,21 +69,38 @@ export function PostIndex({
 
   return (
     <>
-      {/* 2-col grid (matching the header) so the list aligns under the bio. */}
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-7">
-        <div className="hidden md:block" aria-hidden="true" />
-        <div className="grid grid-cols-1 gap-10 md:gap-12">
-          {pageItems.map(([year, yearPosts]) => {
-            return (
-              <PostYearColumn key={year} year={year} posts={yearPosts} />
-            );
-          })}
-        </div>
+      {/* One continuous list: the year gutter marks each group, so the
+          groups run together rather than sitting in separate blocks. The
+          list fills the centred column the shell already sets, so it needs
+          no column structure of its own. */}
+      <div className="post-lists">
+        {pageItems.map(([year, yearPosts]) => (
+          <PostYearGroup key={year} year={year} posts={yearPosts} />
+        ))}
       </div>
 
-      <footer className="mt-auto grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 pt-16 md:gap-x-6">
-        {/* Left cell: live PT datetime, in line with pagination (center). */}
-        <div className="archive-meta !text-[13px] !normal-case opacity-70 min-w-0 justify-self-start truncate whitespace-nowrap text-left text-[var(--color-text)]">
+      <div className="mt-14">
+        <ModelTimelineTile />
+      </div>
+
+      {/* The 3-column grid exists only to hold pagination in the centre, so it
+          is used only when there are pages to show. With a single page the
+          meta line gets the full width instead of a third of it, which it
+          needs now that it carries the location as well as the time. */}
+      <footer
+        className={`mt-auto items-center pt-16 ${
+          totalPages > 1
+            ? "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-x-3 md:gap-x-6"
+            : "flex"
+        }`}
+      >
+        {/* Location + live PT datetime. The location is static so it
+            server-renders, while the timestamp fades in on hydration. */}
+        {/* The pair barely exceeds a 375px viewport, so rather than let it
+            wrap mid-line it stacks below sm and sits on one line above it,
+            where the gap alone separates the two. */}
+        <div className="archive-meta !text-[13px] !normal-case opacity-70 min-w-0 flex flex-col items-start gap-x-4 justify-self-start text-left text-[var(--color-text)] sm:flex-row sm:items-baseline">
+          <span>Sebastopol, California</span>
           <EnvDatetime />
         </div>
         {totalPages > 1 ? (

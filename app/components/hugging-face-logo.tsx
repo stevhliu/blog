@@ -4,16 +4,20 @@
  */
 export function HuggingFaceLogo({
   className = "",
+  decorative = false,
 }: {
   className?: string;
+  /** Hide from screen readers when adjacent text already names the mark. */
+  decorative?: boolean;
 }) {
   return (
     <svg
       viewBox="0 0 95 88"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Hugging Face"
+      role={decorative ? undefined : "img"}
+      aria-hidden={decorative || undefined}
+      aria-label={decorative ? undefined : "Hugging Face"}
       className={`inline-block h-[1em] w-[1em] shrink-0 align-[-0.15em] ${className}`}
     >
       <path
