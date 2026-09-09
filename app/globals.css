@@ -333,21 +333,50 @@ li a:active,
   --chip-under: inset 0 -2px 2px 0 rgba(18, 18, 18, 0.07);
   --chip-ring: inset 0 0 0 1px rgba(18, 18, 18, 0.06);
   --chip-cast: 0 4px 6px -2px rgba(18, 18, 18, 0.16);
+  --chip-cast-lift: 0 6px 10px -3px rgba(18, 18, 18, 0.20);
 
+  position: relative;
   display: inline-block;
   padding: 2px 8px;
   border-radius: 9999px;
   background: #f4f1ec;
-  box-shadow: var(--chip-face), var(--chip-under), var(--chip-ring), var(--chip-cast);
+  /* Only the inset modelling lives here, and it never changes, so this
+     box-shadow is painted once. The cast shadow that does change lives on
+     the two pseudo-elements below. */
+  box-shadow: var(--chip-face), var(--chip-under), var(--chip-ring);
   color: #121212;
   text-decoration: none;
   white-space: nowrap;
   vertical-align: baseline;
-  /* box-shadow is added to the transform/opacity transition the chip
-     inherits from .nav-link, so the shadow travels with the movement. */
-  transition:
-    transform 140ms var(--ease-out),
-    box-shadow 140ms var(--ease-out);
+  /* The return, not the press. A transition belongs to the state being
+     entered, so this curve runs when the chip comes back up: 300ms with a
+     ~10% overshoot so it visibly springs past rest and settles. The press
+     itself overrides this below with a fast, flat curve. */
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* The resting and lifted cast shadows are two stacked layers that
+   cross-fade, because box-shadow is a paint property and opacity is not.
+   Same look, no paint on every hover and press. */
+.hf-chip::before,
+.hf-chip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity 240ms var(--ease-out);
+}
+
+.hf-chip::before {
+  box-shadow: var(--chip-cast);
+  opacity: 1;
+}
+
+.hf-chip::after {
+  box-shadow: var(--chip-cast-lift);
+  opacity: 0;
 }
 
 .hf-chip:hover {
@@ -363,18 +392,35 @@ li a:active,
   .nav-link.hf-chip:hover {
     opacity: 1;
     transform: translateY(-1px);
-    --chip-cast: 0 6px 10px -3px rgba(18, 18, 18, 0.20);
+    /* Same spring as the base state. Releasing a press with the pointer
+       still on the chip lands here, so without this the bounce would only
+       ever be seen by someone who moved the cursor away mid-click. The 1px
+       hover travel is far too small for the overshoot to read on its own. */
+    transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .nav-link.hf-chip:hover::before {
+    opacity: 0;
+  }
+
+  .nav-link.hf-chip:hover::after {
+    opacity: 1;
   }
 }
 
-/* Press: the object goes down into the page. The cast shadow collapses
-   as the gap to the page closes and the lit top face dims, which is what
-   selling the press depends on. This overrides the scale(0.97) inherited
-   from .nav-link, where shrinking read as receding rather than pressing. */
+/* Press: down and slightly smaller, in 90ms with no overshoot. Fast and
+   flat going in, slow and springy coming out. The scale is what makes the
+   depression legible; 2px of travel alone is too little to see, and too
+   little for the return bounce to register. */
 .nav-link.hf-chip:active {
-  transform: translateY(2px);
-  --chip-face: inset 0 2px 1px 0 rgba(255, 255, 255, 0.75);
-  --chip-cast: 0 1px 2px -1px rgba(18, 18, 18, 0.16);
+  transform: translateY(2px) scale(0.95);
+  transition: transform 90ms var(--ease-out);
+}
+
+.nav-link.hf-chip:active::before,
+.nav-link.hf-chip:active::after {
+  opacity: 0;
+  transition: opacity 90ms var(--ease-out);
 }
 
 .hf-chip svg {
@@ -390,23 +436,15 @@ li a:active,
     --chip-face: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
     --chip-under: inset 0 -2px 2px 0 rgba(0, 0, 0, 0.30);
     --chip-ring: inset 0 0 0 1px var(--color-code-border);
+    /* Both cast layers need a dark value. Defining only --chip-cast left
+       the lifted layer on the light theme's 20% near-black, which is
+       invisible on this page, so hovering removed the shadow instead of
+       deepening it. */
     --chip-cast: 0 4px 8px -2px rgba(0, 0, 0, 0.55);
+    --chip-cast-lift: 0 7px 12px -3px rgba(0, 0, 0, 0.65);
 
     background: var(--color-surface);
     color: var(--color-text);
-  }
-
-  .nav-link.hf-chip:active {
-    --chip-face: inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
-    --chip-cast: 0 1px 3px -1px rgba(0, 0, 0, 0.55);
-  }
-}
-
-/* The dark hover shadow needs the pointer gate too, so it is a combined
-   query rather than a rule nested in the block above. */
-@media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
-  .nav-link.hf-chip:hover {
-    --chip-cast: 0 7px 12px -3px rgba(0, 0, 0, 0.65);
   }
 }
 
@@ -414,10 +452,6 @@ li a:active,
    deepens on hover and collapses on press, so the feedback survives
    without anything sliding. */
 @media (prefers-reduced-motion: reduce) {
-  .hf-chip {
-    transition: box-shadow 140ms var(--ease-out);
-  }
-
   .nav-link.hf-chip:hover,
   .nav-link.hf-chip:active {
     transform: none;
@@ -445,7 +479,11 @@ li a:active,
   transform-style: preserve-3d;
   text-decoration: none;
   color: inherit;
-  transition: transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* The turn and the press share one animated property, so the duration
+     is a variable the press can override. Without it the press inherits
+     the turn's timing and takes 420ms to answer a click. */
+  --tl-turn: 420ms;
+  transition: transform var(--tl-turn) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Hover turns it. Focus does the same, so the description is reachable
@@ -461,15 +499,18 @@ li a:active,
   transform: rotateY(180deg);
 }
 
-/* Press pushes the card away from the reader. Written twice because the
-   pressed transform has to carry the flip with it when the card is
-   already turned, and must not introduce a flip when it is not. */
+/* Press pushes the card away from the reader, and drops the duration to
+   the 140ms a press wants. Written twice because the pressed transform
+   has to carry the flip with it when the card is already turned, and must
+   not introduce a flip when it is not. */
 .tl-card:active {
+  --tl-turn: 140ms;
   transform: translateZ(-10px);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .tl-stage:hover .tl-card:active {
+    --tl-turn: 140ms;
     transform: rotateY(180deg) translateZ(-10px);
   }
 }
@@ -563,7 +604,7 @@ li a:active,
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 400ms var(--ease-out);
 }
 
 /* The facet spacing sets the cylinder's radius, so it is also what decides
@@ -577,7 +618,9 @@ li a:active,
   right: 0;
   margin-top: -7.5px;
   height: 15px;
-  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, Menlo, monospace;
+  /* Inherits the page's sans, the same face the post titles and the bio
+     use, so the names read as part of the site rather than as code. */
+  font-family: inherit;
   font-size: 11px;
   line-height: 15px;
   white-space: nowrap;
@@ -630,9 +673,9 @@ li a:active,
   }
 }
 
-/* Reduced motion keeps the tile and its first name, minus the rolling. */
-/* Reduced motion keeps the swap, minus the turn. The card jumps between
-   faces instead of rotating, and the drum stops stepping. */
+/* Reduced motion swaps the faces instead of turning the card. The
+   rotation is dropped entirely and the two faces cross-fade in place, so
+   the description is still reachable without anything moving. */
 @media (prefers-reduced-motion: reduce) {
   .tl-card {
     transition: none;
@@ -644,6 +687,44 @@ li a:active,
 
   .tl-drum {
     transition: none;
+  }
+
+  /* Both faces become plain stacked layers rather than two sides of a
+     turning object. */
+  .tl-face {
+    backface-visibility: visible;
+    transition: opacity 140ms var(--ease-out);
+  }
+
+  .tl-face-back {
+    transform: none;
+    opacity: 0;
+  }
+
+  .tl-card:focus-visible {
+    transform: none;
+  }
+
+  .tl-card:focus-visible .tl-face-front {
+    opacity: 0;
+  }
+
+  .tl-card:focus-visible .tl-face-back {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) and (pointer: fine) {
+  .tl-stage:hover .tl-card {
+    transform: none;
+  }
+
+  .tl-stage:hover .tl-face-front {
+    opacity: 0;
+  }
+
+  .tl-stage:hover .tl-face-back {
+    opacity: 1;
   }
 }
 
