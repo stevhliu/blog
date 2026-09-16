@@ -3,6 +3,7 @@ import type { Post } from "../get-posts";
 import { EnvDatetime } from "../env-datetime";
 import { PostYearGroup } from "./post-year-group";
 import { ModelTimelineTile } from "./model-timeline-tile";
+import { QuantizationTile } from "./quantization-tile";
 
 // Single index page: every year is shown, stacked newest-first.
 const PAGE_SIZE = 99;
@@ -89,7 +90,12 @@ export function PostIndex({
         >
           Projects
         </h2>
-        <ModelTimelineTile />
+        {/* Wraps rather than shrinking: the tiles are a fixed 168px, so on a
+            narrow screen the second one drops to its own line. */}
+        <div className="flex flex-wrap gap-5">
+          <ModelTimelineTile />
+          <QuantizationTile />
+        </div>
       </section>
 
       {/* The 3-column grid exists only to hold pagination in the centre, so it

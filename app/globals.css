@@ -743,3 +743,157 @@ li a:active,
     text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
   }
 }
+
+/* ─── Quantization tile ──────────────────────────────────
+   Second clay square in the Projects row. It borrows the shell above
+   (.tl-stage, .tl-card, .tl-face and the label rules) rather than
+   restating it, so only the drawing lives here. The .tl- prefix now
+   means "project tile" rather than "timeline"; worth renaming if a
+   third one ever turns up.
+
+   The drawing is a bar chart of unit squares, one to a gigabyte. Row
+   length is the footprint and the dashed rule is the card, so a row
+   crossing the rule is a model that will not fit. */
+.qz-art {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
+.qz-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+.qz-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qz-label {
+  width: 24px;
+  flex-shrink: 0;
+  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, Menlo, monospace;
+  font-size: 8px;
+  line-height: 10px;
+  color: var(--qz-t5);
+}
+
+.qz-cells {
+  display: flex;
+  gap: 1.5px;
+}
+
+/* 5px on a 6.5px pitch, so fifteen of them clear the tile's 136px
+   interior with the label column taken out. 10px tall so they still
+   read as blocks rather than as a dotted rule. */
+.qz-sq {
+  width: 5px;
+  height: 10px;
+  border-radius: 1px;
+  flex-shrink: 0;
+  /* Paused, not absent. The component adds .qz-live when the tile is on
+     screen, so nothing blinks in a tile nobody is looking at. */
+  animation: qz-blink var(--qz-cycle) var(--ease-in-out) infinite;
+  animation-play-state: paused;
+}
+
+.qz-live .qz-sq {
+  animation-play-state: running;
+}
+
+/* Full strength for most of the cycle with one brief dip, so at any
+   moment a square or two is moving and the rest are legible. A steady
+   shimmer across the whole field would read as a loading state, and
+   these squares are data rather than a placeholder.
+
+   Tone is swung with opacity rather than background-color: it keeps the
+   work on the compositor, and against the clay a lower opacity reads as
+   a lighter tone, which is the axis the shading already uses. */
+@keyframes qz-blink {
+  0%,
+  86% {
+    opacity: 1;
+  }
+  93% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 24px label + 6px gap + twelve squares at a 6.5px pitch, less half the
+   gap, lands the rule exactly on the card's capacity. */
+.qz-capacity {
+  position: absolute;
+  left: 107.25px;
+  top: 50%;
+  width: 1px;
+  height: 62px;
+  margin-top: -31px;
+  border-left: 1px dashed var(--qz-t5);
+  opacity: 0.85;
+}
+
+.qz-caplabel {
+  position: absolute;
+  left: 107.25px;
+  top: 50%;
+  margin-top: -42px;
+  transform: translateX(-50%);
+  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, Menlo, monospace;
+  font-size: 8px;
+  line-height: 10px;
+  color: var(--qz-t5);
+  white-space: nowrap;
+}
+
+/* "Quantization strategies" is wider than the tile's 136px interior at the
+   13px the shell's label runs at, so it would wrap to two lines and eat
+   16px off the chart. 12px is the largest step that still fits with room
+   to spare; 12.5px clears by under a pixel, which is too close to trust
+   across rendering. Only this tile's front label is affected, so the
+   timeline tile beside it keeps the 13px. */
+.qz-title {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* The clay tone ramp, lightest to darkest. Dark mode rebuilds it from the
+   dark surface up rather than inverting, so the squares keep reading as
+   marks on clay instead of holes in it. */
+:root {
+  --qz-cycle: 4500ms;
+  --qz-t1: #dcd6c9;
+  --qz-t2: #c2baa9;
+  --qz-t3: #b0a794;
+  --qz-t4: #8d8577;
+  --qz-t5: #5c554c;
+  --qz-t6: #121212;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --qz-t1: #38352f;
+    --qz-t2: #4a463e;
+    --qz-t3: #625c51;
+    --qz-t4: #8a8377;
+    --qz-t5: #b5ae9f;
+    --qz-t6: #eceae5;
+  }
+}
+
+/* Everywhere else on this page reduced motion means gentler rather than
+   none, but an animation that never stops on its own is the case that
+   rule carves out. The squares simply hold still. */
+@media (prefers-reduced-motion: reduce) {
+  .qz-sq,
+  .qz-live .qz-sq {
+    animation: none;
+  }
+}
