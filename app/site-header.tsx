@@ -63,7 +63,7 @@ export function SiteHeader() {
             </span>
             </span>
             <span className="mt-3 block opacity-70">
-              Feel free to holla at me on{" "}
+              Say hi on{" "}
               <a
                 href="https://x.com/stevhliu"
                 target="_blank"
