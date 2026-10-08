@@ -31,6 +31,8 @@ export const metadata = {
 };
 
 export const viewport = {
+  // Paints the right canvas before the CSS loads, so dark mode never flashes white.
+  colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0f" },
@@ -48,7 +50,7 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSans.className} antialiased`}
       suppressHydrationWarning={true}
     >
-      <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      <body className="min-h-[100svh] bg-[var(--color-bg)] text-[var(--color-text)]">
         {children}
         <Script id="doge-console" strategy="lazyOnload">
           {`(${doge.toString()})();`}

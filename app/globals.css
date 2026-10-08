@@ -50,9 +50,47 @@
     }
   }
 
+  /* Additions from good-css.com's reset. Tailwind's preflight already
+     covers box-sizing and block images. Synthesis is turned off for weight
+     only: Geist is a 100–900 variable font so bold is always real, but it
+     ships no italic, so posts still rely on the browser slanting emphasis. */
+  :root {
+    scrollbar-gutter: stable;
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+    font-synthesis-weight: none;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  /* No rubber-band bounce with a mouse or trackpad. Touch keeps it, since
+     there it is the feedback that the page has ended. */
+  html {
+    overscroll-behavior-y: none;
+  }
+
+  @media (any-pointer: coarse) {
+    html {
+      overscroll-behavior-y: auto;
+    }
+  }
+
   /* Disable ligatures globally */
   * {
     font-feature-settings: "liga" 0;
+  }
+
+  /* Only controls drop the double-tap delay. On every element it also
+     blocked double-tap zoom on body text. */
+  a,
+  button,
+  [role="button"] {
     touch-action: manipulation;
   }
 }
@@ -94,11 +132,16 @@ pre.shiki {
   color: var(--color-subtext);
 }
 
+/* One ring for everything focusable. currentColor keeps it in step with
+   whatever it surrounds, and the em floor scales it up with large text. */
+:focus-visible {
+  outline: max(2px, 0.08em) solid currentColor;
+  outline-offset: 2px;
+}
+
 a:focus-visible,
 button:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid var(--color-blue);
-  outline-offset: 2px;
   border-radius: 0.25rem;
 }
 
@@ -143,7 +186,7 @@ button:focus-visible,
   column-gap: 12px;
   align-items: baseline;
   min-height: 2.75rem;
-  padding: 6px 0;
+  padding-block: 6px;
   transition: background-color 120ms var(--ease-out);
 }
 
@@ -158,6 +201,8 @@ button:focus-visible,
 .archive-views {
   font-size: 14px;
   opacity: 0.55;
+  /* Equal-width digits so dates and view counts line up down the column. */
+  font-variant-numeric: tabular-nums;
 }
 
 /* The year prints once per group. Later rows keep the element (so the
@@ -175,7 +220,7 @@ button:focus-visible,
   content: "";
   grid-column: 2 / -1;
   align-self: end;
-  margin-top: 8px;
+  margin-block-start: 8px;
   border-bottom: 1px dotted color-mix(in srgb, var(--color-rule) 25%, transparent);
 }
 
@@ -210,31 +255,39 @@ button:focus-visible,
   }
 }
 
-.archive-date {
-  text-align: right;
-}
-
+.archive-date,
 .archive-views {
-  text-align: right;
+  text-align: end;
 }
 
-.post-title {
-  transition: transform 150ms var(--ease-out);
-}
-
+/* Opt-in motion (good-css.com). The opacity fade is not motion, so it
+   applies to everyone. The press scale and its transition are movement,
+   so they only exist for readers who have not asked for less of it. */
 nav a,
 li a,
 .nav-link,
 .post-link {
-  transition: transform 160ms var(--ease-out),
-              opacity 100ms var(--ease-out);
+  transition: opacity 100ms var(--ease-out);
 }
 
-nav a:active,
-li a:active,
-.nav-link:active,
-.post-link:active {
-  transform: scale(0.97);
+/* transition is a shorthand, so the opacity fade is restated here or this
+   rule would drop it. The chip's own press and spring rules further down
+   outrank these on specificity and source order, so it keeps its bounce. */
+@media (prefers-reduced-motion: no-preference) {
+  nav a,
+  li a,
+  .nav-link,
+  .post-link {
+    transition: transform 160ms var(--ease-out),
+                opacity 100ms var(--ease-out);
+  }
+
+  nav a:active,
+  li a:active,
+  .nav-link:active,
+  .post-link:active {
+    transform: scale(0.97);
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -248,20 +301,6 @@ li a:active,
   .archive-date,
   .archive-views {
     transition: none;
-  }
-
-  nav a,
-  li a,
-  .nav-link,
-  .post-link {
-    transition: opacity 100ms var(--ease-out);
-  }
-
-  nav a:active,
-  li a:active,
-  .nav-link:active,
-  .post-link:active {
-    transform: none;
   }
 }
 
@@ -424,7 +463,7 @@ li a:active,
 }
 
 .hf-chip svg {
-  margin-right: 4px;
+  margin-inline-end: 4px;
 }
 
 /* Same modelling in dark mode, with the light source rebuilt for a dark
@@ -494,8 +533,11 @@ li a:active,
   }
 }
 
+/* The ring is drawn by --tile-ring on the faces, so the outline goes
+   transparent rather than away. Forced-colors mode drops box-shadow and
+   repaints a transparent outline, so keyboard users there still see focus. */
 .tl-card:focus-visible {
-  outline: none;
+  outline-color: transparent;
   transform: rotateY(180deg);
 }
 
@@ -614,9 +656,8 @@ li a:active,
 .tl-drum span {
   position: absolute;
   top: 50%;
-  left: 0;
-  right: 0;
-  margin-top: -7.5px;
+  inset-inline: 0;
+  margin-block-start: -7.5px;
   height: 15px;
   /* Inherits the page's sans, the same face the post titles and the bio
      use, so the names read as part of the site rather than as code. */
