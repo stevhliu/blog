@@ -182,7 +182,10 @@ button:focus-visible,
    year in the gutter is what marks where a group starts. */
 .archive-entry {
   display: grid;
-  grid-template-columns: 3.25rem minmax(0, 1fr) auto 2ch;
+  /* The views column is a fixed width because each row is its own grid,
+     so auto would size it per row and break the alignment. 6ch fits a
+     count up to "99,999" at the 14px view size. */
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto 6ch;
   column-gap: 12px;
   align-items: baseline;
   min-height: 2.75rem;
@@ -258,6 +261,7 @@ button:focus-visible,
 .archive-date,
 .archive-views {
   text-align: end;
+  white-space: nowrap;
 }
 
 /* Opt-in motion (good-css.com). The opacity fade is not motion, so it
