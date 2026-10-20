@@ -36,7 +36,7 @@ export function PostChrome({
               ) : null}
             </header>
           ) : null}
-          <div className="post-body text-[var(--color-body)]">
+          <div className="post-body text-[18px] text-[var(--color-body)]">
             {children}
           </div>
           {post ? <ViewCounter id={post.id} /> : null}
