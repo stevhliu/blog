@@ -95,9 +95,9 @@
   }
 }
 
-/* Add generous padding inside all Shiki code blocks. The scroll container
-   (Snippet wrapper) owns rounding + max-height. */
-pre.shiki {
+/* Add generous padding inside all highlighted code blocks. The scroll
+   container (Snippet wrapper) owns rounding + max-height. */
+pre.highlights {
   display: inline-block;
   min-width: 100%;
   box-sizing: border-box;
@@ -111,20 +111,20 @@ pre.shiki {
 
 /* Pierre dual-theme: default to light vars, swap to dark vars via the
    site-wide prefers-color-scheme media query. */
-pre.shiki,
-pre.shiki span {
-  color: var(--shiki-light);
+pre.highlights,
+pre.highlights span {
+  color: var(--hls-light);
 }
-pre.shiki {
-  background-color: var(--shiki-light-bg);
+pre.highlights {
+  background-color: var(--hls-light-bg);
 }
 @media (prefers-color-scheme: dark) {
-  pre.shiki,
-  pre.shiki span {
-    color: var(--shiki-dark);
+  pre.highlights,
+  pre.highlights span {
+    color: var(--hls-dark);
   }
-  pre.shiki {
-    background-color: var(--shiki-dark-bg);
+  pre.highlights {
+    background-color: var(--hls-dark-bg);
   }
 }
 

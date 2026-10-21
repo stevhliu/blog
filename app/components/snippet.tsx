@@ -1,33 +1,34 @@
 import { cache } from "react";
-import { codeToHtml } from "shiki";
-import type { ThemeRegistration } from "shiki";
-import pierreLight from "./themes/pierre-light.json";
-import pierreDark from "./themes/pierre-dark.json";
+import { codeToHtml } from "@pierre/highlights";
+import type { Lang } from "@pierre/highlights";
+import { pierreLight, pierreDark } from "@pierre/highlights/themes";
 
-type SupportedLanguage = "python" | "yaml" | "json";
-
-// Pierre themes (https://diffs.com/theme). Dual-theme output emits
-// --shiki-light / --shiki-dark CSS vars; globals.css switches between them
+// Pierre themes (https://diffs.com/theme), highlighted with Highlights
+// (https://diffs.com/docs#highlights). Dual-theme output emits
+// --hls-light / --hls-dark CSS vars; globals.css switches between them
 // via prefers-color-scheme.
-const THEMES = {
-  light: pierreLight as unknown as ThemeRegistration,
-  dark: pierreDark as unknown as ThemeRegistration,
-};
+const THEMES = { light: pierreLight, dark: pierreDark };
 
-export const highlightCode = cache(async function highlightCode(
+const decoder = new TextDecoder();
+
+export const highlightCode = cache(function highlightCode(
   code: string,
-  lang: SupportedLanguage = "python"
+  lang: Lang = "python"
 ) {
-  return codeToHtml(code, { lang, themes: THEMES, defaultColor: false });
+  // The returned bytes can live in shared WebAssembly memory that the next
+  // call overwrites, so decode them right away.
+  return decoder.decode(
+    codeToHtml(code, { lang, themes: THEMES, defaultColor: false })
+  );
 });
 
 type SnippetProps = {
   children: string;
-  language?: SupportedLanguage;
+  language?: Lang;
   maxHeight?: string;
 };
 
-export async function Snippet({
+export function Snippet({
   children,
   language = "python",
   maxHeight = "400px",
@@ -38,7 +39,7 @@ export async function Snippet({
   // Replace any potential Unicode angle brackets with regular ones before processing
   code = code.replace(/⟨/g, "<").replace(/⟩/g, ">");
 
-  const html = await highlightCode(code, language);
+  const html = highlightCode(code, language);
 
   return (
     <div className="my-6">
@@ -50,4 +51,3 @@ export async function Snippet({
     </div>
   );
 }
-
