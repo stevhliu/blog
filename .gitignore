@@ -13,6 +13,9 @@ TODO
 .env*.local
 fonts/*
 !fonts/init.mjs
+!fonts/README.md
+!fonts/*.md
+!fonts/*.json
 # Ensure we don't commit npm lockfiles
 package-lock.json
 yarn.lock

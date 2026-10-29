@@ -1,5 +1,6 @@
 import { TocSidebar } from "./toc-sidebar";
 import { ViewCounter } from "./view-counter";
+import { fontProfileByPost } from "@/app/font-profile.generated";
 import type { Post } from "../get-posts";
 
 export function PostChrome({
@@ -9,8 +10,13 @@ export function PostChrome({
   post: Post | null;
   children: React.ReactNode;
 }) {
+  const fontProfile = post ? fontProfileByPost[post.id] : undefined;
+  const fontClasses = [
+    fontProfile?.sans ? "font-extended-sans" : "",
+    fontProfile?.mono ? "font-extended-mono" : "",
+  ].filter(Boolean).join(" ");
   return (
-    <div className="text-[var(--color-text)]">
+    <div className={`text-[var(--color-text)] ${fontClasses}`}>
       <div
         className={[
           "mt-6 flex flex-col gap-5 sm:mt-8 sm:gap-6",

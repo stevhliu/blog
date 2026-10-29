@@ -1,7 +1,5 @@
 import "./globals.css";
 
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
 import Script from "next/script";
 import { Analytics } from "./analytics";
 import { doge } from "./doge";
@@ -47,9 +45,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSans.className} antialiased`}
+      className="antialiased"
       suppressHydrationWarning={true}
     >
+      <link
+        rel="preload"
+        href="/fonts/geist-sans-core.woff2"
+        as="font"
+        type="font/woff2"
+        crossOrigin="anonymous"
+      />
+      <link
+        rel="preload"
+        href="/fonts/geist-mono-core.woff2"
+        as="font"
+        type="font/woff2"
+        crossOrigin="anonymous"
+      />
       <body className="min-h-[100svh] bg-[var(--color-bg)] text-[var(--color-text)]">
         {children}
         <Script id="doge-console" strategy="lazyOnload">

@@ -54,7 +54,7 @@ export function AsciiCat() {
     <>
       <pre
         ref={catRef}
-        className="ascii-cat"
+        className="ascii-cat font-extended-mono"
         aria-hidden="true"
         dangerouslySetInnerHTML={{ __html: colorizeNotes(POSE_A) }}
       />

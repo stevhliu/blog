@@ -1,9 +1,15 @@
+@import "./font-subsets.generated.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    --font-geist-sans: "GeistSansCore", "GeistSans Fallback";
+    --font-geist-mono:
+      "GeistMonoCore", ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco,
+      Liberation Mono, DejaVu Sans Mono, Courier New, monospace;
     -webkit-tap-highlight-color: transparent;
     color-scheme: light;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -27,6 +33,16 @@
     /* Warm-gray used on post detail for dimmed meta (sec row, date, inactive TOC, Index link). */
     --color-dim: #b8b0a2;
     background-color: var(--color-page-chrome);
+    font-family: var(--font-geist-sans);
+  }
+
+  @font-face {
+    font-family: "GeistSans Fallback";
+    src: local("Arial");
+    ascent-override: 85.83%;
+    descent-override: 20.53%;
+    line-gap-override: 9.33%;
+    size-adjust: 107.19%;
   }
 
   @media (prefers-color-scheme: dark) {
