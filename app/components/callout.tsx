@@ -7,15 +7,15 @@ interface CalloutProps {
 const CALLOUT_STYLES = {
   default: {
     container: 'bg-emerald-50 dark:bg-[#333] dark:text-gray-300',
-    text: 'text-emerald-500'
+    text: 'text-emerald-700 dark:text-emerald-500'
   },
   tip: {
     container: 'bg-green-50 dark:bg-green-900/20 dark:text-gray-300',
-    text: 'text-green-500 dark:text-green-500'
+    text: 'text-green-700 dark:text-green-500'
   },
   warning: {
     container: 'bg-rose-50 dark:bg-rose-900/20 dark:text-gray-300',
-    text: 'text-rose-500 dark:text-rose-500'
+    text: 'text-rose-700 dark:text-rose-500'
   }
 } as const;
 

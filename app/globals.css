@@ -42,8 +42,9 @@
     --color-code-border: rgba(0, 0, 0, 0.14);
     /* Body copy color — same as --color-text on the index, and also black on post pages. */
     --color-body: #000000;
-    /* Warm-gray used on post detail for dimmed meta (sec row, date, inactive TOC, Index link). */
-    --color-dim: #b8b0a2;
+    /* Warm-gray used on post detail for dimmed meta (sec row, date, inactive TOC, Index link).
+       oklch(0.56 0.022 81.8), the lightest this hue goes and still clears 4.5:1 on white. */
+    --color-dim: #7b7366;
     background-color: var(--color-page-chrome);
     font-family: var(--font-geist-sans);
   }
@@ -64,7 +65,7 @@
       --color-page-border: rgba(88, 166, 255, 0.24);
       --color-bg: #0a0a0f;
       --color-text: #58a6ff;
-      --color-subtext: rgba(88, 166, 255, 0.6);
+      --color-subtext: rgba(88, 166, 255, 0.75);
       --color-blue: #58a6ff;
       --color-accent: #58a6ff;
       --color-rule: #58a6ff;
@@ -73,7 +74,7 @@
       --color-code-bg: rgba(88, 166, 255, 0.08);
       --color-code-border: rgba(88, 166, 255, 0.28);
       --color-body: #ffffff;
-      --color-dim: rgba(88, 166, 255, 0.5);
+      --color-dim: rgba(88, 166, 255, 0.75);
       background-color: var(--color-page-chrome);
     }
   }
@@ -177,6 +178,20 @@ a:focus-visible,
 button:focus-visible,
 [role="button"]:focus-visible {
   border-radius: 0.25rem;
+}
+
+/* A faint edge so white areas in photos don't dissolve into the page. On
+   the element rather than the Image component, because posts also use raw
+   <img>. Tweet cards draw their own border. */
+.post-body img:not(.post-body article img) {
+  outline: 1px solid rgb(0 0 0 / 0.1);
+  outline-offset: -1px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .post-body img:not(.post-body article img) {
+    outline-color: rgb(255 255 255 / 0.1);
+  }
 }
 
 /* ─── Archive index aesthetic ───────────────────────────── */

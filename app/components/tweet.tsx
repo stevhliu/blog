@@ -246,7 +246,7 @@ function TweetCard({ tweet }: { tweet: TweetData }) {
     <article className="w-full max-w-[550px] rounded-xl border border-[rgb(207,217,222)] bg-white p-4 text-left text-[15px] leading-[1.3rem] dark:border-[#333] dark:bg-[#222]">
       <div className="flex items-start justify-between gap-3">
         <TweetAuthor tweet={tweet} />
-        <a href={tweetUrl(tweet)} aria-label="View on X" className="no-underline">
+        <a href={tweetUrl(tweet)} aria-label="View on X" className="-m-3 p-3 no-underline">
           <XLogo />
         </a>
       </div>

@@ -222,7 +222,7 @@ export function TocSidebar() {
                     className={[
                       "block break-words py-[2px] pr-0.5 no-underline transition-[color] duration-200",
                       "max-md:min-h-11 max-md:py-2.5 max-md:leading-snug",
-                      "md:py-0.5 md:leading-snug lg:py-px",
+                      "md:py-1 md:leading-snug",
                       active ? "text-[var(--color-body)]" : "text-[var(--color-dim)]",
                       "[@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]",
                     ].join(" ")}
