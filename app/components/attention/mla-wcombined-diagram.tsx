@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function MLAAbsorbDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 340 140" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 340 140"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="The usual approach expands the latents cQ and cKV back to full-size Q and K with the up-projection matrices WUQ and WUK. MLA pre-multiplies WUQ and WUK into a single precomputed Wcombined, so the latents stay small at inference."
+      >
         {/* Usual approach */}
         <g transform="translate(80, 25)">
           <text x="-8" y="13" textAnchor="end" className="fill-slate-400 dark:fill-slate-500 text-[8px]">inference</text>

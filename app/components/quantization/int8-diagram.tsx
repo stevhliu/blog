@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function Int8Diagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 200 70" className="w-full max-w-xs mx-auto">
+      <svg
+        viewBox="0 0 200 70"
+        className="w-full max-w-xs mx-auto"
+        role="img"
+        aria-label="int8 uses 8 bits, with 1 sign bit and 7 significand bits."
+      >
         {/* Sign bit */}
         <g transform="translate(20, 10)">
           <rect x="0" y="0" width="20" height="40" rx="4" className="fill-rose-100 stroke-rose-400" strokeWidth="1.5"/>

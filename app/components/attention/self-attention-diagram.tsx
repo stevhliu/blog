@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function SelfAttentionDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 460 140" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 460 140"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="Scaled dot-product attention. Q is multiplied by K transposed and divided by the square root of dk to give scores, softmax turns the scores into weights, and the weights are multiplied by V."
+      >
         {/* Q matrix */}
         <g transform="translate(20, 45)">
           <rect x="0" y="0" width="44" height="50" rx="6" className="fill-sky-100 stroke-sky-400" strokeWidth="1.5"/>

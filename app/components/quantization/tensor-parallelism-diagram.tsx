@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function TensorParallelismDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 400 180" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 400 180"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="Tensor parallelism splits a weight matrix W into shards W0, W1 and W2 on three GPUs. Each GPU multiplies the input x by its shard in parallel, and an all-reduce combines the partial results into the output Y."
+      >
         {/* Original weight matrix - centered vertically with GPU stack */}
         <g transform="translate(20, 45)">
           <text x="40" y="-8" textAnchor="middle" className="fill-slate-500 text-[10px] font-medium">weight matrix</text>

@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function MLADecoupleDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 16 260 196" className="w-full max-w-sm mx-auto">
+      <svg
+        viewBox="0 16 260 196"
+        className="w-full max-w-sm mx-auto"
+        role="img"
+        aria-label="Decoupled RoPE in multi-head latent attention. The input h is compressed into latents cQ and cKV whose content scores go through Wcombined, while small separate vectors qR and kR carry the RoPE position information, and the content and position scores are summed for attention, with only cKV and kR cached."
+      >
         {/* ALL LINES FIRST (drawn underneath rectangles) */}
         
         {/* Arrow up from h splitting to latents */}

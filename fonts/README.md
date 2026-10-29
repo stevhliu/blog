@@ -14,4 +14,4 @@ The script visits the index, About page, and every post listed in `app/posts.jso
 
 Review the new files and rerun the same visual comparison used for this change before committing them. Commit the generated files with the content or style change that required them. The generated `app/font-profile.generated.ts` maps each post to the extended faces it needs. The website preloads only the two core files. Pages that need an extended character use one complete extended face for that font family, so kerning still works across accented text. Those larger files include the core glyphs too and are enabled only on pages that need them.
 
-`fonts/initial-measurement.json` preserves the original site’s rendered character, style, preload, and network measurements from this optimization. `fonts/usage.json` is replaced each time the manual script runs.
+`fonts/usage.json` is replaced each time the manual script runs.

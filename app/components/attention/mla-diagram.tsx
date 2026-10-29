@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function MLADiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 300 130" className="w-full max-w-xs mx-auto">
+      <svg
+        viewBox="0 0 300 130"
+        className="w-full max-w-xs mx-auto"
+        role="img"
+        aria-label="A standard KV cache holds four full KV blocks, while multi-head latent attention caches fewer, smaller latent blocks, and the gap between them is memory saved."
+      >
         {/* Standard KV cache */}
         <g transform="translate(20, 20)">
           <text x="0" y="-6" className="fill-slate-400 dark:fill-slate-500 text-[9px]">standard</text>

@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function KVCacheDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 460 160" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 460 160"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="Without a cache, each generation step recomputes K and V for every previous token as well as the new one. With a KV cache, earlier K and V values are reused and only the new token's K and V are computed at each step."
+      >
         {/* Step labels */}
         <text x="75" y="15" textAnchor="middle" className="fill-slate-500 text-[9px] font-medium">step 1</text>
         <text x="155" y="15" textAnchor="middle" className="fill-slate-500 text-[9px] font-medium">step 2</text>

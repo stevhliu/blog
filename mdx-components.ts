@@ -19,7 +19,6 @@ import { Snippet } from "./app/components/snippet";
 import { Caption } from "./app/components/caption";
 import { Callout, Tip, Warning } from "./app/components/callout";
 import { ProBadge } from "./app/components/pro-badge";
-import { SpaceFan } from "./app/components/space-fan";
 import { ZeroBadge } from "./app/components/zero-badge";
 import { Blockquote as blockquote } from "./app/components/blockquote";
 
@@ -66,7 +65,6 @@ export function useMDXComponents(components: {
     Tip,
     Warning,
     ProBadge,
-    SpaceFan,
     ZeroBadge,
     HoverWord,
     Table,

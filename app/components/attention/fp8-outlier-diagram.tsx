@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function FP8OutlierDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 440 145" className="w-full max-w-xl mx-auto">
+      <svg
+        viewBox="0 0 440 145"
+        className="w-full max-w-xl mx-auto"
+        role="img"
+        aria-label="With one global FP8 scale, outlier values of 47 and 52 take up the whole range and squash the normal values near zero. With a scale per block, the small-value block and the outlier block each get their own scale and both stretch across the full FP8 range up to 448."
+      >
         {/* Title for left side - Before */}
         <text x="95" y="16" textAnchor="middle" className="fill-slate-500 text-[9px] font-medium">global scale</text>
         

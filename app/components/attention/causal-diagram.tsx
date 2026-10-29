@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function CausalDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 420 110" className="w-full max-w-md mx-auto">
+      <svg
+        viewBox="0 0 420 110"
+        className="w-full max-w-md mx-auto"
+        role="img"
+        aria-label="Causal self-attention for a single head. Q, K and V pass through a triangular causal mask, so each word can attend to itself and earlier words but not to the words after it."
+      >
         {/* Single head with Q, K, V */}
         <g transform="translate(20, 20)">
           <text x="85" y="-4" textAnchor="middle" className="fill-slate-400 text-[11px]">single head</text>

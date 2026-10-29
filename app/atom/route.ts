@@ -1,11 +1,15 @@
-import { getPosts } from "@/app/get-posts";
+import { getPublishedPosts } from "@/app/get-posts";
 import { escapeXml, toRfc3339 } from "./feed";
 
 const SITE = "https://stevhliu.com";
 const MAX_ENTRIES = 100;
 
+// The feed only changes when posts.json does, so build it once per deploy
+// instead of on every poll.
+export const dynamic = "force-static";
+
 export async function GET() {
-  const posts = (await getPosts()).slice(0, MAX_ENTRIES);
+  const posts = getPublishedPosts().slice(0, MAX_ENTRIES);
 
   const entries = posts.map(post => {
     const year = new Date(`${post.date} UTC`).getUTCFullYear();

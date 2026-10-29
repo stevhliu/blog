@@ -1,13 +1,13 @@
 import { TocSidebar } from "./toc-sidebar";
 import { ViewCounter } from "./view-counter";
 import { fontProfileByPost } from "@/app/font-profile.generated";
-import type { Post } from "../get-posts";
+import type { PostEntry } from "../get-posts";
 
 export function PostChrome({
   post,
   children,
 }: {
-  post: Post | null;
+  post: PostEntry | null;
   children: React.ReactNode;
 }) {
   const fontProfile = post ? fontProfileByPost[post.id] : undefined;
@@ -45,7 +45,8 @@ export function PostChrome({
           <div className="post-body text-[18px] text-[var(--color-body)]">
             {children}
           </div>
-          {post ? <ViewCounter id={post.id} /> : null}
+          {/* /api/view only counts published posts, so drafts don't call it. */}
+          {post && !post.draft ? <ViewCounter id={post.id} /> : null}
         </article>
       </div>
     </div>

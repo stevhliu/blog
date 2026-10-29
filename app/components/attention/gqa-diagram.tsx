@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function GQADiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 500 240" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 500 240"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="Grouped-query attention with eight query heads split into two groups. Heads 1 to 4 share one key and value pair, and heads 5 to 8 share another."
+      >
         {/* Group 1 box */}
         <rect x="20" y="10" width="220" height="220" rx="12" className="fill-violet-50 stroke-violet-200 dark:fill-violet-950 dark:stroke-violet-400" strokeWidth="1.5" strokeDasharray="6,4"/>
         <text x="130" y="32" textAnchor="middle" className="fill-violet-400 text-[11px]">group 1</text>

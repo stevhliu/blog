@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function DeviceMapDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 420 130" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 420 130"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="With a device map, layers 0 to 7 run on GPU 0, layers 8 to 15 on GPU 1 and layers 16 to 23 on GPU 2 one after another, so two of the three GPUs sit idle at any moment before GPU 2 produces the output."
+      >
         {/* Timeline header */}
         <g transform="translate(80, 15)">
           <text x="140" y="0" textAnchor="middle" className="fill-slate-400 text-[9px]">time →</text>

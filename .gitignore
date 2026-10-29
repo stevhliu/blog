@@ -19,7 +19,6 @@ fonts/*
 # Ensure we don't commit npm lockfiles
 package-lock.json
 yarn.lock
-AGENTS.md
 CLAUDE.md
 .cursor/skills/
 .agents/

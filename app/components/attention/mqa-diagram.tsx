@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function MQADiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 340 180" className="w-full max-w-sm mx-auto">
+      <svg
+        viewBox="0 0 340 180"
+        className="w-full max-w-sm mx-auto"
+        role="img"
+        aria-label="Multi-query attention with six query heads that all share a single key and value."
+      >
         {/* Head 1 */}
         <g transform="translate(20, 10)">
           <rect x="-5" y="0" width="50" height="75" rx="8" className="fill-slate-50 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-500" strokeWidth="1" strokeDasharray="4,2"/>

@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function AsymmetricQuantizationDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 340 240" className="w-full max-w-md mx-auto">
+      <svg
+        viewBox="0 0 340 240"
+        className="w-full max-w-md mx-auto"
+        role="img"
+        aria-label="Asymmetric quantization maps the fp32 range from -3.2 to 5.8 onto the int8 range from -128 to 127. The scale is (5.8 + 3.2) / 255, about 0.035, and fp32 zero lands on a zero-point of 35 that dequantization subtracts before multiplying by the scale."
+      >
         {/* FP32 number line */}
         <g transform="translate(40, 30)">
           <text x="-25" y="24" textAnchor="middle" className="fill-slate-500 text-[11px] font-medium">fp32</text>

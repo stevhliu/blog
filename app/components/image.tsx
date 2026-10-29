@@ -32,7 +32,7 @@ export async function Image({
   const factor = dividedBy / 100;
 
   if (isDataImage) {
-    /* eslint-disable @next/next/no-img-element */
+    // eslint-disable-next-line @next/next/no-img-element
     return <img src={src} alt={originalAlt ?? ""} loading="lazy" decoding="async" />;
   }
 

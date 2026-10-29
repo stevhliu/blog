@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function FA3PipelineDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 420 145" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 420 145"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="In FlashAttention-2 every warp loads a K, V block and then computes on it, one after the other. FlashAttention-3 gives loading to a producer warp using TMA and computing to consumer warps using tensor cores, so the next block loads while the current one is computed."
+      >
         {/* FlashAttention-2 side */}
         <g transform="translate(10, 10)">
           <text x="117" y="0" textAnchor="middle" className="fill-slate-600 text-[11px] font-medium">FlashAttention-2</text>

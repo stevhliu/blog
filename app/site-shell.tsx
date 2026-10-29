@@ -1,10 +1,11 @@
-import { Header } from "./header";
+import { SiteHeader } from "./site-header";
 
 /**
  * The outer site frame shared by every page. `chrome` (home, about, 404) adds
  * the page-border top rule; `post` is full-bleed. The variant used to be derived
  * in the root layout from a request header set by middleware; it is now chosen
- * per route group so every page renders statically.
+ * per route group so every page renders statically. Only `chrome` renders the
+ * site header, so post pages never download or hydrate it.
  */
 export function SiteShell({
   variant,
@@ -37,7 +38,7 @@ export function SiteShell({
           variant === "chrome" ? "max-w-[630px]" : "max-w-6xl"
         }`}
       >
-        <Header />
+        {variant === "chrome" ? <SiteHeader /> : null}
         <main id="main">{children}</main>
       </div>
     </div>

@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function FAWarpDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 420 195" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 420 195"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="FlashAttention shares Q across warps and splits K and V between them, so every warp writes partial results to shared memory and has to sync and reduce. FlashAttention-2 shares K and V and splits Q instead, so each warp produces its own output block with no shared memory writes and no sync until the end."
+      >
         {/* FlashAttention side */}
         <g transform="translate(10, 10)">
           <text x="90" y="0" textAnchor="middle" className="fill-slate-600 text-[11px] font-medium">FlashAttention</text>

@@ -268,10 +268,28 @@ export function HoverCard({
     setIsOpen(false);
   }, [clearTimeout]);
 
+  // The card is position: fixed, so it has to follow its trigger while the
+  // page scrolls or resizes. Capture catches scrolling in any ancestor, and
+  // one rAF per frame keeps it from measuring on every event.
   useEffect(() => {
-    if (isOpen) {
-      updatePosition();
-    }
+    if (!isOpen) return;
+    updatePosition();
+
+    let frame = 0;
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updatePosition();
+      });
+    };
+    window.addEventListener("scroll", schedule, { capture: true, passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", schedule, { capture: true });
+      window.removeEventListener("resize", schedule);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, [isOpen, updatePosition]);
 
   return (

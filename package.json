@@ -18,15 +18,15 @@
     "react-tweet": "^3.1.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@types/node": "^24.13.3",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "autoprefixer": "^10.4.14",
-    "eslint": "^8.56.0",
+    "eslint": "^9.39.5",
     "eslint-config-next": "15.5.19",
     "playwright": "^1.61.1",
     "postcss": "^8.4.21",
-    "prettier": "^2.8.4",
     "tailwindcss": "^3.3.1",
     "typescript": "5.9.3",
     "vitest": "^4.1.9"
@@ -36,13 +36,10 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "vitest run",
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "postinstall": "node ./fonts/init.mjs"
-  },
-  "prettier": {
-    "arrowParens": "avoid"
   },
   "packageManager": "pnpm@10.14.0"
 }

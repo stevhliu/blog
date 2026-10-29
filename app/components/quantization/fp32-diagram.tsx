@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function FP32Diagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 400 70" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 400 70"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="fp32 uses 32 bits, with 1 sign bit, 8 exponent bits and 23 significand bits."
+      >
         {/* Sign bit */}
         <g transform="translate(20, 10)">
           <rect x="0" y="0" width="30" height="40" rx="4" className="fill-rose-100 stroke-rose-400" strokeWidth="1.5"/>

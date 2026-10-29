@@ -14,16 +14,8 @@ const fontPaths = [
     dest: "geist-light.ttf"
   },
   {
-    src: "node_modules/geist/dist/fonts/geist-sans/Geist-Regular.ttf",
-    dest: "geist-regular.ttf"
-  },
-  {
     src: "node_modules/geist/dist/fonts/geist-sans/Geist-Medium.ttf",
     dest: "geist-medium.ttf"
-  },
-  {
-    src: "node_modules/geist/dist/fonts/geist-sans/Geist-Bold.ttf",
-    dest: "geist-bold.ttf"
   },
   {
     src: "node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.ttf",

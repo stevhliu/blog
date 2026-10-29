@@ -7,7 +7,8 @@ import { useEffect, useRef } from "react";
  * Pose B is padded with a blank top row so both poses occupy 6 lines —
  * without this the layout jumps by one line-height every swap.
  *
- * Pauses entirely under prefers-reduced-motion.
+ * Pauses entirely under prefers-reduced-motion, and stops ticking while the
+ * cat is scrolled out of view, like the home page tiles.
  */
 const POSE_A =
   "♪\n　　   ∧＿＿∧　　   ♪\n　   （´・ω・｀∩\n　　   o　　　,ﾉ\n　　  Ｏ＿　.ﾉ\n♪　　    (ノ";
@@ -40,14 +41,35 @@ export function AsciiCat() {
     ) {
       return;
     }
+    const cat = catRef.current;
+    if (!cat) return;
+
     let pose = 0;
-    const id = window.setInterval(() => {
-      pose = (pose + 1) % POSES.length;
-      if (catRef.current) {
-        catRef.current.innerHTML = colorizeNotes(POSES[pose]);
+    let id: number | null = null;
+    const start = () => {
+      if (id === null) {
+        id = window.setInterval(() => {
+          pose = (pose + 1) % POSES.length;
+          cat.innerHTML = colorizeNotes(POSES[pose]);
+        }, 500);
       }
-    }, 500);
-    return () => window.clearInterval(id);
+    };
+    const stop = () => {
+      if (id !== null) {
+        window.clearInterval(id);
+        id = null;
+      }
+    };
+
+    const observer = new IntersectionObserver(([entry]) =>
+      entry.isIntersecting ? start() : stop()
+    );
+    observer.observe(cat);
+
+    return () => {
+      observer.disconnect();
+      stop();
+    };
   }, []);
 
   return (

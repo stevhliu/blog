@@ -3,14 +3,29 @@ import postsData from "./posts.json";
 import { formatInteger } from "./post-format";
 import { supabase } from "./supabase";
 
-export type Post = {
+/** A post as registered in posts.json, without view counts. */
+export type PostEntry = {
   id: string;
   date: string;
   title: string;
-  views: number;
-  viewsFormatted: string;
   draft?: boolean;
 };
+
+export type Post = PostEntry & {
+  views: number;
+  viewsFormatted: string;
+};
+
+/** Every registered post, drafts included, in posts.json order. */
+export const allPosts: PostEntry[] = postsData.posts;
+
+/**
+ * Published posts without view counts. Use this instead of getPosts() when
+ * nothing on the page shows views, so the route never queries Supabase.
+ */
+export function getPublishedPosts(): PostEntry[] {
+  return allPosts.filter(post => !post.draft);
+}
 
 // shape of the views rows in supabase
 type Views = {
@@ -19,7 +34,7 @@ type Views = {
 
 // Legacy post IDs remain in Supabase so their historical views can be
 // displayed on the merged canonical post.
-export const VIEW_ALIASES: Record<string, string[]> = {
+const VIEW_ALIASES: Record<string, string[]> = {
   "transformers-loading-pipeline": [
     "transformers-compendium-1",
     "transformers-compendium-2",
@@ -36,7 +51,7 @@ export function getAggregatedViews(postId: string, viewsMap: Views): number {
 // Wrapped with React.cache() to deduplicate requests within the same render pass
 export const getPosts = cache(async () => {
   // Drafts are kept in posts.json but excluded from the public index and feed.
-  const publishedPosts = postsData.posts.filter(post => !("draft" in post && post.draft));
+  const publishedPosts = getPublishedPosts();
 
   if (!supabase) {
     return publishedPosts.map((post): Post => ({

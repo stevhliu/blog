@@ -1,21 +1,14 @@
-"use client";
-
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { AsciiCat } from "./ascii-cat";
 import { HuggingFaceLogo } from "./components/hugging-face-logo";
-import { isPostDetailPathname } from "./post-routing";
 
 /**
- * Post detail URLs: no site header (post template provides title + local nav).
- * All other routes: top meta row (live PT datetime + total records) + ASCII cat hero.
+ * Header for the chrome pages (home, about, 404): the ASCII cat hero and the
+ * bio. Post pages don't render it; SiteShell only includes it for `chrome`.
  *
  * The hero is the dancing ASCII cat — "Observation Log" is kept for screen readers only.
  */
 export function SiteHeader() {
-  const pathname = usePathname() ?? "";
-  if (isPostDetailPathname(pathname)) return null;
-
   return (
     <header className="mb-8">
       {/* One column at every width: the cat sits above the bio rather than

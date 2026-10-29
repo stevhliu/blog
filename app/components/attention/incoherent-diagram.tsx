@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function IncoherentDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 440 145" className="w-full max-w-xl mx-auto">
+      <svg
+        viewBox="0 0 440 145"
+        className="w-full max-w-xl mx-auto"
+        role="img"
+        aria-label="Multiplying a vector that has an outlier of 47 by a random orthogonal matrix R spreads that magnitude evenly, so every dimension ends up around 8 to 9. Because R transposed times R is the identity, dot products are unchanged."
+      >
         {/* Input vector with outlier */}
         <g transform="translate(15, 45)">
           <text x="50" y="-35" textAnchor="middle" className="fill-slate-500 text-[9px] font-medium">input</text>

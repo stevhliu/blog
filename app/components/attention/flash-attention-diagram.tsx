@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function FlashAttentionDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 420 170" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 420 170"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="FlashAttention works through K one block at a time. Block 1 records a row-wise max m1 and sum l1, block 2 updates them to m2 and l2, and the partial output O1 is rescaled before O2 is added, so the full attention score matrix is never stored."
+      >
         {/* Block 1 */}
         <g transform="translate(20, 15)">
           <text x="75" y="6" textAnchor="middle" className="fill-slate-500 text-[10px] font-medium">block 1</text>

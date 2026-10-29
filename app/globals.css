@@ -1,5 +1,17 @@
 @import "./font-subsets.generated.css";
 
+/* Paper Mono for code blocks, self-hosted because it isn't installed on
+   most readers' machines. Built by scripts/build-paper-mono.py; license in
+   public/fonts/PaperMono-OFL.txt. Not preloaded, since only posts with
+   code blocks use it. */
+@font-face {
+  font-family: "Paper Mono";
+  src: url("/fonts/paper-mono.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,10 +26,10 @@
     color-scheme: light;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-    /* Warm off-white paper + black ink for the index. Post detail overrides --color-body below. */
+    /* White paper + black ink for the index. Post detail overrides --color-body below. */
     --color-page-chrome: #ffffff;
     --color-page-border: #cbc5bc;
-    --color-bg: #fbfaf9;
+    --color-bg: #ffffff;
     --color-text: #000000;
     --color-subtext: rgba(0, 0, 0, 0.6);
     --color-blue: #000000;
@@ -113,13 +125,19 @@
 
 /* Add generous padding inside all highlighted code blocks. The scroll
    container (Snippet wrapper) owns rounding + max-height. */
+/* The inner <code> needs the font too: Tailwind's preflight gives every
+   <code> its own font-family, which would override the <pre>'s. */
+pre.highlights,
+pre.highlights code {
+  font-family: theme("fontFamily.code");
+}
+
 pre.highlights {
   display: inline-block;
   min-width: 100%;
   box-sizing: border-box;
   padding: 1rem 1rem;
   margin: 0;
-  font-family: "Geist Mono", monospace;
   white-space: pre;
   overflow-wrap: normal;
   word-break: normal;
@@ -162,14 +180,6 @@ button:focus-visible,
 }
 
 /* ─── Archive index aesthetic ───────────────────────────── */
-.archive-serif {
-  font-family: "Times New Roman", Times, serif;
-}
-
-.archive-mono {
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
-}
-
 /* Observation Log title: Geist sans, medium weight, tight tracking. The hero is the ASCII cat;
    the text label only shows for screen readers. */
 .archive-title {
@@ -337,7 +347,6 @@ li a,
   margin: 0;
   white-space: pre;
   display: inline-block;
-  will-change: contents;
   /* The two poses are not the same width (pose A is the wider one), so a
      shrink-to-fit box changes size on every 500ms swap. That went unnoticed
      while the cat was flush left, but now that it is centred a changing
@@ -349,17 +358,6 @@ li a,
 @media (min-width: 768px) {
   .ascii-cat {
     font-size: 24px;
-  }
-}
-
-@layer utilities {
-  .scrollbar-hidden {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .scrollbar-hidden::-webkit-scrollbar {
-    display: none;
   }
 }
 

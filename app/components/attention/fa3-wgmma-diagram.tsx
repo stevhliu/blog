@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function FA3WGMMADiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 400 130" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 400 130"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="FlashAttention-3 overlaps two pipelines across four steps. While WGMMA asynchronously computes the next block of scores and accumulates the output, softmax runs on the current block of scores, and the two only sync at the wgmma_wait step."
+      >
         {/* Loop body - showing overlap */}
         <g transform="translate(20, 10)">
           {/* Timeline labels */}

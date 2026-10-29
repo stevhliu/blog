@@ -1,5 +1,6 @@
-import { cache } from "react";
-import { codeToHtml } from "@pierre/highlights";
+import { cache, isValidElement } from "react";
+import type { ReactNode } from "react";
+import { codeToHtml, isSupportedLanguage } from "@pierre/highlights";
 import type { Lang } from "@pierre/highlights";
 import { pierreLight, pierreDark } from "@pierre/highlights/themes";
 
@@ -11,7 +12,7 @@ const THEMES = { light: pierreLight, dark: pierreDark };
 
 const decoder = new TextDecoder();
 
-export const highlightCode = cache(function highlightCode(
+const highlightCode = cache(function highlightCode(
   code: string,
   lang: Lang = "python"
 ) {
@@ -23,23 +24,48 @@ export const highlightCode = cache(function highlightCode(
 });
 
 type SnippetProps = {
-  children: string;
+  children: ReactNode;
   language?: Lang;
   maxHeight?: string;
 };
+
+type CodeElementProps = { className?: string; children?: ReactNode };
+
+// Snippet is used two ways. Written as <Snippet>{`...`}</Snippet> it gets the
+// code as a string. Mapped to `pre` for Markdown fences, MDX hands it a
+// <code className="language-x"> element instead, so read the text and the
+// language off that element.
+function readSource(children: ReactNode): { code: string; fenceLang?: string } {
+  if (typeof children === "string") return { code: children };
+  if (isValidElement<CodeElementProps>(children)) {
+    const { className = "", children: inner } = children.props;
+    const fenceLang = className.match(/language-(\S+)/)?.[1];
+    return { code: readSource(inner).code, fenceLang: fenceLang ?? "plain" };
+  }
+  if (Array.isArray(children)) {
+    return { code: children.map(child => readSource(child).code).join("") };
+  }
+  return { code: "" };
+}
 
 export function Snippet({
   children,
   language = "python",
   maxHeight = "400px",
 }: SnippetProps) {
+  const { code: source, fenceLang } = readSource(children);
+  // A fence's language tag wins; an unknown tag falls back to plain text
+  // instead of failing the build.
+  const requested = fenceLang ?? language;
+  const lang: Lang = isSupportedLanguage(requested) ? requested : "plain";
+
   // Pre-process the code to ensure < and > characters are preserved
-  let code = typeof children === "string" ? children.trim() : "";
+  let code = source.trim();
 
   // Replace any potential Unicode angle brackets with regular ones before processing
   code = code.replace(/⟨/g, "<").replace(/⟩/g, ">");
 
-  const html = highlightCode(code, language);
+  const html = highlightCode(code, lang);
 
   return (
     <div className="my-6">

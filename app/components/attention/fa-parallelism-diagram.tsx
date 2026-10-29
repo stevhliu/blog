@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function FAParallelismDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 420 200" className="w-full max-w-lg mx-auto">
+      <svg
+        viewBox="0 0 420 200"
+        className="w-full max-w-lg mx-auto"
+        role="img"
+        aria-label="FlashAttention parallelizes over batch, heads and query blocks, so 2 batches of 4 heads keep only 8 of 16 streaming multiprocessors busy. FlashAttention-2 splits each head into more query blocks, which keeps all 16 busy."
+      >
         {/* FlashAttention-1 side */}
         <g transform="translate(10, 10)">
           <text x="90" y="0" textAnchor="middle" className="fill-slate-600 text-[11px] font-medium">FlashAttention</text>

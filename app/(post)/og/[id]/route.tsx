@@ -1,11 +1,13 @@
-export const revalidate = 60;
-
 import { ImageResponse } from "next/og";
-import { getPosts } from "@/app/get-posts";
+import { allPosts } from "@/app/get-posts";
 import { loadGeistFont, loadPublicImageDataUrl } from "@/app/og-assets";
 
-export async function generateStaticParams() {
-  return (await getPosts()).map(post => ({ id: post.id }));
+// Drafts get cards too, since their pages are reachable by URL and point
+// og:image here. Unknown ids 404 without rendering.
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return allPosts.map(post => ({ id: post.id }));
 }
 
 const geistSansMedium = loadGeistFont("geist-medium.ttf");
@@ -54,11 +56,11 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const [{ id }, posts] = await Promise.all([params, getPosts()]);
-  const idx = posts.findIndex(p => p.id === id);
+  const { id } = await params;
+  const idx = allPosts.findIndex(p => p.id === id);
   if (idx === -1) return new Response("Not found", { status: 404 });
 
-  const post = posts[idx];
+  const post = allPosts[idx];
 
   return new ImageResponse(
     (

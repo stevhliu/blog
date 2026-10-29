@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function FP16Diagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 280 70" className="w-full max-w-md mx-auto">
+      <svg
+        viewBox="0 0 280 70"
+        className="w-full max-w-md mx-auto"
+        role="img"
+        aria-label="fp16 uses 16 bits, with 1 sign bit, 5 exponent bits and 10 significand bits."
+      >
         {/* Sign bit */}
         <g transform="translate(20, 10)">
           <rect x="0" y="0" width="20" height="40" rx="4" className="fill-rose-100 stroke-rose-400" strokeWidth="1.5"/>

@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function MLARoPEDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 250 145" className="w-full max-w-md mx-auto">
+      <svg
+        viewBox="0 0 250 145"
+        className="w-full max-w-md mx-auto"
+        role="img"
+        aria-label="With RoPE, the rotation Rt transposed Rj sits between WUQ and WUK and changes for every pair of token positions t and j, so the three cannot be folded into one fixed matrix ahead of time."
+      >
         {/* With RoPE - R blocks combination */}
         <g transform="translate(110, 28)">
           <text x="-8" y="16" textAnchor="end" className="fill-rose-500 dark:fill-rose-400 text-[8px] font-medium">with RoPE</text>

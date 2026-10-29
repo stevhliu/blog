@@ -22,7 +22,6 @@ export async function GET() {
         <main tw="flex grow pt-4 w-full justify-center items-center">
           <div tw="flex flex-row">
             <div tw="flex">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 tw="rounded-full h-74"
                 alt="Steven Liu"

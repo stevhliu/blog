@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function MHADiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 360 90" className="w-full max-w-md mx-auto">
+      <svg
+        viewBox="0 0 360 90"
+        className="w-full max-w-md mx-auto"
+        role="img"
+        aria-label="Multi-head attention with three heads, where each head has its own query, key and value."
+      >
         {/* Head 1 */}
         <g transform="translate(20, 30)">
           <text x="50" y="-8" textAnchor="middle" className="fill-slate-400 text-[9px]">head 1</text>

@@ -3,7 +3,12 @@ import { Caption } from "../caption";
 export function BMIDiagram() {
   return (
     <figure className="my-8">
-      <svg viewBox="0 0 380 120" className="w-full max-w-md mx-auto">
+      <svg
+        viewBox="0 0 380 120"
+        className="w-full max-w-md mx-auto"
+        role="img"
+        aria-label="Big Model Inference creates an empty model on the meta device and fills it from checkpoint shards loaded one at a time, discarding each shard after use, so the model is never held in memory twice."
+      >
         {/* Shards */}
         <g transform="translate(20, 28)">
           <text x="40" y="-13" textAnchor="middle" className="fill-slate-500 text-[10px] font-medium">shards</text>
