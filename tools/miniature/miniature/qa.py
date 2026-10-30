@@ -51,6 +51,34 @@ def words(image: Image.Image) -> Counter:
     return Counter(t for t in tokens if t)
 
 
+def match_words(expected: Counter, found: Counter) -> list[str]:
+    """The expected words with no match among the found ones. OCR drops or
+    bends a letter now and then on either side ("CONTAINS" read as
+    "ONTAIN" from the photo, "SMILEMATTER" as "MILEMATTER"), so a word
+    counts as found when a found word is close to it: the same word, one
+    containing the other (four letters or more), or within a letter or two
+    (difflib ratio 0.8). Each found word is spent once."""
+    from difflib import SequenceMatcher
+
+    pool = list(found.elements())
+    missing = []
+    for word in expected.elements():
+        best = None
+        for i, candidate in enumerate(pool):
+            close = (
+                candidate == word
+                or (len(word) >= 4 and len(candidate) >= 4 and (word in candidate or candidate in word))
+                or SequenceMatcher(None, word, candidate).ratio() >= 0.8
+            )
+            if close and (best is None or candidate == word):
+                best = i
+        if best is None:
+            missing.append(word)
+        else:
+            pool.pop(best)
+    return missing
+
+
 def glb_primitives_missing_normals(path: Path) -> int:
     """How many primitives in a GLB have no NORMAL attribute. Viewers shade
     those flat, one visible facet per triangle."""
@@ -106,7 +134,8 @@ def check(
     )
     expected = words(photo)
     found = words(view)
-    matched = sum((expected & found).values())
+    missing = match_words(expected, found)
+    matched = sum(expected.values()) - len(missing)
     # No readable text in the photo means nothing to check, not a failure.
     recall = matched / sum(expected.values()) if expected else 1.0
 
@@ -124,7 +153,7 @@ def check(
         "pixel_error": round(error, 2),
         "text_recall": round(recall, 3),
         "text_words": sum(expected.values()),
-        "text_missing": sorted((expected - found).elements()),
+        "text_missing": sorted(missing),
         "text_extra": sorted((found - expected).elements()),
         "shading_roughness": round(roughness, 4),
         "primitives_missing_normals": missing_normals,

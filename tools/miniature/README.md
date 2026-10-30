@@ -51,7 +51,7 @@ installed Google Chrome.
 | --- | --- | --- |
 | Silhouette overlap | ≥ 0.97 | 0.999 |
 | Pixel error on the object (2px blur on both) | ≤ 6 / 255 | 1.1 |
-| Words matched (macOS Vision) | ≥ 95% (skipped with no text) | 21 of 21 |
+| Words matched (macOS Vision; a word counts when the render has it, a word containing it, or one within a letter or two, since OCR slips a letter on either side) | ≥ 95% (skipped with no text) | 21 of 21 |
 | Every part has normals | all | all |
 | Shading roughness under a raking light | ≤ 0.003 | 0.0010 |
 
