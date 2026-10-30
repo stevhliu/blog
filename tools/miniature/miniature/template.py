@@ -42,6 +42,8 @@ GUSSET_STEPS = 10  # points across each gusset
 FIN = 0.0015  # half-thickness of the sealed fin, in scene units
 FOLD = 0.08  # how far a gusset's middle folds in, as a fraction of the depth there
 SHOULDER = 0.12  # how gradually the panels round over into the seal
+EDGE_SMOOTH = 3  # rows either way the outline is smoothed over; see row_extents
+CRIMP = 0.006  # of the width: outline jitter up to this is seal crimp, not shape
 ATLAS = 1024
 # Outline overlap lost per pixel of mean print reprojection error (fit_pouch).
 REPROJECTION_PENALTY = 0.01
@@ -117,8 +119,25 @@ def row_extents(alpha: np.ndarray, rows: np.ndarray) -> tuple[np.ndarray, np.nda
     for edge in (left, right):
         ok = ~np.isnan(edge)
         edge[~ok] = np.interp(np.nonzero(~ok)[0], np.nonzero(ok)[0], edge[ok])
-    k = np.ones(3) / 3
-    smooth = lambda e: np.concatenate([e[:1], np.convolve(e, k, "valid"), e[-1:]])
+    # The medians still carry the crimp (its period is close to the row
+    # spacing), and a gusset built on a jittering edge zigzags row to row,
+    # which lights as ribbing down the whole side. So the edge is smoothed
+    # (a box of EDGE_SMOOTH rows either way, twice over, ends mirrored so
+    # the top and base rows stay put), but only the small departures from
+    # that smooth line are dropped: anything beyond CRIMP of the width is a
+    # real feature of the outline, a wide tooth or a corner, and is kept,
+    # so a bag with a coarse seal or a bulging side still fits its photo.
+    width = float(np.nanmedian(right - left))
+    k = np.ones(2 * EDGE_SMOOTH + 1) / (2 * EDGE_SMOOTH + 1)
+
+    def smooth(e: np.ndarray) -> np.ndarray:
+        line = e.copy()
+        for _ in range(2):
+            padded = np.concatenate([line[EDGE_SMOOTH:0:-1], line, line[-2 : -EDGE_SMOOTH - 2 : -1]])
+            line = np.convolve(padded, k, "valid")
+        residual = e - line
+        return line + np.sign(residual) * np.maximum(np.abs(residual) - CRIMP * width, 0)
+
     return smooth(left), smooth(right)
 
 

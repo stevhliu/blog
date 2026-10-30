@@ -25,6 +25,13 @@ from .raster import rasterize
 
 FRONT_ANGLE = 70.0  # degrees from head-on; steeper faces would smear the photo
 FADE_ANGLE = 84.0  # photo blends into the atlas up to this angle
+# A face turned past this from head-on stops taking the photo within
+# EDGE_MARGIN (of the photo's size) of the silhouette: those pixels are the
+# outline's own edge (a crimped seal, say), and spread across a surface
+# seen at a slant they draw as streaks. Head-on faces keep them: on the
+# front a seal's crimp is detail, not a smear.
+OBLIQUE_ANGLE = 45.0
+EDGE_MARGIN = 0.015
 DEPTH_TOLERANCE = 0.004  # fraction of camera distance; absorbs rasterizer error
 # Extra photos count for less than the primary where both saw a texel, since
 # their colours are only matched to it, not taken from it.
@@ -70,6 +77,10 @@ class View:
         px, depth = camera.project(verts)
         self.frags = rasterize(px, depth, faces, camera.size)
         self.tolerance = DEPTH_TOLERANCE * camera.distance
+        # How far each photo pixel is from the silhouette, in pixels.
+        import cv2
+
+        self.inset = cv2.distanceTransform((self.alpha > 0.5).astype(np.uint8), cv2.DIST_L2, 5)
 
     def visible(self, points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Which points this camera saw unoccluded, on the object, and where
@@ -86,7 +97,13 @@ class View:
         fading to 0 by FADE_ANGLE, 0 where unseen. Plus the photo pixels."""
         seen, px = self.visible(points)
         cos = np.einsum("ij,ij->i", normals, self.camera.view_dirs(points))
-        return seen * smoothstep(np.cos(np.radians(FADE_ANGLE)), np.cos(np.radians(FRONT_ANGLE)), cos), px
+        facing = smoothstep(np.cos(np.radians(FADE_ANGLE)), np.cos(np.radians(FRONT_ANGLE)), cos)
+        # Oblique faces lose the photo in the band along the silhouette.
+        size = self.camera.size
+        ix = np.clip(px.astype(int), 0, size - 1)
+        margin = smoothstep(0.0, EDGE_MARGIN * size, self.inset[ix[:, 1], ix[:, 0]])
+        oblique = 1 - smoothstep(np.cos(np.radians(FRONT_ANGLE)), np.cos(np.radians(OBLIQUE_ANGLE)), cos)
+        return seen * facing * (1 - oblique * (1 - margin)), px
 
 
 def harmonize(source: np.ndarray, reference: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -131,7 +148,21 @@ def project(
     front = vert_seen[faces].all(1) & (facing > np.cos(np.radians(FRONT_ANGLE)))
     behind = np.zeros(len(faces), bool)
     if back is not None:
+        import cv2
+
+        back_photo, back_uv = back
         behind = facing < -np.cos(np.radians(FRONT_ANGLE))
+        # And only faces the back photo shows well inside its outline. The
+        # gussets' inner halves also face away, but their place in the back
+        # photo is its edge (the seal's crimp), which spread across a
+        # gusset draws as streaks; they take the atlas instead.
+        back_alpha = np.asarray(back_photo.convert("RGBA"))[..., 3] > 127
+        back_inset = cv2.distanceTransform(back_alpha.astype(np.uint8), cv2.DIST_L2, 5)
+        back_size = back_alpha.shape[0]
+        centre_uv = back_uv[faces].mean(1)
+        bx = np.clip((centre_uv[:, 0] * back_size).astype(int), 0, back_size - 1)
+        by = np.clip(((1 - centre_uv[:, 1]) * back_size).astype(int), 0, back_size - 1)
+        behind &= back_inset[by, bx] >= EDGE_MARGIN * back_size
 
     # Every texel of the atlas, as a point on the surface.
     atlas = np.asarray(mesh.visual.material.baseColorTexture.convert("RGB")).astype(np.float64)
