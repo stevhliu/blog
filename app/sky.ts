@@ -228,12 +228,20 @@ export function renderSky(sun: Vec, width: number, height: number): Uint8Clamped
 export const SKY_WIDTH = 256;
 export const SKY_HEIGHT = 128;
 
-/** The sky over Sebastopol at `date`, as an image URL model-viewer can
- * take for environment-image, and the sun's elevation in degrees. Browser
- * only: it draws through a canvas. */
-export function skyEnvironment(date: Date): { url: string; elevation: number } {
+/** The sky over Sebastopol at `date` under `clouds` (cover, 0 to 1), as
+ * an image URL model-viewer can take for environment-image, and the sun's
+ * elevation in degrees. Cloud turns each pixel toward a grey of its own
+ * brightness, which blurs the sun into the overcast the way a diffuser
+ * does. Browser only: it draws through a canvas. */
+export function skyEnvironment(date: Date, clouds = 0): { url: string; elevation: number } {
   const position = sunPosition(date, SEBASTOPOL.latitude, SEBASTOPOL.longitude);
   const pixels = renderSky(sunVector(position), SKY_WIDTH, SKY_HEIGHT);
+  if (clouds > 0) {
+    for (let i = 0; i < pixels.length; i += 4) {
+      const grey = 0.2126 * pixels[i] + 0.7152 * pixels[i + 1] + 0.0722 * pixels[i + 2];
+      for (let c = 0; c < 3; c++) pixels[i + c] += (grey - pixels[i + c]) * 0.8 * clouds;
+    }
+  }
   const canvas = document.createElement("canvas");
   canvas.width = SKY_WIDTH;
   canvas.height = SKY_HEIGHT;

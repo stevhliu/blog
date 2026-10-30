@@ -6,6 +6,13 @@ import { doge } from "./doge";
 import { pageLightScript } from "./sky-lighting";
 import { SkyLighting } from "./sky-refresh";
 
+// A short hash of the lighting script, for its URL.
+const skyLightVersion = (() => {
+  let hash = 5381;
+  for (const char of pageLightScript()) hash = ((hash * 33) ^ char.charCodeAt(0)) >>> 0;
+  return hash.toString(36);
+})();
+
 export const metadata = {
   title: "steven liu",
   description:
@@ -68,10 +75,15 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         {/* The page is lit by the sky over Sebastopol at this hour (see
-            sky-lighting.ts). Inline and in the head, so it runs before the
-            stylesheet paints and a night-time reader never sees the page
-            white first. The CSS palettes remain the no-script fallback. */}
-        <script id="sky-light" dangerouslySetInnerHTML={{ __html: pageLightScript() }} />
+            sky-lighting.ts). A blocking script in the head, so it runs
+            before the stylesheet paints and a night-time reader never sees
+            the page white first; its own file so it is cached across pages,
+            with the URL versioned by its content so a deploy is never served
+            the old one. The CSS palettes remain the no-script fallback. */}
+        {/* Synchronous on purpose: it must run before first paint, and it
+            is 15KB from the same origin, cached after the first page. */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script id="sky-light" src={`/sky-light.js?v=${skyLightVersion}`} />
       </head>
       <body className="min-h-[100svh] bg-[var(--color-bg)] text-[var(--color-text)]">
         <SkyLighting />

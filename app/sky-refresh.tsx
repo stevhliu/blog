@@ -2,32 +2,57 @@
 
 import { useEffect } from "react";
 
-import { SEBASTOPOL_LAT, SEBASTOPOL_LON, applyPageLight, pageLight, skyInstant, sunPosition } from "./sky-lighting";
+import { SEBASTOPOL_LAT, SEBASTOPOL_LON, lightDocument, skyContext } from "./sky-lighting";
 
 // The sun moves a quarter of a degree a minute, about one level in 255 of
 // any colour on the page; globals.css eases each step over eight seconds,
 // so the day passes without a visible step.
 const REFRESH_MS = 60_000;
+// Cloud cover over Sebastopol from Open-Meteo (no key, no account). Half
+// an hour matches how often the forecast itself updates.
+const WEATHER_MS = 30 * 60_000;
+const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${SEBASTOPOL_LAT}&longitude=${SEBASTOPOL_LON}&current=cloud_cover`;
 
 /**
  * Keeps the page lit by the sky as the afternoon goes on. The first
- * lighting is done by the inline script in layout.tsx before paint; this
- * only refreshes it. A page opened at a chosen hour (?sky=) stays there.
+ * lighting is done by /sky-light.js before paint; this only refreshes
+ * it, and brings in the weather: the cloud cover is kept in
+ * sessionStorage so the next page's first paint has it too. A page
+ * opened at a chosen hour (?sky=) stays there.
  */
 export function SkyLighting() {
   useEffect(() => {
-    if (skyInstant()) return;
-    const refresh = () =>
-      applyPageLight(pageLight(sunPosition(new Date(), SEBASTOPOL_LAT, SEBASTOPOL_LON)));
+    if (skyContext().at) return;
+    const refresh = () => lightDocument(SEBASTOPOL_LAT, SEBASTOPOL_LON);
+    const weather = async () => {
+      try {
+        const kept = JSON.parse(sessionStorage.getItem("sky-clouds") || "null");
+        if (kept && Date.now() - kept.at < WEATHER_MS) return;
+        const data = await (await fetch(WEATHER_URL)).json();
+        const cover = Number(data?.current?.cloud_cover);
+        if (!isNaN(cover)) {
+          sessionStorage.setItem("sky-clouds", JSON.stringify({ cover: cover / 100, at: Date.now() }));
+          refresh();
+        }
+      } catch {
+        // offline, or the service is down: the sky stays clear
+      }
+    };
+    weather();
     const timer = window.setInterval(refresh, REFRESH_MS);
+    const forecast = window.setInterval(weather, WEATHER_MS);
     // A tab left open overnight and brought back in the morning shouldn't
-    // wait up to five minutes in the dark.
+    // wait up to a minute in the dark.
     const onVisible = () => {
-      if (document.visibilityState === "visible") refresh();
+      if (document.visibilityState === "visible") {
+        refresh();
+        weather();
+      }
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       window.clearInterval(timer);
+      window.clearInterval(forecast);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);

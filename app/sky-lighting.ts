@@ -50,14 +50,50 @@ export function sunPosition(date: Date, latitude: number, longitude: number): Su
   return { altitude: Math.asin(up) / rad, bearing, lowest: (declination - (Math.PI / 2 - lat)) / rad };
 }
 
-/** Colour tokens as CSS values, keyed by variable name, plus whether the
- * page counts as dark. */
-export type PageLight = { vars: Record<string, string>; dark: boolean; irradiance: number };
+export type MoonPosition = {
+  /** Degrees above the horizon (negative below). */
+  altitude: number;
+  /** Lit fraction of the disc, 0 (new) to 1 (full). */
+  fraction: number;
+};
+
+/** The moon from a place at an instant, to about a degree (Meeus's short
+ * series, as SunCalc uses); self-contained. */
+export function moonPosition(date: Date, latitude: number, longitude: number): MoonPosition {
+  const rad = Math.PI / 180;
+  const days = date.getTime() / 86_400_000 - 10957.5; // since J2000.0
+  const obliquity = rad * 23.4397;
+  const L = rad * (218.316 + 13.176396 * days); // mean longitude
+  const M = rad * (134.963 + 13.064993 * days); // mean anomaly
+  const F = rad * (93.272 + 13.22935 * days); // argument of latitude
+  const l = L + rad * 6.289 * Math.sin(M);
+  const b = rad * 5.128 * Math.sin(F);
+  const rightAscension = Math.atan2(Math.sin(l) * Math.cos(obliquity) - Math.tan(b) * Math.sin(obliquity), Math.cos(l));
+  const declination = Math.asin(Math.sin(b) * Math.cos(obliquity) + Math.cos(b) * Math.sin(obliquity) * Math.sin(l));
+  const siderealHours = 18.697374558 + 24.06570982441908 * days + longitude / 15;
+  const hourAngle = rad * 15 * siderealHours - rightAscension;
+  const lat = rad * latitude;
+  const up = Math.sin(lat) * Math.sin(declination) + Math.cos(lat) * Math.cos(declination) * Math.cos(hourAngle);
+  // Phase from the moon's elongation from the sun along the ecliptic.
+  const sunAnomaly = rad * ((357.529 + 0.98560028 * days) % 360);
+  const sunLongitude = rad * (280.459 + 0.98564736 * days + 1.915 * Math.sin(sunAnomaly));
+  return { altitude: Math.asin(up) / rad, fraction: (1 - Math.cos(l - sunLongitude)) / 2 };
+}
+
+/** Colour tokens as CSS values, keyed by variable name; whether the page
+ * counts as dark; and how bright it is, 0 (night) to 1 (full day), which
+ * anything else lit by the sky (the pouch) follows. */
+export type PageLight = { vars: Record<string, string>; dark: boolean; adapted: number };
 
 /**
- * The sky for this sun, and the inks solved from it; self-contained.
+ * The sky for this sun and moon under this much cloud, and the inks
+ * solved from it; self-contained. clouds is cover from 0 (clear) to 1.
  */
-export function pageLight(sun: { altitude: number; bearing: number; lowest: number }): PageLight {
+export function pageLight(
+  sun: { altitude: number; bearing: number; lowest: number },
+  moon: { altitude: number; fraction: number } = { altitude: -90, fraction: 0 },
+  clouds = 0,
+): PageLight {
   type Rgb = [number, number, number];
   type Lch = [number, number, number];
   const clamp = (x: number, lo: number, hi: number) => Math.min(Math.max(x, lo), hi);
@@ -196,9 +232,21 @@ export function pageLight(sun: { altitude: number; bearing: number; lowest: numb
   // A page outdoors is lit by the sun as well as the sky: direct sunlight
   // through the air, by how high the sun stands. It is what keeps a noon
   // page near white rather than sky-blue, and goes amber as the sun sets.
-  const sunlight = toSun(eye, sunDir).map((v) => 20 * v * Math.max(sunDir[1], 0) * 0.12);
-  const zenith = tone([0, 1, 2].map((c) => up[c] + 0.2 * ring[c]) as Rgb);
-  const horizon = tone([0, 1, 2].map((c) => ring[c] + 0.5 * up[c] + sunlight[c]) as Rgb);
+  const sunlight = toSun(eye, sunDir).map((v) => 20 * v * Math.max(sunDir[1], 0) * 0.12 * (1 - 0.85 * clouds));
+  // Cloud turns the sky toward a grey of the same brightness (an overcast
+  // sky is a white diffuser) and takes most of the direct sun.
+  const overcast = (c: Rgb): Rgb => {
+    const grey = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    return c.map((v) => v + (grey - v) * 0.8 * clouds) as Rgb;
+  };
+  const upC = overcast(up), ringC = overcast(ring);
+  // Moonlight: by the lit fraction and the moon's height, a touch cool.
+  // Far fainter than the night sky's floor in truth; here it is a visible
+  // lift of a moonlit night over a moonless one.
+  const moonlight = 0.02 * moon.fraction * Math.max(Math.sin(moon.altitude * rad), 0) * (1 - 0.7 * clouds);
+  const moonColour = [0.85, 0.92, 1.0];
+  const zenith = tone([0, 1, 2].map((c) => upC[c] + 0.2 * ringC[c] + moonColour[c] * moonlight) as Rgb);
+  const horizon = tone([0, 1, 2].map((c) => ringC[c] + 0.5 * upC[c] + sunlight[c] + moonColour[c] * moonlight) as Rgb);
 
   // How bright the page is follows the light on it, the way eyes adapt:
   // a soft curve from the night's floor up to white paper, saturating
@@ -206,7 +254,7 @@ export function pageLight(sun: { altitude: number; bearing: number; lowest: numb
   // fall is the long, even slide a real dusk is. One continuous function
   // of the light, so nothing about the page steps from one phase of the
   // day to the next.
-  const onPage = [0, 1, 2].map((c) => ring[c] + 0.5 * up[c] + sunlight[c]);
+  const onPage = [0, 1, 2].map((c) => (ringC[c] + 0.5 * upC[c]) * (1 - 0.5 * clouds) + sunlight[c] + moonColour[c] * moonlight);
   // Single scattering on eight steps undercounts twilight: the glow that
   // light scattered twice or more spreads over the whole sky after the
   // sun has set, which is what keeps the evening going until the sun is
@@ -296,36 +344,66 @@ export function pageLight(sun: { altitude: number; bearing: number; lowest: numb
     "--color-code-bg": dark ? css(text, 0.08) : css(paper),
     "--color-code-border": css(text, dark ? 0.28 : 0.14),
   };
-  return { vars, dark, irradiance };
+  return { vars, dark, adapted };
 }
 
-/** Write the lit page into the document; self-contained. */
+/** Write the lit page into the document, and tell anything else lit by
+ * the sky (a "sky-light" event on the document, with the light as its
+ * detail; `--sky-adapted` on the root for CSS). Self-contained. */
 export function applyPageLight(light: PageLight): void {
   const root = document.documentElement;
   for (const name in light.vars) root.style.setProperty(name, light.vars[name]);
+  root.style.setProperty("--sky-adapted", String(Math.round(light.adapted * 1000) / 1000));
   root.style.colorScheme = light.dark ? "dark" : "light";
   root.dataset.night = light.dark ? "true" : "false";
   const metas = document.querySelectorAll('meta[name="theme-color"]');
   for (let i = 0; i < metas.length; i++) metas[i].setAttribute("content", light.vars["--sky-wash"]);
+  document.dispatchEvent(new CustomEvent("sky-light", { detail: light }));
 }
 
-/** The instant to light the page for: now, or `?sky=<ISO time>` to look
- * at another hour (which also stops the refresh). Self-contained. */
-export function skyInstant(): Date | null {
+export type SkyContext = {
+  /** The instant to light for; null means now. `?sky=<ISO time>` pins it
+   * (and stops the refresh). */
+  at: Date | null;
+  /** Cloud cover 0..1: `?clouds=` if given, else the last fetched value
+   * (sky-refresh.tsx keeps it in sessionStorage for the next page), else 0. */
+  clouds: number;
+};
+
+/** What the page is lit for; self-contained. */
+export function skyContext(): SkyContext {
+  const out: SkyContext = { at: null, clouds: 0 };
   try {
-    const at = new URLSearchParams(location.search).get("sky");
-    if (at) {
-      const d = new Date(at);
-      if (!isNaN(d.getTime())) return d;
+    const params = new URLSearchParams(location.search);
+    const at = params.get("sky");
+    if (at && !isNaN(new Date(at).getTime())) out.at = new Date(at);
+    const clouds = params.get("clouds");
+    if (clouds !== null && !isNaN(Number(clouds))) out.clouds = Math.min(Math.max(Number(clouds), 0), 1);
+    else {
+      const kept = JSON.parse(sessionStorage.getItem("sky-clouds") || "null");
+      if (kept && Date.now() - kept.at < 3_600_000) out.clouds = kept.cover;
     }
   } catch {
-    // no location (tests), or a broken value: light for now
+    // no location or storage (tests, private windows): clear sky, now
   }
-  return null;
+  return out;
 }
 
-/** The inline script for the document's head: lights the page before the
- * stylesheet's first paint, so a night-time reader never sees it white. */
+/** Light the document for its context; self-contained. The three
+ * numbers are the place and the one before them the instant. */
+export function lightDocument(latitude: number, longitude: number): void {
+  const context = skyContext();
+  const at = context.at || new Date();
+  applyPageLight(pageLight(sunPosition(at, latitude, longitude), moonPosition(at, latitude, longitude), context.clouds));
+}
+
+/** The script that lights the page before the stylesheet's first paint,
+ * so a night-time reader never sees it white. Served as /sky-light.js
+ * (app/sky-light.js/route.ts) and loaded blocking from the head. */
 export function pageLightScript(): string {
-  return `(function(){var sun=${sunPosition.toString()};var light=${pageLight.toString()};var apply=${applyPageLight.toString()};var when=${skyInstant.toString()};try{apply(light(sun(when()||new Date(),${SEBASTOPOL_LAT},${SEBASTOPOL_LON})))}catch(e){}})();`;
+  // Each function is declared under the name the build gave it (the
+  // minifier shortens them, consistently across the module), so the
+  // references between them, and the call at the end, line up.
+  const parts = [sunPosition, moonPosition, pageLight, applyPageLight, skyContext, lightDocument];
+  return `(function(){${parts.map((f) => `var ${f.name}=${f.toString()};`).join("")}try{${lightDocument.name}(${SEBASTOPOL_LAT},${SEBASTOPOL_LON})}catch(e){}})();`;
 }
