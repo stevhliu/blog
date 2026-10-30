@@ -28,18 +28,33 @@ export function SiteShell({
       >
         Skip to content
       </a>
-      {/* 20px top, 40px bottom; 24px h-padding on mobile, 40px ≥768px.
-          The chrome pages (home, about) run as one centred column about 550px
-          wide, so the reading measure stays constant no matter how wide the
-          window is. Post pages keep the full width, since their content
-          template sets its own measure. */}
+      {/* The chrome pages (home, about, 404) run as one column 550px wide,
+          so the reading measure stays constant however wide the window is.
+          From 1120px up the column sits in a centred block with room for the
+          home page's 300px coffee pouch beside it (CurrentlyDrinking),
+          550 + 128 gap + 300 = 978px: extra width goes to the outer margins,
+          not the gap. The block is the pouch's positioning context. Below
+          1120px the column sits at the inset and the pouch flows underneath.
+          Post pages are centred at full width, since their content template
+          sets its own measure: 20px top, 40px bottom, 24px h-padding on
+          mobile, 40px ≥768px. */}
       <div
-        className={`relative z-10 mx-auto min-h-[inherit] px-6 pb-10 pt-5 md:px-10 ${
-          variant === "chrome" ? "max-w-[630px]" : "max-w-6xl"
+        className={`relative z-10 min-h-[inherit] pb-10 ${
+          variant === "chrome"
+            ? "px-[var(--page-inset)] pt-[var(--page-top)]"
+            : "mx-auto max-w-6xl px-6 pt-5 md:px-10"
         }`}
       >
-        {variant === "chrome" ? <SiteHeader /> : null}
-        <main id="main">{children}</main>
+        {variant === "chrome" ? (
+          <div className="relative min-[1120px]:mx-auto min-[1120px]:max-w-[978px]">
+            <div className="max-w-[550px]">
+              <SiteHeader />
+              <main id="main">{children}</main>
+            </div>
+          </div>
+        ) : (
+          <main id="main">{children}</main>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,59 @@
+[
+  {
+    "name": "bigface",
+    "photo": "work/inputs/bigface-front.png",
+    "extra": [
+      "work/inputs/bigface-side.png"
+    ],
+    "note": "silver pouch, black print, transparent background, plus a three-quarter view"
+  },
+  {
+    "name": "bigface-pouch",
+    "photo": "work/inputs/bigface-front.png",
+    "extra": [
+      "work/inputs/bigface-side.png"
+    ],
+    "shape": "pouch",
+    "note": "the same pouch with the flat-bottom template, depth and lens fitted to the side photo"
+  },
+  {
+    "name": "bigface-front-only",
+    "photo": "work/inputs/bigface-front.png",
+    "note": "the same pouch from one photo"
+  },
+  {
+    "name": "iloma",
+    "photo": "work/inputs/iloma.png",
+    "note": "dark bag, light printed label, embossed wordmark, photo fills the frame"
+  },
+  {
+    "name": "iloma-pouch",
+    "photo": "work/inputs/iloma.png",
+    "shape": "pouch",
+    "note": "dark bag with the template from one photo, depth from the shape model"
+  },
+  {
+    "name": "el-rincon",
+    "photo": "work/inputs/el-rincon.png",
+    "note": "near twin of iloma: results should match closely"
+  },
+  {
+    "name": "santa-rosa",
+    "photo": "work/inputs/santa-rosa.png",
+    "note": "silver bag, dark printed label, embossed wordmark"
+  },
+  {
+    "name": "bucket-hat",
+    "photo": "work/inputs/bucket-hat.jpg",
+    "note": "not packaging: soft fabric, no print"
+  },
+  {
+    "name": "ciao",
+    "photo": "work/inputs/ciao-front.png",
+    "back": "work/inputs/ciao-back.png",
+    "shape": "pouch",
+    "depth": 0.25,
+    "seal": 0.1,
+    "note": "phone photos at 4032px: frosted pouch lying flat, crimped right seal, back panel with a logo placed by its outline"
+  }
+]

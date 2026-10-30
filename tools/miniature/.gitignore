@@ -1,0 +1,5 @@
+# Python environment, the vendored model code and per-run working files are
+# all reproducible, so none of them are committed.
+.venv/
+vendor/
+work/

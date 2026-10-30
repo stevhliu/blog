@@ -12,8 +12,8 @@ export function generateStaticParams() {
 
 const geistSansMedium = loadGeistFont("geist-medium.ttf");
 
-// Pose A of the home page's dancing cat, captured from the live page
-// (scripts/shoot-dancing-cat.mjs) so the card shows the real thing.
+// Pose A of the dancing cat that used to head the home page, captured from
+// the live page before it was removed. The PNGs are the only copy now.
 const dancingCat = loadPublicImageDataUrl("images/dancing-cat.png", "image/png");
 
 // The capture is cropped to the cat, and CAT_SCALE keeps it at the size it drew

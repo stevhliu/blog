@@ -1,0 +1,75 @@
+<!doctype html>
+<!-- Lighting calibration page, driven by calibrate.mjs. It renders the shipped
+     model in <model-viewer> with the site's settings, from the photo's own
+     camera, and scores material settings against the photo. Not part of the
+     site. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Miniature calibration</title>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.4.0/dist/model-viewer.min.js"></script>
+    <style>
+      body { margin: 0; background: #fff; }
+      model-viewer { width: 512px; height: 512px; background: #fff; }
+    </style>
+  </head>
+  <body>
+    <model-viewer id="mv" environment-image="neutral" exposure="1" tone-mapping="neutral"
+      shadow-intensity="0" interaction-prompt="none" min-camera-orbit="auto auto 0m"
+      min-field-of-view="1deg" max-field-of-view="120deg"
+      max-camera-orbit="auto auto 100m" interpolation-decay="1000"></model-viewer>
+    <script type="module">
+      const SIZE = 512;
+      const frames = n => new Promise(r => { const step = () => (n-- ? requestAnimationFrame(step) : r()); step(); });
+      const loadImage = src => new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = src; });
+
+      function pixels(image) {
+        const c = new OffscreenCanvas(SIZE, SIZE);
+        const g = c.getContext("2d", { willReadFrequently: true });
+        g.fillStyle = "#fff";
+        g.fillRect(0, 0, SIZE, SIZE);
+        // The same slight blur as the Python gate, so resampling noise in
+        // fine texture doesn't swamp the lighting differences being measured.
+        g.filter = "blur(1px)";
+        g.drawImage(image, 0, 0, SIZE, SIZE);
+        return g.getImageData(0, 0, SIZE, SIZE).data;
+      }
+
+      // view: {photo, target: [x,y,z], orbit: [theta, phi, radius], fov, toneMapping}
+      // models: one GLB URL per material setting, already baked
+      window.calibrate = async (view, models) => {
+        const mv = document.getElementById("mv");
+        await customElements.whenDefined("model-viewer");
+        const photo = await loadImage(view.photo);
+        // Score only where the photo is fully the object (not its soft edge).
+        const c = new OffscreenCanvas(SIZE, SIZE);
+        const g = c.getContext("2d", { willReadFrequently: true });
+        g.drawImage(photo, 0, 0, SIZE, SIZE);
+        const alpha = g.getImageData(0, 0, SIZE, SIZE).data;
+        const want = pixels(photo);
+
+        const errors = [];
+        for (const model of models) {
+          mv.src = model;
+          await new Promise(r => mv.addEventListener("load", r, { once: true }));
+          mv.toneMapping = view.toneMapping ?? "neutral";
+          mv.fieldOfView = `${view.fov}deg`;
+          mv.cameraTarget = view.target.map(v => `${v}m`).join(" ");
+          mv.cameraOrbit = `${view.orbit[0]}rad ${view.orbit[1]}rad ${view.orbit[2]}m`;
+          mv.jumpCameraToGoal();
+          await frames(4);
+          const got = pixels(await loadImage(mv.toDataURL("image/png")));
+          let error = 0, n = 0;
+          for (let i = 0; i < want.length; i += 4) {
+            if (alpha[i + 3] < 250) continue;
+            error += Math.abs(got[i] - want[i]) + Math.abs(got[i + 1] - want[i + 1]) + Math.abs(got[i + 2] - want[i + 2]);
+            n += 3;
+          }
+          errors.push(error / Math.max(n, 1));
+        }
+        return errors;
+      };
+      window.ready = true;
+    </script>
+  </body>
+</html>

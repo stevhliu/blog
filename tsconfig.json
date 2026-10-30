@@ -39,6 +39,9 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "tools/miniature/.venv",
+    "tools/miniature/vendor",
+    "tools/miniature/work"
   ]
 }

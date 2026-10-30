@@ -1,0 +1,38 @@
+<!doctype html>
+<!-- Inspection page for pipeline output. Serve tools/miniature (the
+     "miniature-viewer" launch config) and open
+     viewer.html?model=work/<name>/<file>.glb. Not part of the site. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Miniature viewer</title>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.4.0/dist/model-viewer.min.js"></script>
+    <style>
+      body { margin: 0; font: 13px/1.5 ui-monospace, monospace; background: #fff; color: #111; }
+      main { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; padding: 16px; }
+      figure { margin: 0; }
+      /* height: auto releases model-viewer's own fixed 150px height. */
+      model-viewer { width: 100%; height: auto; aspect-ratio: 13 / 11; background: #f6f6f6; }
+      figcaption { padding-top: 4px; color: #555; }
+    </style>
+  </head>
+  <body>
+    <main id="views"></main>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const model = params.get("model");
+      const angles = (params.get("angles") || "0,-30,-90,180,90").split(",");
+      const views = document.getElementById("views");
+      for (const yaw of angles) {
+        const figure = document.createElement("figure");
+        figure.innerHTML = `
+          <model-viewer src="${model}" camera-controls environment-image="neutral"
+            exposure="1" tone-mapping="neutral" shadow-intensity="0.5"
+            camera-orbit="${yaw}deg 84deg auto" interaction-prompt="none"></model-viewer>
+          <figcaption>${yaw}°</figcaption>`;
+        views.appendChild(figure);
+      }
+    </script>
+  </body>
+</html>

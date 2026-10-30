@@ -1,71 +1,69 @@
 import Link from "next/link";
-import { AsciiCat } from "./ascii-cat";
-import { HuggingFaceLogo } from "./components/hugging-face-logo";
 
 /**
- * Header for the chrome pages (home, about, 404): the ASCII cat hero and the
- * bio. Post pages don't render it; SiteShell only includes it for `chrome`.
- *
- * The hero is the dancing ASCII cat — "Observation Log" is kept for screen readers only.
+ * Header for the chrome pages (home, about, 404): the name and the bio.
+ * Post pages don't render it; SiteShell only includes it for `chrome`.
+ * The name is the page's h1, so the pages below it start at h2.
  */
 export function SiteHeader() {
   return (
     <header className="mb-8">
-      {/* One column at every width: the cat sits above the bio rather than
-          beside it, so the header reads down the same centred measure the
-          archive and footer use. */}
-      <section className="mt-20 md:mt-24 pb-6 flex flex-col gap-8">
-        {/* The cat is centred across the text column rather than set flush
-            left. Its art carries leading whitespace on most lines, so flush
-            left reads as an accidental indent against the bio below it. */}
-        <h1 className="archive-title text-[var(--color-text)] text-[56px] md:text-[96px] m-0 mx-auto w-fit">
-          <Link href="/" className="nav-link no-underline text-inherit">
-            <AsciiCat />
-          </Link>
-        </h1>
-
-        <aside className=" text-[var(--color-text)]">
-          <p className="m-0 text-[14px] leading-[1.7]">
-            <span className="block">Steven Liu</span>
-            <span className="mt-3 block">
+      <section className="pb-6">
+        <aside className="text-[var(--color-text)] text-[18px] leading-[1.5]">
+          {/* text-box trims the half-leading above the cap height, so the
+              top inset is measured to the letters, like the left one is.
+              Browsers without text-box sit about 7px lower. */}
+          <h1 className="m-0 text-[18px] font-normal leading-[1.5] [text-box:trim-start_cap_alphabetic]">
+            <Link href="/" className="nav-link no-underline text-inherit">
+              Steven Liu
+            </Link>
+          </h1>
+          <p className="m-0 mt-3">
             <span className="opacity-70">
-            I work on developer docs at{" "}
-            </span>
-            <span className="whitespace-nowrap">
+              I work on all things related to developer docs at{" "}
               <a
                 href="https://huggingface.co"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="nav-link hf-chip"
+                className="nav-link underline underline-offset-2"
               >
-                <HuggingFaceLogo decorative />
                 Hugging Face
-              </a>
-              <span className="opacity-70">,</span>
-            </span>
-            <span className="opacity-70">
-            {" "}the open-source ML platform. Most of my work is on{" "}
-            <a
-              href="https://huggingface.co/docs/transformers"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nav-link underline underline-offset-2"
-            >
-              Transformers
-            </a>, the standard model definition of the ecosystem.
-            </span>
-            </span>
-            <span className="mt-3 block opacity-70">
-              Say hi on{" "}
+              </a>{" "}
+              for{" "}
               <a
-                href="https://x.com/stevhliu"
+                href="https://huggingface.co/docs/transformers/main/en/index"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="nav-link underline underline-offset-2"
               >
-                X
-              </a>{" "}.
+                Transformers
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://huggingface.co/docs/diffusers/main/en/index"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-link underline underline-offset-2"
+              >
+                Diffusers
+              </a>
+              .
             </span>
+          </p>
+          <p className="m-0 mt-3 opacity-70">
+            I enjoy writing, reading, brewing coffee, and messing with my cats.
+          </p>
+          <p className="m-0 mt-3 opacity-70">
+            Say hi on{" "}
+            <a
+              href="https://x.com/stevhliu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-link underline underline-offset-2"
+            >
+              X
+            </a>
+            .
           </p>
         </aside>
       </section>

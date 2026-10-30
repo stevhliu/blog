@@ -1,4 +1,3 @@
-import { Caption } from "../caption";
 import {
   chartAnnotationStyle,
   chartInlineStyle,
@@ -52,7 +51,6 @@ const isNewShape = (() => {
     return fresh;
   });
 })();
-const COLD_MALLOC_COUNT = isNewShape.filter(Boolean).length;
 
 function rectFor(t: TensorSpec) {
   return {
@@ -73,9 +71,6 @@ const WARM_INTERVAL = 0.28;
 
 const COLD_TENSOR_AT = (i: number) => COLD_START + i * COLD_INTERVAL;
 const WARM_TENSOR_AT = (i: number) => WARM_TENSOR_START + i * WARM_INTERVAL;
-
-const COLD_DONE = COLD_TENSOR_AT(N - 1) + 0.4;
-const WARM_DONE = WARM_TENSOR_AT(N - 1) + 0.4;
 
 // ---- Layout ----
 const VIEW_WIDTH = 700;

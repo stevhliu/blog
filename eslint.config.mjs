@@ -19,7 +19,11 @@ const config = [
       ".agents/**",
       ".claude/**",
       ".cursor/**",
-      ".cursor-previews/**",
+      // The miniature pipeline's Python environment, vendored model code and
+      // working files (see tools/miniature/.gitignore).
+      "tools/miniature/.venv/**",
+      "tools/miniature/vendor/**",
+      "tools/miniature/work/**",
     ],
   },
   ...compat.extends("next/core-web-vitals"),

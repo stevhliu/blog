@@ -28,7 +28,7 @@ export function PostYearGroup({ year, posts }: { year: number; posts: Post[] }) 
             >
               {year}
             </span>
-            <span className="post-title min-w-0 break-words text-[14px] font-normal leading-[1.3] tracking-[0.01em]">
+            <span className="post-title min-w-0 break-words text-[18px] font-normal leading-[1.3] tracking-[0.01em]">
               {post.title}
             </span>
             <time

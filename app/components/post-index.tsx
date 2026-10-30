@@ -2,8 +2,7 @@ import Link from "next/link";
 import type { Post } from "../get-posts";
 import { EnvDatetime } from "../env-datetime";
 import { PostYearGroup } from "./post-year-group";
-import { ModelTimelineTile } from "./model-timeline-tile";
-import { QuantizationTile } from "./quantization-tile";
+import { CurrentlyDrinking } from "./currently-drinking";
 
 // Single index page: every year is shown, stacked newest-first.
 const PAGE_SIZE = 99;
@@ -80,23 +79,9 @@ export function PostIndex({
         ))}
       </div>
 
-      {/* Set like the header's own type rather than as a heading face the
-          page does not otherwise have: the metrics of the "Steven Liu"
-          line, dimmed to the 0.70 the bio copy runs at. */}
-      <section className="mt-14 flex flex-col gap-5" aria-labelledby="projects-heading">
-        <h2
-          id="projects-heading"
-          className="m-0 text-[14px] font-normal leading-[1.7] opacity-70 text-[var(--color-text)]"
-        >
-          Projects
-        </h2>
-        {/* Wraps rather than shrinking: the tiles are a fixed 168px, so on a
-            narrow screen the second one drops to its own line. */}
-        <div className="flex flex-wrap gap-5">
-          <ModelTimelineTile />
-          <QuantizationTile />
-        </div>
-      </section>
+      {/* Below the list on narrow screens; from 1120px, beside the column at
+          the top right of the centred block SiteShell sets up. */}
+      <CurrentlyDrinking />
 
       {/* The 3-column grid exists only to hold pagination in the centre, so it
           is used only when there are pages to show. With a single page the

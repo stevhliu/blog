@@ -6,9 +6,9 @@ import { loadGeistFont } from "@/app/og-assets";
 const geistSansMedium = loadGeistFont("geist-medium.ttf");
 const geistMono = loadGeistFont("geist-mono-regular.ttf");
 
-// Pose A of the home page's dancing ASCII cat, rendered as a stack of
-// div rows so Satori preserves the exact spacing (it won't respect
-// whitespace in a single <pre>/<div>).
+// Pose A of the dancing ASCII cat that used to head the home page,
+// rendered as a stack of div rows so Satori preserves the exact spacing
+// (it won't respect whitespace in a single <pre>/<div>).
 const CAT_LINES = [
   "*",
   "     /\\_/\\   *",
