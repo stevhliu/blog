@@ -2,13 +2,18 @@
 
 - Turn it to face +z (model-viewer's default view) and stand it on the
   ground at the origin.
-- Crop the photo texture to the part the model uses and store both textures
-  as JPEG; the projected photo is opaque, so nothing needs PNG.
+- Crop the photo texture to the part the model uses. The working files keep
+  their textures lossless (PNG) so the print is compressed once, at the end.
 - Simplify each part with gltfpack (the printed front much less than the
   rest), keeping a plain (unquantized) copy that the quality check can
   load, then quantize it for the site with
   KHR_mesh_quantization, which three.js and so model-viewer read natively,
   with no decoder to download.
+- Store the shipped textures as WebP (EXT_texture_webp, which three.js and
+  so model-viewer read natively). On black print over near-white film,
+  WebP at the same quality is half the bytes of JPEG and has none of its
+  halo round the strokes, which 4:2:0 JPEG draws in colour at half
+  resolution.
 - Write the poster model-viewer shows until the model loads.
 """
 from __future__ import annotations
@@ -22,27 +27,22 @@ import numpy as np
 import trimesh
 from PIL import Image
 
+from .glb import read_glb, write_glb
+
 GLTFPACK = ["npx", "--yes", "gltfpack@1.3.0"]
 # Fraction of triangles kept per part. The printed front carries the text and
 # catches the light, so it keeps the most; the unseen parts carry plain film.
 SIMPLIFY = {"photo": 0.75, "back": 0.5, "atlas": 0.3}
 TEXTURE_MARGIN = 8  # px kept round the cropped photo texture
-PHOTO_QUALITY = 86
 # Longest side of a photo texture. The model shows at 300px, 600 on a 2x
-# screen, but readers zoom in: 2048 keeps the print sharp to about 3x zoom
-# on a 2x screen, where 1280 went soft past 2x. The back carries only a
-# logo, so it gets less.
-MAX_PHOTO_TEXTURE = {"photo": 2048, "back": 1536}
-ATLAS_QUALITY = 82
+# screen, but readers zoom in: on a 2x screen the print has a texel per
+# device pixel up to 3x zoom at 2048 and 6x at 4096. The back carries only
+# a logo, so it gets less.
+MAX_PHOTO_TEXTURE = {"photo": 4096, "back": 1536}
+# WebP quality per part. The photo parts carry the print; the atlas is
+# plain film, so it gets less.
+WEBP_QUALITY = {"photo": 88, "back": 88, "atlas": 82}
 POSTER_WIDTH = 600  # twice the 300px it's shown at
-
-
-def jpeg(image: Image.Image, quality: int) -> Image.Image:
-    """Re-open an image as an in-memory JPEG, so the GLB embeds JPEG bytes."""
-    buf = io.BytesIO()
-    image.convert("RGB").save(buf, "JPEG", quality=quality, optimize=True)
-    buf.seek(0)
-    return Image.open(buf)
 
 
 def crop_photo_texture(mesh: trimesh.Trimesh, limit: int) -> None:
@@ -60,7 +60,7 @@ def crop_photo_texture(mesh: trimesh.Trimesh, limit: int) -> None:
     scale = min(1.0, limit / max(cw, ch))
     if scale < 1:
         cropped = cropped.resize((round(cw * scale), round(ch * scale)), Image.LANCZOS)
-    mesh.visual.material.baseColorTexture = jpeg(cropped, PHOTO_QUALITY)
+    mesh.visual.material.baseColorTexture = cropped.convert("RGB")
 
 
 def place(scene: trimesh.Scene) -> tuple[trimesh.Scene, np.ndarray]:
@@ -85,16 +85,61 @@ def gltfpack(src: Path, dst: Path, *flags: str) -> None:
     subprocess.run([*GLTFPACK, "-i", str(src), "-o", str(dst), *flags], check=True, capture_output=True)
 
 
-def package(scene: trimesh.Scene, prepared: Image.Image, out: Path, name: str) -> tuple[dict, np.ndarray]:
+def to_webp(model: Path) -> None:
+    """Re-encode every image in the GLB as WebP, referenced through
+    EXT_texture_webp. The extension is required rather than carrying a
+    JPEG fallback, which would double the file. The images' buffer views
+    change size, so the binary chunk is rebuilt view by view."""
+    gltf, binary = read_glb(model)
+    views = gltf["bufferViews"]
+    # Which part each image belongs to, through its material's name.
+    quality = {}
+    for material in gltf["materials"]:
+        texture = material.get("pbrMetallicRoughness", {}).get("baseColorTexture")
+        if texture is not None:
+            quality[gltf["textures"][texture["index"]]["source"]] = WEBP_QUALITY[material["name"]]
+    encoded = {}
+    for i, image in enumerate(gltf["images"]):
+        view = views[image["bufferView"]]
+        start = view.get("byteOffset", 0)
+        buf = io.BytesIO()
+        Image.open(io.BytesIO(binary[start : start + view["byteLength"]])).convert("RGB").save(
+            buf, "WEBP", quality=quality[i], method=6
+        )
+        encoded[image["bufferView"]] = buf.getvalue()
+        image["mimeType"] = "image/webp"
+    rebuilt = bytearray()
+    for i, view in enumerate(views):
+        start = view.get("byteOffset", 0)
+        data = encoded.get(i, binary[start : start + view["byteLength"]])
+        view["byteOffset"], view["byteLength"] = len(rebuilt), len(data)
+        rebuilt += data + b"\0" * (-len(data) % 4)
+    gltf["buffers"][0]["byteLength"] = len(rebuilt)
+    for texture in gltf["textures"]:
+        texture["extensions"] = {**texture.get("extensions", {}), "EXT_texture_webp": {"source": texture.pop("source")}}
+    for key in ("extensionsUsed", "extensionsRequired"):
+        if "EXT_texture_webp" not in gltf.setdefault(key, []):
+            gltf[key].append("EXT_texture_webp")
+    write_glb(model, gltf, bytes(rebuilt))
+
+
+def package(
+    scene: trimesh.Scene, prepared: Image.Image, out: Path, name: str, texture: Image.Image | None = None
+) -> tuple[dict, np.ndarray]:
+    """texture: a sharper copy of the photo with the same framing
+    (prepare.prepare_texture). The front panel's UVs are fractions of the
+    photo, so it drops in for the projected photo without touching the mesh.
+    Its colours should already extend past the object's edge the way
+    project.bleed() extends the photo's."""
     web = out / "web"
     web.mkdir(exist_ok=True)
 
     placed, placement = place(scene)
+    if texture is not None:
+        placed.geometry["photo"].visual.material.baseColorTexture = texture.convert("RGB")
     for part, limit in MAX_PHOTO_TEXTURE.items():
         if part in placed.geometry:
             crop_photo_texture(placed.geometry[part], limit)
-    atlas = placed.geometry["atlas"].visual.material
-    atlas.baseColorTexture = jpeg(atlas.baseColorTexture, ATLAS_QUALITY)
     placed.export(out / "placed.glb", include_normals=True)
 
     # Each part is simplified on its own: the printed front keeps most of its
@@ -111,16 +156,12 @@ def package(scene: trimesh.Scene, prepared: Image.Image, out: Path, name: str) -
         # letting one part's edge poke past another's at the silhouette.
         gltfpack(src, dst, "-si", str(keep), "-slb", "-noq")
         piece = trimesh.load(dst, force="mesh", process=False)
-        # Reloading hands back plain images, which trimesh would re-encode as
-        # PNG on export; keep them JPEG.
-        material = piece.visual.material
-        quality = ATLAS_QUALITY if part == "atlas" else PHOTO_QUALITY
-        material.baseColorTexture = jpeg(material.baseColorTexture, quality)
         simplified.add_geometry(piece, geom_name=part)
     simplified.export(out / "simplified.glb", include_normals=True)
-    # Quantized for the site.
+    # Quantized and compressed for the site.
     model = web / f"{name}.glb"
     gltfpack(out / "simplified.glb", model, "-kn")
+    to_webp(model)
 
     alpha = np.asarray(prepared.getchannel("A"))
     ys, xs = np.nonzero(alpha > 8)

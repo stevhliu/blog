@@ -1,28 +1,33 @@
-"""Reprint the old studio photo for the Ciao bag, at SCALE times the
-resolution.
+"""Reprint the old studio photo for the Ciao bag, with the print as curves.
 
 - Film and lighting: the studio photo's, print removed, upscaled.
-- Print the two bags share (wordmark, most of the small text, QR, icon):
-  the studio photo's own, with its edges rebuilt at the higher resolution
-  (coverage upscaled, then re-thresholded with a soft ramp) so it stays
-  crisp when zoomed rather than going soft like a plain upscale. The small
-  text is emboldened to the real bag's weight.
-- Words that differ (REPLACE boxes): ink from the phone photo, aligned by
-  print features. The phone's wordmark isn't used: the bag lay over its
-  fold, so its E is creased in the photo, and its small text is only taken
-  where it differs, since the beans behind the film make the rest uneven.
+- Print: traced into curves with potrace and drawn again at any size, so a
+  letter's edge is a fitted curve rather than a stretched pixel. The
+  wordmark comes from the studio render, which is clean but small (the
+  small print there is 12px tall, too little to trace a letter's shape
+  from). The small print, icon and QR come from the phone photo of the
+  real bag, where the same letters are three times the size, aligned by
+  the print both bags share. The phone's wordmark isn't used: the bag lay
+  over its fold, so its E is creased in the photo.
 - Back: the studio film mirrored and blank, with Bigface's logo artwork
   (LOGO) at the size and place the back photo shows it, found through the
   bag's outline.
+
+Two front images come out, framed alike: the pipeline's input at SCALE
+times the studio photo (shape, lighting and the quality gate run at this
+size) and a texture master at MASTER times it, which --texture drops in
+as the front panel's texture.
 
 Run from tools/miniature with its venv, after running the pipeline on the
 phone photos as work/ciao (it reads their prepared cut-outs):
 
     .venv/bin/python reprint_ciao.py
     .venv/bin/python -m miniature work/inputs/ciao-reprint-front.png \\
+        --texture work/inputs/ciao-reprint-front-texture.png \\
         --back work/inputs/ciao-reprint-back.png --shape pouch --depth 0.25 --seal 0.1 --name ciao-reprint
 """
 import os
+import subprocess
 import sys
 
 import cv2
@@ -37,26 +42,43 @@ from miniature.panel import register  # noqa: E402
 
 D = "work/ciao-reprint-previews/"  # checks to look at by eye
 os.makedirs(D, exist_ok=True)
-SCALE = 3
-INK_RATIO = 0.4  # phone photo: ink is darker than this share of the film around it
-# The small text block in the studio photo (x0, y0, x1, y1). The real bag's
-# small print is bolder than the studio render's (6px strokes at SCALE in
-# the phone photo, 2.7 in the studio's), so the studio's text is
-# emboldened to match. KEEP boxes inside it (icon, QR code) are left as is.
+SCALE = 3  # the pipeline's frame: the studio photo, three times over
+MASTER = 6  # the texture master's frame: twice the pipeline's (--texture)
+INK_RATIO = 0.45  # phone photo: ink is darker than this share of the film around it
+# The print, element by element: where it is (x0, y0, x1, y1 in studio
+# px), which photo its ink is traced from, how potrace treats it (see
+# trace_options) and the ink threshold its part of that photo needs (for
+# the phone, a share of the film's brightness; for the studio render, a
+# coverage). Later elements paint over earlier ones, so a word whose
+# part of the phone photo needs its own threshold, and the icon and QR,
+# sit inside the small print's block.
 TEXT_BLOCK = (140, 450, 1160, 690)
-KEEP = [(148, 486, 210, 556), (1030, 610, 1145, 725), (285, 585, 405, 712)]  # icon, QR, airlock ring
-BOLDEN = 2.2  # px added to each side of a stroke; matches by eye better than the medians
-# Words that differ on the Ciao bag, from the phone photo, each with the
-# ink threshold its part of the photo needs.
-REPLACE = [
-    ((145, 452, 250, 484), 0.45),  # BF — X        -> BF — IO.F
-    ((312, 470, 470, 522), 0.37),  # MULTI         -> ISOLATED
-    ((312, 527, 470, 560), 0.45),  # OMNI          -> FILTER
-    ((540, 527, 650, 560), 0.55),  # (after 250G)  -> (8.8OZ); 250G itself is the studio's
+ELEMENTS = [
+    ((130, 850, 1220, 1070), "studio", "display", 0.5),  # BIGFACE wordmark
+    (TEXT_BLOCK, "phone", "text", INK_RATIO),  # the small print
+    ((145, 452, 250, 484), "phone", "text", 0.45),  # BF — IO.F
+    ((312, 470, 470, 522), "phone", "text", 0.37),  # ISOLATED
+    ((540, 527, 650, 560), "phone", "text", 0.55),  # (8.8OZ): thin ink here
+    # Words that beans' shadows run through in the phone photo, so their
+    # letters close up (an S reads as an 8). The studio render has the same
+    # words; its small print is traced from 12px letters, so their shapes
+    # are approximate, but every letter is the letter it should be.
+    ((480, 527, 540, 560), "studio", "text", 0.5),  # 250G
+    ((805, 455, 985, 500), "studio", "text", 0.5),  # CONTAINS SMILEMATTER™
+    ((1035, 455, 1150, 500), "studio", "text", 0.5),  # FULL ANALYSIS
+    # The icon is the phone's (the studio render draws its ring as a
+    # hairline that doesn't survive thresholding, and different eyes); as
+    # "display" its filled mouth isn't dropped as a blob. The QR is the
+    # studio's: the phone's is warped by the bag's bulge and, through the
+    # film, its modules merge.
+    ((148, 486, 210, 556), "phone", "display", 0.45),  # icon
+    ((1030, 610, 1145, 725), "studio", "qr", 0.5),  # QR code
 ]
-LETTER_AREA = 3000  # phone px; anything bigger is a bean's shadow, not a letter
+# Not ink: the airlock valve's rim, which the studio render shows as faint
+# grey lines. It stays a raster, its edges redrawn by crisp().
+RASTER = [(285, 585, 405, 712)]
+LETTER_AREA = 3000  # phone px; in the small print, anything bigger is a bean's shadow, not a letter
 LOGO = "work/inputs/bigface-logo.png"  # commons.wikimedia.org/wiki/File:BIGFACE_logo.png
-STROKE = 2.7  # px at SCALE: the studio's small text, measured
 
 
 def lum(rgb):
@@ -95,10 +117,46 @@ def crisp(coverage, scale):
     """Upscale ink coverage with sharp edges: cubic upscale, then a narrow
     ramp around half coverage, which redraws each edge at the new
     resolution instead of stretching the old one's blur."""
-    n = coverage.shape[0] * scale
-    c = cv2.resize(coverage.astype(np.float32), (n, n), interpolation=cv2.INTER_CUBIC)
+    h, w = coverage.shape
+    c = cv2.resize(coverage.astype(np.float32), (w * scale, h * scale), interpolation=cv2.INTER_CUBIC)
     t = np.clip((c - 0.3) / 0.4, 0, 1)
     return t * t * (3 - 2 * t)
+
+
+def trace_options(kind):
+    """potrace's flags for one kind of print element.
+
+    kind is "text" (the small print: a grotesque with square corners, at
+    about 35px tall in the phone photo), "display" (the wordmark and the
+    icon: large, rounded letterforms) or "qr" (a grid of squares, where
+    every corner must stay a corner). The knobs that matter: -a/--alphamax
+    is the corner threshold (0 keeps every corner, 1 is the default and
+    rounds anything under about 90°, up to 4/3 rounds everything),
+    -t/--turdsize drops specks up to that many pixels (the bitmaps are
+    thresholded photos, so film grain survives as 1-3px dots),
+    -O/--opttolerance sets how far the fitted curve may stray from the
+    bitmap (0.2 default; smaller follows wobble, larger smooths it) and
+    -n/--longcurve turns curve optimisation off. Returns a list of
+    strings, e.g. ["-a", "0.6", "-t", "4"]."""
+    # Thresholded photos leave 1-3px grain; the small print's periods and the
+    # arrows' heads are about 8px across in the pipeline's frame, so 4 clears
+    # the grain and keeps them.
+    return {
+        "text": ["-a", "0.5", "-t", "4", "-O", "0.3"],  # square corners, wobble smoothed
+        "display": ["-a", "1.0", "-t", "4"],  # rounded letterforms as they are
+        "qr": ["-a", "0", "-n", "-t", "2"],  # every corner a corner, no curve fitting
+    }[kind]
+
+
+def trace(ink, kind, scale):
+    """Trace a binary ink mask into curves with potrace and draw it again
+    `scale` times larger, antialiased. Returns coverage 0..1 at the new
+    size, exactly scale times the mask's."""
+    pbm, pgm = D + "trace.pbm", D + "trace.pgm"
+    # PBM's 1 is black; PIL writes a mode "1" image that way round.
+    Image.fromarray(np.where(ink, 0, 255).astype(np.uint8)).convert("1", dither=Image.Dither.NONE).save(pbm)
+    subprocess.run(["potrace", pbm, "-b", "pgm", "-x", str(scale), *trace_options(kind), "-o", pgm], check=True)
+    return 1 - np.asarray(Image.open(pgm), dtype=np.float32) / 255
 
 
 old = np.asarray(Image.open("work/bigface-pouch/prepared.png"))
@@ -119,40 +177,57 @@ printed = cv2.dilate(printed.astype(np.uint8), np.ones((5, 5))) > 0
 film = push_pull(old[..., :3].astype(np.float64), obj & ~printed)
 coverage = np.clip((lum(film) - l) / np.maximum(lum(film) - ink_l, 1), 0, 1) * obj
 coverage[coverage < 0.15] = 0  # film texture, not print
-film_up = cv2.resize(film, (S, S), interpolation=cv2.INTER_CUBIC)
-ink = crisp(coverage, SCALE)
-ink_colour = np.median(old[..., :3][coverage > 0.9], axis=0)
+ink_colour = np.median(old[..., :3][coverage > 0.9], axis=0).astype(np.float32)
+studio_coverage = crisp(coverage, SCALE)
 
-# The differing words from the phone photo, aligned by the print features
-# both bags share.
+# The phone photo's ink, aligned by the print features both bags share.
 a, b = match(Image.fromarray(old), new_img)
 H0, _ = cv2.findHomography(a, b, cv2.RANSAC, 4.0)  # studio px -> phone px
-def phone_text(ratio):
-    phone = phone_ink(new, min_area=12, ratio=ratio, max_area=LETTER_AREA)
-    return cv2.warpPerspective(phone, H0 @ up, (S, S), flags=cv2.WARP_INVERSE_MAP | cv2.INTER_AREA)
+phone_bits = {}
 
 
-def bolden(ink, extra):
-    """Thicken strokes by `extra` px a side, with an antialiased edge."""
-    core = (ink > 0.5).astype(np.uint8)
-    dist = cv2.distanceTransform(1 - core, cv2.DIST_L2, 5)
-    return np.maximum(ink, np.clip(extra + 0.5 - dist, 0, 1))
+def phone_text(ratio, kind):
+    """The phone photo's ink at this threshold, as bits in the pipeline's
+    frame. Only the small print drops large blobs: the icon's mouth and
+    the QR's finder squares are bigger than any letter."""
+    key = (ratio, kind == "text")
+    if key not in phone_bits:
+        phone = phone_ink(new, min_area=12, ratio=ratio, max_area=LETTER_AREA if kind == "text" else None)
+        warped = cv2.warpPerspective(phone, H0 @ up, (S, S), flags=cv2.WARP_INVERSE_MAP | cv2.INTER_AREA)
+        phone_bits[key] = warped > 0.5
+    return phone_bits[key]
 
 
-x0, y0, x1, y1 = (v * SCALE for v in TEXT_BLOCK)
-original = ink.copy()
-ink[y0:y1, x0:x1] = bolden(ink[y0:y1, x0:x1], BOLDEN * 1.0)
-for kx0, ky0, kx1, ky1 in KEEP:
-    box = (slice(ky0 * SCALE, ky1 * SCALE), slice(kx0 * SCALE, kx1 * SCALE))
-    ink[box] = original[box]
-for (rx0, ry0, rx1, ry1), ratio in REPLACE:
-    box = (slice(ry0 * SCALE, ry1 * SCALE), slice(rx0 * SCALE, rx1 * SCALE))
-    ink[box] = phone_text(ratio)[box]
+# Every element is traced in the pipeline's frame and drawn into the
+# master's, MASTER / SCALE times larger. A potrace drawing is exactly that
+# multiple of its input, so the boxes line up without resampling.
+M = n * MASTER
+master_ink = np.zeros((M, M), np.float32)
+for (x0, y0, x1, y1), source, kind, ratio in ELEMENTS:
+    bits = studio_coverage > ratio if source == "studio" else phone_text(ratio, kind)
+    crop = bits[y0 * SCALE : y1 * SCALE, x0 * SCALE : x1 * SCALE]
+    if source == "studio" and kind == "text":
+        # The real bag's small print is bolder than the render's (6px
+        # strokes to 2.7 at SCALE), so studio words sitting among phone
+        # words are thickened to match.
+        crop = cv2.dilate(crop.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    master_ink[y0 * MASTER : y1 * MASTER, x0 * MASTER : x1 * MASTER] = trace(crop, kind, MASTER // SCALE)
+for x0, y0, x1, y1 in RASTER:
+    master_ink[y0 * MASTER : y1 * MASTER, x0 * MASTER : x1 * MASTER] = crisp(coverage[y0:y1, x0:x1], MASTER)
 
-front = film_up * (1 - ink[..., None]) + ink_colour * ink[..., None]
-Image.fromarray(np.dstack([np.clip(front, 0, 255), alpha_up]).astype(np.uint8), "RGBA").save(
-    "work/inputs/ciao-reprint-front.png"
-)
+# The film is smooth, so a cubic upscale loses nothing; the ink is drawn
+# over it at the master's size, and the pipeline's input is the master
+# averaged down, so both carry the same print at the same place.
+film_master = cv2.resize(film.astype(np.float32), (M, M), interpolation=cv2.INTER_CUBIC)
+master = film_master * (1 - master_ink[..., None]) + ink_colour * master_ink[..., None]
+del film_master
+master = np.clip(master, 0, 255).astype(np.uint8)
+alpha_master = cv2.resize(old[..., 3], (M, M), interpolation=cv2.INTER_LINEAR)
+Image.fromarray(np.dstack([master, alpha_master]), "RGBA").save("work/inputs/ciao-reprint-front-texture.png")
+front = cv2.resize(master, (S, S), interpolation=cv2.INTER_AREA)
+Image.fromarray(np.dstack([front, alpha_up]), "RGBA").save("work/inputs/ciao-reprint-front.png")
+Image.fromarray(master).crop((130 * MASTER, 440 * MASTER, 700 * MASTER, 570 * MASTER)).save(D + "master-detail.png")
+del master
 
 # Back: mirrored blank film plus the logo, placed by the back photo.
 back_photo = Image.open("work/ciao/prepared-back.png")

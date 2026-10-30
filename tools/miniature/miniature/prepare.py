@@ -26,15 +26,19 @@ def cut_out(photo: Image.Image) -> Image.Image:
     return rembg.remove(photo)
 
 
-def square(photo: Image.Image) -> Image.Image:
-    """Crop and pad to a square around the object, the way Stable Fast 3D's
-    resize_foreground does, but without shrinking it."""
+def frame(photo: Image.Image) -> tuple[int, int, int]:
+    """The square (left, top, side) around the object, the way Stable Fast
+    3D's resize_foreground frames it, but without shrinking it."""
     alpha = np.asarray(photo)[:, :, 3]
     ys, xs = np.nonzero(alpha > 127)
     x1, x2, y1, y2 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
     side = int(max(x2 - x1, y2 - y1) / FOREGROUND_RATIO)
-    left = int((x1 + x2) / 2 - side / 2)
-    top = int((y1 + y2) / 2 - side / 2)
+    return int((x1 + x2) / 2 - side / 2), int((y1 + y2) / 2 - side / 2), side
+
+
+def square(photo: Image.Image, box: tuple[int, int, int] | None = None) -> Image.Image:
+    """Crop and pad to the square frame() finds, or to the one given."""
+    left, top, side = box or frame(photo)
     out = Image.new("RGBA", (side, side), (0, 0, 0, 0))
     out.paste(photo.crop((left, top, left + side, top + side)), (0, 0))
     return out
@@ -43,3 +47,19 @@ def square(photo: Image.Image) -> Image.Image:
 def prepare(photo: Image.Image) -> Image.Image:
     # Phone photos store their rotation as a tag rather than in the pixels.
     return square(cut_out(ImageOps.exif_transpose(photo)))
+
+
+def prepare_texture(texture: Image.Image, photo: Image.Image) -> Image.Image:
+    """A sharper copy of the photo, framed exactly as prepare() framed the
+    photo, so the front panel's UVs (fractions of the photo) land on the same
+    print. Its sides must be a whole multiple of the photo's: the frame is
+    scaled, never re-found, so the two can't drift by a pixel. The photo's
+    cut-out is recomputed here, which costs nothing for a photo that is
+    already cut out."""
+    photo = cut_out(ImageOps.exif_transpose(photo))
+    texture = ImageOps.exif_transpose(texture).convert("RGBA")
+    k = texture.width // photo.width
+    if (texture.width, texture.height) != (photo.width * k, photo.height * k):
+        raise ValueError(f"texture {texture.size} is not a whole multiple of the photo {photo.size}")
+    left, top, side = frame(photo)
+    return square(texture, (left * k, top * k, side * k))

@@ -15,6 +15,8 @@ SF3D_COMMIT=ff21fc491b4dc5314bf6734c7c0dabd86b5f5bb2
 
 # SF3D's texture baker compiles with OpenMP, which Apple's clang lacks.
 brew list libomp >/dev/null 2>&1 || brew install libomp
+# reprint_ciao.py traces the bag's print into curves with potrace.
+brew list potrace >/dev/null 2>&1 || brew install potrace
 OMP="$(brew --prefix libomp)"
 
 if [ ! -d vendor/stable-fast-3d ]; then

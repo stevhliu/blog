@@ -3,3 +3,4 @@
 .venv/
 vendor/
 work/
+__pycache__/

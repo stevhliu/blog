@@ -9,6 +9,7 @@ photo's own pixels, and so its text, on every surface the camera saw.
 .venv/bin/python -m miniature front.png --extra side.png --name bigface
 .venv/bin/python -m miniature front.png --extra side.png --shape pouch --name bigface
 .venv/bin/python -m miniature front.png --back back.png --shape pouch --depth 0.25 --seal 0.1 --name ciao
+.venv/bin/python -m miniature front.png --texture front-2x.png --name bigface   # a sharper copy for the texture
 .venv/bin/python -m miniature.suite                           # the test set
 ```
 
@@ -33,7 +34,7 @@ the text is the photo's own pixels, not a guess.
 | 3 | `refine.py`, `align.py` | Smooths the surface (the model embosses print and lumps into it), recovers each photo's camera from its silhouette, and pulls the mesh's outline onto every photo's. Extra photos reshape only what the primary photo can't see. |
 | 3 (`--shape pouch`) | `template.py`, `match.py` | For flat-bottom pouches, replaces the shape model's guess (a loaf with a rounded back) with the real construction: flat front and back panels leaning from the base into the seal, flat triangular gussets, built on the photo's own camera rays so the front outline is exact. Extra photos are placed by matching their print to the primary photo (SIFT, then perspective-n-point), and their outline then fits the base depth, the seal height and the photo's lens. A straight-on photo of the back shares no print with the front, so `panel.py` lines it up by outline instead (ECC on the cut-out masks) and maps it onto the back panel as its own textured part. |
 | 4 | `project.py`, `back.py` | Faces the primary camera saw get the photo itself as their texture. Extra photos fill what it saw poorly, colour-matched to it. Unseen surfaces get the photo's material without its features (packaging), or the shape model's guess (textured objects); `--unseen` overrides. |
-| 5 | `package.py`, `lighting.py` | Faces the model forward, crops and compresses the textures, simplifies each part with gltfpack, then renders it in headless Chrome with `<model-viewer>` from the photo's camera and picks the material (how much of the photo shows unlit, roughness, reflections) that matches the photo best. |
+| 5 | `package.py`, `lighting.py` | Faces the model forward, crops the textures, simplifies each part with gltfpack, stores the textures as WebP (`EXT_texture_webp`; the front at up to 4096px, half the bytes of JPEG for black print on white film and no colour halo round the strokes), then renders it in headless Chrome with `<model-viewer>` from the photo's camera and picks the material (how much of the photo shows unlit, roughness, reflections) that matches the photo best. `--texture` swaps a sharper copy of the photo (same framing, a whole multiple of its size) in as the front panel's texture: the panel's UVs are fractions of the photo, so nothing else changes. |
 | 6 | `qa.py` | Renders the shipped model from the photo's camera and fails the run unless the outline, the pixels and the text (read by macOS Vision) match the photo, and the shading is smooth. |
 
 `camera.py`, `raster.py`, `render.py`, `fill.py` and `glb.py` are the shared
@@ -76,6 +77,24 @@ texture is; the lighting step already picks the best setting.
 
 Lighting calibration roughly halves the lit error in every case (Bigface
 17.6 → 11.4, Iloma 22.2 → 9.2, the hat 43.7 → 23.6).
+
+## Print as curves
+
+Text can only be as sharp as the photo, and in a photo a letter is a few
+dozen pixels with a soft edge. `reprint_ciao.py` gets past that for the
+Ciao bag by tracing its print into curves with potrace (installed by
+`setup.sh`) and drawing them again at any size, so an edge is a fitted
+curve rather than a stretched pixel. Each element of the print (the
+wordmark, the small print's block, single words, the icon, the QR) names
+the photo its ink comes from and how potrace should fit it: square corners
+for the small print, rounded for the wordmark and icon, every corner kept
+for the QR. The small print is taken from the phone photo of the real bag,
+where its letters are 35px tall, rather than from the studio render, where
+they are 12px; words that a bean's shadow runs through in the phone photo
+come from the render instead. The script writes the pipeline's input at 3x
+the studio photo and a texture master at 6x, framed alike, and the run
+passes the master as `--texture`. The quality gate then reads its expected
+words from the master, where OCR is surer than on the photo.
 
 ## Photos that work best
 

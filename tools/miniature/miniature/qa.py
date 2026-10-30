@@ -77,8 +77,18 @@ def shading_roughness(scene: trimesh.Scene, camera: Camera, shade_out: np.ndarra
 
 
 def check(
-    scene: trimesh.Scene, prepared: Image.Image, camera: Camera, iou: float, shipped: Path
+    scene: trimesh.Scene,
+    prepared: Image.Image,
+    camera: Camera,
+    iou: float,
+    shipped: Path,
+    texture: Image.Image | None = None,
 ) -> tuple[dict, Image.Image, Image.Image]:
+    """texture: the sharper copy of the photo shipped as the front's texture
+    (--texture). The words expected on the render are read from it rather
+    than from the photo: at the photo's size OCR misreads a letter here and
+    there ("250Q"), and the render would be marked wrong for showing the
+    right one."""
     view, _ = render(scene, camera)
     rgba = np.asarray(prepared.convert("RGBA")).astype(np.float64)
     obj = rgba[..., 3] > 250
@@ -90,8 +100,9 @@ def check(
     error = float(np.abs(blurred(rgba[..., :3]) - blurred(np.asarray(view, dtype=np.float64)))[obj].mean())
 
     # Compare text on white, the way the photo would be printed.
+    source = np.asarray((texture or prepared).convert("RGBA")).astype(np.float64)
     photo = Image.fromarray(
-        (rgba[..., :3] * (rgba[..., 3:] / 255) + 255 * (1 - rgba[..., 3:] / 255)).astype(np.uint8)
+        (source[..., :3] * (source[..., 3:] / 255) + 255 * (1 - source[..., 3:] / 255)).astype(np.uint8)
     )
     expected = words(photo)
     found = words(view)

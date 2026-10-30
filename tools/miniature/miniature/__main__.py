@@ -38,7 +38,7 @@ from PIL import Image
 from .align import fit_camera, fit_view, iou
 from .lighting import bake, calibrate, choose
 from .package import package
-from .prepare import prepare
+from .prepare import prepare, prepare_texture
 from .project import project
 from .qa import check, load_for_check
 from .raster import silhouette
@@ -55,6 +55,12 @@ def main() -> None:
     parser.add_argument("--back", type=Path, help="pouch template only: a straight-on photo of the back, seal at the top")
     parser.add_argument("--depth", type=float, help="pouch template only: base depth as a fraction of the width")
     parser.add_argument("--seal", type=float, default=0.15, help="pouch template only: seal height as a fraction of the height")
+    parser.add_argument(
+        "--texture",
+        type=Path,
+        help="a sharper copy of the primary photo, framed the same and a whole multiple of its size, "
+        "used as the front panel's texture in place of the photo",
+    )
     parser.add_argument("--reuse-shape", action="store_true", help="skip stage 2 if shape.glb exists")
     parser.add_argument(
         "--shape",
@@ -84,6 +90,7 @@ def main() -> None:
 
     prepared = stage("prepare", lambda: prepare(Image.open(args.photo)))
     prepared.save(out / "prepared.png")
+    texture = prepare_texture(Image.open(args.texture), Image.open(args.photo)) if args.texture else None
     extras = [prepare(Image.open(p)) for p in args.extra]
     for i, image in enumerate(extras):
         image.save(out / f"prepared-extra-{i}.png")
@@ -153,7 +160,7 @@ def main() -> None:
     )
     scene.export(out / "miniature.glb", include_normals=True)
 
-    manifest, placement = stage("package", lambda: package(scene, prepared, out, args.name))
+    manifest, placement = stage("package", lambda: package(scene, prepared, out, args.name, texture))
     model = out / "web" / f"{args.name}.glb"
 
     def light():
@@ -169,7 +176,7 @@ def main() -> None:
     (out / "web" / f"{args.name}.json").write_text(json.dumps(manifest, indent=2))
 
     shipped = load_for_check(out / "simplified.glb", placement)
-    qa, view, lit = stage("qa", lambda: check(shipped, prepared, camera, fit, model))
+    qa, view, lit = stage("qa", lambda: check(shipped, prepared, camera, fit, model, texture))
     # Reported, not gated: the lighting step already picks the best setting by
     # measurement, and the error's floor depends on how fine the texture is
     # (resampling noise), so no single threshold is fair to every object.
