@@ -34,7 +34,6 @@
     --page-top: clamp(var(--page-inset), 7vw, 112px);
     /* White paper + black ink for the index. Post detail overrides --color-body below. */
     --color-page-chrome: #ffffff;
-    --color-page-border: #cbc5bc;
     --color-bg: #ffffff;
     --color-text: #000000;
     --color-subtext: rgba(0, 0, 0, 0.6);
@@ -68,7 +67,6 @@
     :root {
       color-scheme: dark;
       --color-page-chrome: #000000;
-      --color-page-border: rgba(88, 166, 255, 0.24);
       --color-bg: #0a0a0f;
       --color-text: #58a6ff;
       --color-subtext: rgba(88, 166, 255, 0.75);

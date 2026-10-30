@@ -31,8 +31,10 @@ export const metadata = {
 export const viewport = {
   // Paints the right canvas before the CSS loads, so dark mode never flashes white.
   colorScheme: "light dark",
+  // The browser chrome and the overscroll area above the page take this
+  // colour, so it must be --color-bg exactly or a band shows at the top.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0f" },
   ],
 };

@@ -1,11 +1,14 @@
 import { SiteHeader } from "./site-header";
 
 /**
- * The outer site frame shared by every page. `chrome` (home, about, 404) adds
- * the page-border top rule; `post` is full-bleed. The variant used to be derived
- * in the root layout from a request header set by middleware; it is now chosen
- * per route group so every page renders statically. Only `chrome` renders the
- * site header, so post pages never download or hydrate it.
+ * The outer site frame shared by every page. `chrome` (home, about, 404) sets
+ * the header and the centred column; `post` is full-bleed. There is no rule
+ * along the top, so the page runs seamlessly into the browser's overscroll
+ * area, which theme-color (layout.tsx) paints the same colour. The variant
+ * used to be derived in the root layout from a request header set by
+ * middleware; it is now chosen per route group so every page renders
+ * statically. Only `chrome` renders the site header, so post pages never
+ * download or hydrate it.
  */
 export function SiteShell({
   variant,
@@ -18,7 +21,7 @@ export function SiteShell({
     <div
       className={
         variant === "chrome"
-          ? "min-h-screen overflow-clip border-t border-[var(--color-page-border)] bg-[var(--color-bg)]"
+          ? "min-h-screen overflow-clip bg-[var(--color-bg)]"
           : "min-h-screen bg-[var(--color-bg)]"
       }
     >
