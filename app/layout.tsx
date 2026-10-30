@@ -3,6 +3,8 @@ import "./globals.css";
 import Script from "next/script";
 import { Analytics } from "./analytics";
 import { doge } from "./doge";
+import { pageLightScript } from "./sky-lighting";
+import { SkyLighting } from "./sky-refresh";
 
 export const metadata = {
   title: "steven liu",
@@ -50,21 +52,29 @@ export default function RootLayout({
       className="antialiased"
       suppressHydrationWarning={true}
     >
-      <link
-        rel="preload"
-        href="/fonts/geist-sans-core.woff2"
-        as="font"
-        type="font/woff2"
-        crossOrigin="anonymous"
-      />
-      <link
-        rel="preload"
-        href="/fonts/geist-mono-core.woff2"
-        as="font"
-        type="font/woff2"
-        crossOrigin="anonymous"
-      />
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/geist-sans-core.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/geist-mono-core.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        {/* The page is lit by the sky over Sebastopol at this hour (see
+            sky-lighting.ts). Inline and in the head, so it runs before the
+            stylesheet paints and a night-time reader never sees the page
+            white first. The CSS palettes remain the no-script fallback. */}
+        <script id="sky-light" dangerouslySetInnerHTML={{ __html: pageLightScript() }} />
+      </head>
       <body className="min-h-[100svh] bg-[var(--color-bg)] text-[var(--color-text)]">
+        <SkyLighting />
         {children}
         <Script id="doge-console" strategy="lazyOnload">
           {`(${doge.toString()})();`}

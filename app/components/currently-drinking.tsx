@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { skyEnvironment } from "../sky";
+import { skyInstant } from "../sky-lighting";
+
 // Built by tools/miniature with the flat-bottom pouch template: Bigface's
 // studio photo for the film and lighting, reprinted with the print from
 // photos of the Ciao bag itself (tools/miniature/reprint_ciao.py). The
@@ -16,6 +19,32 @@ const POSTER = "/images/ciao-poster.webp";
 // screen, where the 4096px texture still has two texels a pixel.
 const FIELD_OF_VIEW = "25deg";
 const CLOSEST_FIELD_OF_VIEW = "5deg";
+// The sky is redrawn this often. The sun moves a quarter of a degree a
+// minute, so five minutes is just over a degree: under what the film shows.
+const SKY_REFRESH_MS = 5 * 60_000;
+
+/**
+ * model-viewer's exposure for the sun at `elevation` degrees above the
+ * horizon (negative below it). The sky map already carries the day's
+ * brightness: noon is bright, dusk dim, night nearly black, and 65% of the
+ * pouch's colour is unlit emissive, so it never disappears. Exposure is
+ * the remaining choice: how much the lit share is let through. 1 keeps the
+ * sky's own brightness; more than 1 lifts the dark hours the way eyes do;
+ * less than 1 lets midday glare settle. Returns a number.
+ */
+function exposureFor(elevation: number): number {
+  // Exposure scales the emissive share too, so it can't lift the night
+  // much: at 2.5 the print's 65% unlit share clips to white and the bag
+  // reads as a flat cutout. A small lift, smoothly from 1 at the horizon
+  // to 1.15 by astronomical night (-18°), reads as eyes adapting without
+  // that; the day keeps the exposure the material was calibrated at.
+  return 1 + 0.15 * smoothstep(0, -18, elevation);
+}
+
+function smoothstep(from: number, to: number, x: number): number {
+  const t = Math.min(Math.max((x - from) / (to - from), 0), 1);
+  return t * t * (3 - 2 * t);
+}
 
 /**
  * model-viewer gives every texture an anisotropy of 4. GPUs allow 16, which
@@ -83,6 +112,26 @@ export function CurrentlyDrinking() {
     const sharpen = () => sharpenTextures(element);
     element.addEventListener("load", sharpen);
     return () => element.removeEventListener("load", sharpen);
+  }, []);
+  // The sky over Sebastopol now, redrawn every few minutes, lights the
+  // pouch. Attributes rather than properties, so it holds whether or not
+  // model-viewer has upgraded the element yet. The first draw waits for
+  // an idle moment: it takes about 200ms of main thread.
+  useEffect(() => {
+    const element = viewer.current;
+    if (!element) return;
+    const light = () => {
+      // The same hour the page is lit for (?sky= looks at another one).
+      const { url, elevation } = skyEnvironment(skyInstant() ?? new Date());
+      element.setAttribute("environment-image", url);
+      element.setAttribute("exposure", String(exposureFor(elevation)));
+    };
+    const idle = window.requestIdleCallback?.(light) ?? window.setTimeout(light, 0);
+    const timer = window.setInterval(light, SKY_REFRESH_MS);
+    return () => {
+      (window.cancelIdleCallback ?? window.clearTimeout)(idle);
+      window.clearInterval(timer);
+    };
   }, []);
   const [focused, setFocused] = useState(false);
   const blur = () => {

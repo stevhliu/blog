@@ -50,6 +50,20 @@ home index and the feed but remain reachable by URL.
 - The shared site frame lives in `app/site-shell.tsx`; the `(post)` and `(chrome)`
   route groups pick its variant so every page renders statically.
 - The MDX component registry is `mdx-components.ts` plus `mdx-diagrams.ts`.
+- The site is lit by the sky over Sebastopol at the current time, the way
+  pengzhe.ng lights its pages. `app/sky-lighting.ts` works out the sun's
+  altitude, takes the page's hue and chroma from a single-scattering
+  atmosphere (the sun through the air plus the sky's own light, on nine
+  rays), takes its lightness from a table of keyframes (day, golden hour,
+  dusk, blue hour, three stages of night) blended in OKLCH, and solves every
+  ink from that paper by contrast ratio, so text, secondary text, rules and
+  links all shift together and never fall under 4.5:1. An inline script in the root layout
+  applies it before first paint and `app/sky-refresh.tsx` refreshes it every
+  five minutes with a fade; the CSS palettes stay as the no-script fallback.
+  `/?sky=2026-10-30T18:05:00-07:00` shows the page at another hour. The home
+  page's coffee pouch (`app/components/currently-drinking.tsx`, a GLB built
+  by `tools/miniature`) gets the same sky as an environment map, ray-marched
+  in `app/sky.ts`.
 - OG images are generated at `app/(post)/og/[id]/route.tsx`; the feed is at
   `app/atom/route.ts`.
 - `fonts/init.mjs` runs on `postinstall` and copies raw TTFs out of the `geist`

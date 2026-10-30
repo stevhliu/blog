@@ -50,8 +50,17 @@
     /* Warm-gray used on post detail for dimmed meta (sec row, date, inactive TOC, Index link).
        oklch(0.56 0.022 81.8), the lightest this hue goes and still clears 4.5:1 on white. */
     --color-dim: #7b7366;
+    /* The sky's wash: sky-lighting.ts sets a little of the sky's top colour
+       to run down into the paper. Without the script, both are the paper. */
+    --sky-wash: var(--color-bg);
     background-color: var(--color-page-chrome);
     font-family: var(--font-geist-sans);
+  }
+
+  body {
+    background-color: var(--color-bg);
+    background-image: linear-gradient(to bottom, var(--sky-wash), var(--color-bg) 45svh);
+    background-repeat: no-repeat;
   }
 
   @font-face {
@@ -155,7 +164,8 @@ pre.highlights {
 }
 
 /* Pierre dual-theme: default to light vars, swap to dark vars via the
-   site-wide prefers-color-scheme media query. */
+   site-wide prefers-color-scheme media query, or when the sky has turned
+   the page to night (sky-lighting.ts sets data-night on the root). */
 pre.highlights,
 pre.highlights span {
   color: var(--hls-light);
@@ -171,6 +181,118 @@ pre.highlights {
   pre.highlights {
     background-color: var(--hls-dark-bg);
   }
+}
+:root[data-night="true"] pre.highlights,
+:root[data-night="true"] pre.highlights span {
+  color: var(--hls-dark);
+}
+:root[data-night="true"] pre.highlights {
+  background-color: var(--hls-dark-bg);
+}
+:root[data-night="false"] pre.highlights,
+:root[data-night="false"] pre.highlights span {
+  color: var(--hls-light);
+}
+:root[data-night="false"] pre.highlights {
+  background-color: var(--hls-light-bg);
+}
+
+/* The sky moves continuously. sky-refresh.tsx re-lights the page every
+   minute, and the colour variables themselves are registered as colours
+   so they animate: the transition lives on the root alone, every var()
+   below follows it frame by frame, and nothing else on the page (hover
+   colours, focus rings) is slowed. A minute's step of sun is about one
+   level in 255, so eight seconds of easing reads as a sky changing. */
+@property --sky-wash {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+@property --color-page-chrome {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+@property --color-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+@property --color-text {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #000000;
+}
+@property --color-body {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #000000;
+}
+@property --color-subtext {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgb(0 0 0 / 0.6);
+}
+@property --color-dim {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #7b7366;
+}
+@property --color-blue {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #000000;
+}
+@property --color-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #000000;
+}
+@property --color-rule {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #000000;
+}
+@property --color-rule-soft {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgb(0 0 0 / 0.3);
+}
+@property --color-surface {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgb(0 0 0 / 0.05);
+}
+@property --color-code-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+@property --color-code-border {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgb(0 0 0 / 0.14);
+}
+/* The paper eases; the inks take a steep curve that holds near the old
+   value, crosses in the middle and settles, so when the page steps from
+   light to dark the ink is grey-on-grey for a moment, not for seconds. */
+:root {
+  --ink-curve: cubic-bezier(0.9, 0, 0.1, 1);
+  transition:
+    --sky-wash 8s ease,
+    --color-page-chrome 8s ease,
+    --color-bg 8s ease,
+    --color-surface 8s ease,
+    --color-code-bg 8s ease,
+    --color-text 8s var(--ink-curve),
+    --color-body 8s var(--ink-curve),
+    --color-subtext 8s var(--ink-curve),
+    --color-dim 8s var(--ink-curve),
+    --color-blue 8s var(--ink-curve),
+    --color-accent 8s var(--ink-curve),
+    --color-rule 8s var(--ink-curve),
+    --color-rule-soft 8s var(--ink-curve),
+    --color-code-border 8s var(--ink-curve);
 }
 
 .subtext {
@@ -202,6 +324,12 @@ button:focus-visible,
   .post-body img:not(.post-body article img) {
     outline-color: rgb(255 255 255 / 0.1);
   }
+}
+:root[data-night="true"] .post-body img:not(.post-body article img) {
+  outline-color: rgb(255 255 255 / 0.1);
+}
+:root[data-night="false"] .post-body img:not(.post-body article img) {
+  outline-color: rgb(0 0 0 / 0.1);
 }
 
 /* ─── Archive index aesthetic ───────────────────────────── */
