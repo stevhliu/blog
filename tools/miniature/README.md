@@ -10,6 +10,7 @@ photo's own pixels, and so its text, on every surface the camera saw.
 .venv/bin/python -m miniature front.png --extra side.png --shape pouch --name bigface
 .venv/bin/python -m miniature front.png --back back.png --shape pouch --depth 0.25 --seal 0.1 --name ciao
 .venv/bin/python -m miniature front.png --texture front-2x.png --name bigface   # a sharper copy for the texture
+.venv/bin/python -m miniature front.png --shape pouch --depth 0.25 --seal 0.1 --bulge 0.05 --zipper 0.88 --valve 0.21 0.47 0.05 --name ciao
 .venv/bin/python -m miniature.suite                           # the test set
 ```
 
@@ -32,7 +33,7 @@ the text is the photo's own pixels, not a guess.
 | 1 | `prepare.py` | Cuts out the object (rembg, unless the photo is already cut out) and squares it the way the shape model frames its input, at full resolution. |
 | 2 | `shape.py` | Generates the shape with [Stable Fast 3D](https://github.com/Stability-AI/stable-fast-3d) on the CPU (the GPU path runs out of memory below 32GB). The only module that knows which model is used. |
 | 3 | `refine.py`, `align.py` | Smooths the surface (the model embosses print and lumps into it), recovers each photo's camera from its silhouette, and pulls the mesh's outline onto every photo's. Extra photos reshape only what the primary photo can't see. |
-| 3 (`--shape pouch`) | `template.py`, `match.py` | For flat-bottom pouches, replaces the shape model's guess (a loaf with a rounded back) with the real construction: flat front and back panels leaning from the base into the seal, flat triangular gussets, built on the photo's own camera rays so the front outline is exact. Extra photos are placed by matching their print to the primary photo (SIFT, then perspective-n-point), and their outline then fits the base depth, the seal height and the photo's lens. A straight-on photo of the back shares no print with the front, so `panel.py` lines it up by outline instead (ECC on the cut-out masks) and maps it onto the back panel as its own textured part. |
+| 3 (`--shape pouch`) | `template.py`, `match.py` | For flat-bottom pouches, replaces the shape model's guess (a loaf with a rounded back) with the real construction: flat front and back panels leaning from the base into the seal, flat triangular gussets, built on the photo's own camera rays so the front outline is exact. `--bulge`, `--zipper` and `--valve` add relief on top: the contents' swell in each panel, the zipper's lip across the top, the airlock standing proud of the front. Each is a height along the camera ray, so the outline and the print stay put and only the shading changes, which is what tells a bag from a cutout as it turns. Extra photos are placed by matching their print to the primary photo (SIFT, then perspective-n-point), and their outline then fits the base depth, the seal height and the photo's lens. A straight-on photo of the back shares no print with the front, so `panel.py` lines it up by outline instead (ECC on the cut-out masks) and maps it onto the back panel as its own textured part. |
 | 4 | `project.py`, `back.py` | Faces the primary camera saw get the photo itself as their texture. Extra photos fill what it saw poorly, colour-matched to it. Unseen surfaces get the photo's material without its features (packaging), or the shape model's guess (textured objects); `--unseen` overrides. |
 | 5 | `package.py`, `lighting.py` | Faces the model forward, crops the textures, simplifies each part with gltfpack, stores the textures as WebP (`EXT_texture_webp`; the front at up to 4096px, half the bytes of JPEG for black print on white film and no colour halo round the strokes), then renders it in headless Chrome with `<model-viewer>` from the photo's camera and picks the material (how much of the photo shows unlit, roughness, reflections) that matches the photo best. `--texture` swaps a sharper copy of the photo (same framing, a whole multiple of its size) in as the front panel's texture: the panel's UVs are fractions of the photo, so nothing else changes. |
 | 6 | `qa.py` | Renders the shipped model from the photo's camera and fails the run unless the outline, the pixels and the text (read by macOS Vision) match the photo, and the shading is smooth. |
@@ -74,6 +75,15 @@ texture is; the lighting step already picks the best setting.
 | santa-rosa | silver bag, dark label, embossed wordmark | pass |
 | bucket-hat | fabric, no print, white background | pass |
 | ciao | phone photos at 4032px of a frosted pouch lying flat, with a crimped seal down one edge; the back panel's photo placed by its outline (`--back`), depth and seal given | pass |
+
+The shipped Ciao model is `ciao-reprint` (see `reprint_ciao.py`), run with
+the relief flags above. The shading check is what keeps relief honest: the
+raking-light render must stay smooth, so a lip that aliases against the
+mesh rows, or a slope wound the wrong way, fails the run rather than
+shipping as a dark line. Finding that out also fixed how the check itself
+reads normals: `scene.dump()` and `force="mesh"` recompute each part's
+normals from its own faces, which bends them along the cuts between parts,
+so the packaging and the check now carry the stored normals through.
 
 Lighting calibration roughly halves the lit error in every case (Bigface
 17.6 → 11.4, Iloma 22.2 → 9.2, the hat 43.7 → 23.6).

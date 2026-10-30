@@ -67,10 +67,17 @@ def place(scene: trimesh.Scene) -> tuple[trimesh.Scene, np.ndarray]:
     """Face the model +z and stand it on the ground, centred. Returns the
     placed scene and the 4x4 transform applied, which the quality check
     inverts to line the model up with the photo's camera again."""
-    meshes = {name: g.copy() for name, g in scene.geometry.items()}
     turn = trimesh.transformations.rotation_matrix(np.pi, [0, 1, 0])
-    for g in meshes.values():
+    meshes = {}
+    for name, g in scene.geometry.items():
+        # The parts carry the whole mesh's normals, which copy() drops and
+        # a recompute would bend along the cuts between parts. Turn them
+        # with the vertices.
+        normals = np.asarray(g.vertex_normals) @ turn[:3, :3].T
+        g = g.copy()
         g.apply_transform(turn)
+        g.vertex_normals = normals
+        meshes[name] = g
     lo = np.min([g.bounds[0] for g in meshes.values()], axis=0)
     hi = np.max([g.bounds[1] for g in meshes.values()], axis=0)
     shift = np.array([-(lo[0] + hi[0]) / 2, -lo[1], -(lo[2] + hi[2]) / 2])
@@ -155,7 +162,10 @@ def package(
         # each would move its side of the edge differently, opening gaps and
         # letting one part's edge poke past another's at the silhouette.
         gltfpack(src, dst, "-si", str(keep), "-slb", "-noq")
-        piece = trimesh.load(dst, force="mesh", process=False)
+        # Not force="mesh": that goes through scene.dump(), which recomputes
+        # the normals from the part's own faces and bends them at its cuts.
+        # Loaded as a scene, the part keeps the normals gltfpack kept (-kn).
+        piece = next(iter(trimesh.load(dst, process=False).geometry.values()))
         simplified.add_geometry(piece, geom_name=part)
     simplified.export(out / "simplified.glb", include_normals=True)
     # Quantized and compressed for the site.

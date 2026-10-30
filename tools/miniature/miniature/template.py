@@ -16,11 +16,19 @@ pouch() builds that shape straight from the photo:
   front mirrored through the bag's middle.
 - `depth` is a fraction of the bag's width. The shape model's own estimate
   is a good start (estimate_depth); an extra photo refines it.
+- Relief, when given, lifts the panels off their flat lean: the swell of
+  the contents in the middle of each panel, the zipper's lip across the
+  top, the airlock valve standing proud of the front. Each is a height
+  added along the camera ray, so the outline and the projected print
+  don't move; only the shading does, which is what a flat panel lacks as
+  the bag turns.
 
 The mesh carries a plain atlas (a regular grid unwrap) so the projection
 step can treat it like any other.
 """
 from __future__ import annotations
+
+from dataclasses import dataclass
 
 import numpy as np
 import trimesh
@@ -37,6 +45,51 @@ SHOULDER = 0.12  # how gradually the panels round over into the seal
 ATLAS = 1024
 # Outline overlap lost per pixel of mean print reprojection error (fit_pouch).
 REPROJECTION_PENALTY = 0.01
+# Relief sizes, as fractions of the bag's width (heights) or height (the
+# zipper's spread). A zipper's lip on a 150mm bag is a millimetre or so.
+ZIPPER_HEIGHT = 0.006
+ZIPPER_SPREAD = 0.012  # standard deviation of the lip's bell, up the bag
+VALVE_HEIGHT = 0.012
+VALVE_RIM = 0.3  # share of the valve's radius over which its edge rounds off
+EDGE_FADE = 0.04  # how far in from the side edges a ridge dies out, across the bag
+
+
+@dataclass
+class Relief:
+    """Departures from the flat panels, each a fraction of the bag's width
+    unless said otherwise. bulge: how far the middle of each panel swells
+    outward. zipper: how far up the bag the zipper runs, as a fraction of
+    its height from the base. valve: the airlock's centre across and down
+    the bag's box (fractions of its width and height) and its radius."""
+
+    bulge: float = 0.0
+    zipper: float | None = None
+    valve: tuple[float, float, float] | None = None
+
+
+def bulge_profile(u: np.ndarray, h: np.ndarray, seal: float) -> np.ndarray:
+    """How much of the full bulge each point on a panel gets, 0 to 1.
+
+    u runs 0 to 1 from the panel's left edge to its right, h from 0 at the
+    base to 1 at the top; the flat seal occupies h > 1 - seal. The sides
+    are seals too, and the base is a flat gusset, so the swell must reach 0
+    at u = 0, u = 1, h = 0 and h = 1 - seal. Whatever is inside the bag
+    settles, so the swell's peak sits below the panel's middle and the fall
+    toward the seal is longer than the rise from the base.
+    """
+    # Across: a half-sine, flat-topped by the power so the swell stays full
+    # across most of the panel and falls to the side seals over the last
+    # fifth, which is how film drapes over a filled bag. Up the bag: the
+    # same bell with the height skewed, so the peak sits about 40% up.
+    t = np.clip(h / (1 - seal), 0, 1)
+    across = np.sin(np.pi * u) ** 0.6
+    up = np.sin(np.pi * t**0.6) ** 1.2
+    return across * up
+
+
+def smoothstep(x: np.ndarray) -> np.ndarray:
+    t = np.clip(x, 0, 1)
+    return t * t * (3 - 2 * t)
 
 
 def row_extents(alpha: np.ndarray, rows: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -74,7 +127,9 @@ class PouchFrame:
     point for a photo pixel: camera rays, the bag's extent in the photo and
     the depth profile (full at the base, nothing from the seal up)."""
 
-    def __init__(self, prepared: Image.Image, camera: Camera, depth: float, seal: float):
+    def __init__(
+        self, prepared: Image.Image, camera: Camera, depth: float, seal: float, relief: Relief | None = None
+    ):
         self.alpha = np.asarray(prepared.getchannel("A"))
         ys = np.nonzero((self.alpha > 127).any(1))[0]
         self.top, self.bottom = ys.min(), ys.max() + 1
@@ -83,13 +138,22 @@ class PouchFrame:
         self.focal = camera.focal
         self.c = camera.size / 2
         self.seal = seal
+        self.relief = relief or Relief()
 
         # Width in scene units, measured on the middle plane (z = 0).
         mid = (self.top + self.bottom) / 2
         xs = np.nonzero(self.alpha[int(mid)] > 127)[0]
         span = self.ray(np.array([xs.min(), xs.max() + 1.0]), np.array([mid, mid]))
         hits = self.eye + span * ((0 - self.eye[2]) / span[:, 2])[:, None]
-        self.base_depth = depth * np.linalg.norm(hits[1] - hits[0])
+        self.width = np.linalg.norm(hits[1] - hits[0])
+        self.base_depth = depth * self.width
+        # The bag's left and right edge on every pixel row, so any photo
+        # pixel can be placed across its panel (0 at the left edge, 1 at
+        # the right) for the relief.
+        self.edge_rows = np.arange(self.top, self.bottom, dtype=float)
+        self.left, self.right = row_extents(self.alpha, self.edge_rows)
+        # The width in pixels on the middle row, for the valve's circle.
+        self.width_px = float(xs.max() + 1 - xs.min())
 
     def ray(self, px: np.ndarray, py: np.ndarray) -> np.ndarray:
         d = np.stack([(px - self.c) / self.focal, (py - self.c) / self.focal, np.ones_like(px)], axis=-1)
@@ -104,20 +168,50 @@ class PouchFrame:
         lean = rest * (1 - np.exp(-rest / SHOULDER))
         return np.maximum(self.base_depth / 2 * lean, FIN)
 
-    def front(self, px: np.ndarray, py: np.ndarray) -> np.ndarray:
-        """The front panel's 3D point under each photo pixel."""
+    def relief_height(self, px: np.ndarray, py: np.ndarray, valve: bool) -> np.ndarray:
+        """How far each pixel's point stands out from the flat panel, in
+        scene units. The valve is on the front only."""
+        relief = self.relief
+        h = (self.bottom - py) / (self.bottom - self.top)
+        left = np.interp(py, self.edge_rows, self.left)
+        right = np.interp(py, self.edge_rows, self.right)
+        u = np.clip((px - left) / np.maximum(right - left, 1), 0, 1)
+        out = np.zeros_like(px, dtype=float)
+        if relief.bulge:
+            out += relief.bulge * self.width * bulge_profile(u, h, self.seal)
+        if relief.zipper is not None:
+            bell = np.exp(-0.5 * ((h - relief.zipper) / ZIPPER_SPREAD) ** 2)
+            fade = smoothstep(u / EDGE_FADE) * smoothstep((1 - u) / EDGE_FADE)
+            out += ZIPPER_HEIGHT * self.width * bell * fade
+        if valve and relief.valve is not None:
+            cx, cy, radius = relief.valve
+            # Distance from the valve's centre in units of the bag's width,
+            # with the vertical measured in pixels so the circle is round.
+            dx = u - cx
+            dy = ((1 - h) - cy) * (self.bottom - self.top) / self.width_px
+            dist = np.sqrt(dx * dx + dy * dy)
+            out += VALVE_HEIGHT * self.width * smoothstep((radius - dist) / (VALVE_RIM * radius))
+        return out
+
+    def front(self, px: np.ndarray, py: np.ndarray, valve: bool = True) -> np.ndarray:
+        """The front panel's 3D point under each photo pixel. With
+        valve=False it is the back's twin before mirroring: the same relief
+        without the valve."""
         d = self.ray(px, py)
-        z = -self.half_depth(py)
+        z = -(self.half_depth(py) + self.relief_height(px, py, valve))
         return self.eye + d * ((z - self.eye[2]) / d[:, 2])[:, None]
 
 
-def pouch(prepared: Image.Image, camera: Camera, depth: float, seal: float) -> trimesh.Trimesh:
+def pouch(
+    prepared: Image.Image, camera: Camera, depth: float, seal: float, relief: Relief | None = None
+) -> trimesh.Trimesh:
     """A flat-bottom pouch fitted to the photo's outline.
 
     depth: base depth as a fraction of the bag's width.
     seal: height of the flat sealed strip at the top, as a fraction of the
-    bag's height; the gussets close to nothing where it begins."""
-    frame = PouchFrame(prepared, camera, depth, seal)
+    bag's height; the gussets close to nothing where it begins.
+    relief: the swell, zipper and valve that lift the panels off flat."""
+    frame = PouchFrame(prepared, camera, depth, seal, relief)
     top, bottom = frame.top, frame.bottom
     rows = np.linspace(top + 0.5, bottom - 0.5, ROWS)
     left, right = row_extents(frame.alpha, rows)
@@ -127,8 +221,9 @@ def pouch(prepared: Image.Image, camera: Camera, depth: float, seal: float) -> t
     loop = 2 * COLS + 2 * GUSSET_STEPS
     verts = np.zeros((ROWS, loop + 1, 3))
     for i, py in enumerate(rows):
-        front = frame.front(np.linspace(left[i], right[i], COLS), np.full(COLS, py))
-        back = front * np.array([1, 1, -1])  # mirrored through z = 0
+        cols, row = np.linspace(left[i], right[i], COLS), np.full(COLS, py)
+        front = frame.front(cols, row)
+        back = frame.front(cols, row, valve=False) * np.array([1, 1, -1])  # mirrored through z = 0
         fold = FOLD * 2 * half[i]
 
         def gusset(a: np.ndarray, b: np.ndarray, inward: float) -> np.ndarray:
@@ -182,9 +277,14 @@ def pouch(prepared: Image.Image, camera: Camera, depth: float, seal: float) -> t
     front_face = mesh.face_normals[: 2 * COLS].mean(0)
     if front_face @ (eye - positions[: COLS].mean(0)) < 0:
         mesh.faces = mesh.faces[:, ::-1]
-    # Caps were wound independently; point each away from the middle.
+    # Caps were wound independently; point each away from the middle. Only
+    # the caps: a relief's slope that leans toward the middle (the lower
+    # side of the zipper's lip) is wound right already, and turning it
+    # would hand it to the back.
     centre = positions.mean(0)
+    tube = 2 * (ROWS - 1) * loop
     flip = np.einsum("ij,ij->i", mesh.face_normals, mesh.triangles_center - centre) < 0
+    flip[:tube] = False
     mesh.faces[flip] = mesh.faces[flip][:, ::-1]
 
     mesh.visual = trimesh.visual.TextureVisuals(
@@ -215,6 +315,7 @@ def fit_pouch(
     depth: float,
     extras: list[Image.Image],
     seal: float = 0.15,
+    relief: Relief | None = None,
 ) -> tuple[trimesh.Trimesh, float, float, list[Camera | None], dict]:
     """Refine depth and seal height against extra photos. Returns the mesh,
     the chosen depth and seal, and a camera per extra photo (None where the
@@ -234,15 +335,15 @@ def fit_pouch(
     from .raster import silhouette
 
     if not extras:
-        return pouch(prepared, camera, depth, seal), depth, seal, [], {}
+        return pouch(prepared, camera, depth, seal, relief), depth, seal, [], {}
 
     matches = [match(prepared, image) for image in extras]
     usable = [i for i, (a, _) in enumerate(matches) if len(a) >= 12]
     stats = {"matches": [len(a) for a, _ in matches]}
     if not usable:
-        return pouch(prepared, camera, depth, seal), depth, seal, [None] * len(extras), stats
+        return pouch(prepared, camera, depth, seal, relief), depth, seal, [None] * len(extras), stats
 
-    start = PouchFrame(prepared, camera, depth, seal)
+    start = PouchFrame(prepared, camera, depth, seal, relief)
     kept = {}
     for i in usable:
         a, b = matches[i]
@@ -253,8 +354,8 @@ def fit_pouch(
     best = None
     for d in np.arange(0.15, 0.65, 0.05):
         for s in (0.1, 0.15, 0.2, 0.25):
-            frame = PouchFrame(prepared, camera, d, s)
-            mesh = pouch(prepared, camera, d, s)
+            frame = PouchFrame(prepared, camera, d, s, relief)
+            mesh = pouch(prepared, camera, d, s, relief)
             verts, faces = np.asarray(mesh.vertices), np.asarray(mesh.faces)
             score, cams, fits, errors = 0.0, [], [], []
             for i in usable:
@@ -281,4 +382,4 @@ def fit_pouch(
         reprojection_px=[round(e, 2) for e in errors],
         field_of_view=[c.fovy for c in found],
     )
-    return pouch(prepared, camera, d, s), float(d), float(s), cams, stats
+    return pouch(prepared, camera, d, s, relief), float(d), float(s), cams, stats

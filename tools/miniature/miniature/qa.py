@@ -28,7 +28,7 @@ from PIL import Image
 
 from .camera import Camera
 from .fill import box_blur
-from .render import render, shading
+from .render import parts, render, shading
 
 MIN_IOU = 0.97
 MAX_PIXEL_ERROR = 6.0  # mean absolute error on object pixels, out of 255, after PIXEL_BLUR
@@ -142,12 +142,10 @@ def check(
 def load_for_check(path: Path, placement: np.ndarray) -> trimesh.Scene:
     """Load a packaged GLB and undo its placement, so it lines up with the
     camera found in stage 3 again."""
-    # process=False keeps the vertices and normals exactly as stored.
+    # process=False keeps the vertices and normals exactly as stored, and
+    # parts() carries those normals through the move.
     scene = trimesh.load(path, process=False)
-    undo = np.linalg.inv(placement)
     out = trimesh.Scene()
-    for i, g in enumerate(scene.dump()):
-        g = g.copy()
-        g.apply_transform(undo)
+    for i, g in enumerate(parts(scene, np.linalg.inv(placement))):
         out.add_geometry(g, geom_name=f"part{i}")
     return out

@@ -55,6 +55,15 @@ def main() -> None:
     parser.add_argument("--back", type=Path, help="pouch template only: a straight-on photo of the back, seal at the top")
     parser.add_argument("--depth", type=float, help="pouch template only: base depth as a fraction of the width")
     parser.add_argument("--seal", type=float, default=0.15, help="pouch template only: seal height as a fraction of the height")
+    parser.add_argument("--bulge", type=float, default=0.0, help="pouch template only: how far the panels swell, as a fraction of the width")
+    parser.add_argument("--zipper", type=float, help="pouch template only: height of the zipper's lip up the bag, as a fraction of the height")
+    parser.add_argument(
+        "--valve",
+        type=float,
+        nargs=3,
+        metavar=("CX", "CY", "R"),
+        help="pouch template only: the airlock valve's centre across and down the bag's box and its radius, as fractions of the width (height for CY)",
+    )
     parser.add_argument(
         "--texture",
         type=Path,
@@ -127,13 +136,14 @@ def main() -> None:
 
     def fit_template():
         from .camera import Camera
-        from .template import estimate_depth, fit_pouch
+        from .template import Relief, estimate_depth, fit_pouch
 
         # The template is built through the shape model's own camera, so the
         # front outline is the photo's; the shape model only estimates depth.
         camera = Camera(size=prepared.width)
         depth = args.depth if args.depth is not None else estimate_depth(mesh, camera)
-        fitted, d, s, cameras, stats = fit_pouch(prepared, camera, depth, extras, args.seal)
+        relief = Relief(args.bulge, args.zipper, tuple(args.valve) if args.valve else None)
+        fitted, d, s, cameras, stats = fit_pouch(prepared, camera, depth, extras, args.seal, relief)
         timings["template"] = {"depth": round(d, 3), "seal": s, **stats}
         return fitted, camera, cameras
 

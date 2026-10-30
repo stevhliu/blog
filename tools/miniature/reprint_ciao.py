@@ -24,7 +24,12 @@ phone photos as work/ciao (it reads their prepared cut-outs):
     .venv/bin/python reprint_ciao.py
     .venv/bin/python -m miniature work/inputs/ciao-reprint-front.png \\
         --texture work/inputs/ciao-reprint-front-texture.png \\
-        --back work/inputs/ciao-reprint-back.png --shape pouch --depth 0.25 --seal 0.1 --name ciao-reprint
+        --back work/inputs/ciao-reprint-back.png --shape pouch --depth 0.25 --seal 0.1 \\
+        --bulge 0.05 --zipper 0.877 --valve 0.212 0.472 0.053 --name ciao-reprint
+
+The zipper and valve positions are measured on the studio render (zipper
+line at y=350, valve ring centred on (345, 648) with radius 60, in its
+1344px frame) as fractions of the bag's box.
 """
 import os
 import subprocess

@@ -14,12 +14,41 @@ from .project import sample
 from .raster import rasterize
 
 
+def parts(scene: trimesh.Scene | trimesh.Trimesh, transform: np.ndarray | None = None) -> list[trimesh.Trimesh]:
+    """The scene's meshes in world space, with the normals they carry.
+    scene.dump() would recompute each part's normals from its own faces,
+    which bends them along the cuts between parts (a vertex on the cut
+    between the photo and the atlas only sees half its faces), and the
+    quality check would then see seams a viewer never shades. transform,
+    if given, is applied on top of the scene graph's."""
+    if isinstance(scene, trimesh.Trimesh):
+        return [scene] if transform is None else parts(trimesh.Scene(scene), transform)
+    out = []
+    for node in scene.graph.nodes_geometry:
+        matrix, name = scene.graph[node]
+        if transform is not None:
+            matrix = transform @ matrix
+        g = scene.geometry[name]
+        normals = np.asarray(g.vertex_normals) @ matrix[:3, :3].T
+        normals /= np.linalg.norm(normals, axis=1, keepdims=True)
+        out.append(
+            trimesh.Trimesh(
+                trimesh.transform_points(np.asarray(g.vertices), matrix),
+                np.asarray(g.faces),
+                vertex_normals=normals,
+                visual=g.visual.copy(),
+                process=False,
+            )
+        )
+    return out
+
+
 def shading(scene: trimesh.Scene, camera: Camera, light: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Diffuse shading (n·l, 0–1) from the scene's own vertex normals,
     interpolated across each triangle the way a viewer would, plus the face
     id under each pixel (-1 where empty). Used to spot faceting: smooth
     normals change gradually across triangle edges, flat ones jump."""
-    meshes = scene.dump() if isinstance(scene, trimesh.Scene) else [scene]
+    meshes = parts(scene)
     verts, faces, normals = [], [], []
     offset = 0
     for m in meshes:
@@ -40,7 +69,7 @@ def shading(scene: trimesh.Scene, camera: Camera, light: np.ndarray) -> tuple[np
 
 def render(scene: trimesh.Scene, camera: Camera, background=(255, 255, 255)) -> tuple[Image.Image, np.ndarray]:
     """Returns the rendered RGB image and the coverage mask."""
-    meshes = [g for g in scene.dump()] if isinstance(scene, trimesh.Scene) else [scene]
+    meshes = parts(scene)
     verts, faces, uvs, owner = [], [], [], []
     offset = 0
     for i, m in enumerate(meshes):
