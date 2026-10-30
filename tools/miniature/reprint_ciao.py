@@ -40,8 +40,8 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, ".")
-from miniature.back import INTERIOR_BLUR, blank  # noqa: E402
-from miniature.fill import box_blur, push_pull  # noqa: E402
+
+from miniature.fill import push_pull  # noqa: E402
 from miniature.match import match  # noqa: E402
 from miniature.panel import register  # noqa: E402
 
@@ -179,6 +179,10 @@ l = lum(old)
 ink_l = np.percentile(l[obj], 1)
 printed = obj & (l < 140)
 printed = cv2.dilate(printed.astype(np.uint8), np.ones((5, 5))) > 0
+# The valve's rim isn't ink, but it isn't film either: filled in too, so
+# the film under the front's ring, which the back is made of, is plain.
+for x0, y0, x1, y1 in RASTER:
+    printed[y0:y1, x0:x1] = obj[y0:y1, x0:x1]
 film = push_pull(old[..., :3].astype(np.float64), obj & ~printed)
 coverage = np.clip((lum(film) - l) / np.maximum(lum(film) - ink_l, 1), 0, 1) * obj
 coverage[coverage < 0.15] = 0  # film texture, not print
@@ -264,16 +268,13 @@ logo_up[cy - h // 2 : cy - h // 2 + h, cx - w // 2 : cx - w // 2 + w] = cv2.resi
 # Redraw the enlarged edges sharp, as crisp() does for the front's print.
 t = np.clip((logo_up - 0.3) / 0.4, 0, 1)
 logo_up = t * t * (3 - 2 * t)
-# The pipeline's own blank film (print gone, interior smoothed so no
-# letter-shaped ghosts survive), mirrored like the real back. Its outline
-# band is smoothed too: blank() keeps the side seals' crimp sharp, and seen
-# nearly edge-on as the back turns past the side, those fine ridges alias
-# into streaks.
-plain = blank(old)
-ys, xs = np.nonzero(obj)
-radius = max(1, int(INTERIOR_BLUR * max(np.ptp(xs), np.ptp(ys))))
-plain = np.stack([box_blur(plain[..., c], radius) for c in range(3)], axis=-1)
-back_film = cv2.resize(plain, (S, S), interpolation=cv2.INTER_CUBIC)[:, ::-1]
+# The front's own film, print filled in (the same `film` the front's print
+# is drawn over), mirrored like the real back: so the back carries the
+# same crimped seals, zipper line, folds and sheen the front does, rather
+# than a smoothed blank that reads as a flat white card. The fill under
+# the wordmark is soft, but it sits below the logo where the film is
+# plain anyway.
+back_film = cv2.resize(film.astype(np.float32), (S, S), interpolation=cv2.INTER_CUBIC)[:, ::-1]
 rgb = back_film * (1 - logo_up[..., None]) + ink_colour * logo_up[..., None]
 Image.fromarray(np.dstack([np.clip(rgb, 0, 255), alpha_up[:, ::-1]]).astype(np.uint8), "RGBA").save(
     "work/inputs/ciao-reprint-back.png"

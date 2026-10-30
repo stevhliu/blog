@@ -101,7 +101,9 @@ for the small print, rounded for the wordmark and icon, every corner kept
 for the QR. The small print is taken from the phone photo of the real bag,
 where its letters are 35px tall, rather than from the studio render, where
 they are 12px; words that a bean's shadow runs through in the phone photo
-come from the render instead. The script writes the pipeline's input at 3x
+come from the render instead. The back is the front's own film with the
+print and the valve's rim filled in, mirrored, under Bigface's logo
+artwork, so it carries the same seals, zipper line, folds and sheen. The script writes the pipeline's input at 3x
 the studio photo and a texture master at 6x, framed alike, and the run
 passes the master as `--texture`. The quality gate then reads its expected
 words from the master, where OCR is surer than on the photo.
