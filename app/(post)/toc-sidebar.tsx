@@ -28,6 +28,10 @@ export function TocSidebar() {
   const itemsKeyRef = useRef("");
   const activeIdRef = useRef<string | null>(null);
   const scrolledRef = useRef(false);
+  // The heading a TOC click scrolled to. A short section puts the next
+  // heading above the spy line too, so on arrival the clicked heading wins
+  // until it leaves the viewport.
+  const pinnedRef = useRef<{ id: string; arrived: boolean } | null>(null);
 
   // Collect h2s from the article body after mount
   useEffect(() => {
@@ -82,7 +86,7 @@ export function TocSidebar() {
 
   // Scroll-spy: track which heading is "current" + whether we've passed the article header.
   useEffect(() => {
-    const updateState = () => {
+    const updateState = (scrollEnded = false) => {
       const headerEl = headerElRef.current;
       if (headerEl) {
         const { bottom } = headerEl.getBoundingClientRect();
@@ -111,6 +115,24 @@ export function TocSidebar() {
           }
         }
       }
+
+      // The pin only takes over once the clicked heading reaches the spy
+      // line, so the highlight still walks through sections on the way.
+      // Near the bottom of a post the heading may never reach the line, so
+      // landing anywhere visible when the scroll ends counts as arriving.
+      const pin = pinnedRef.current;
+      const pinnedEl = pin && headingEls.find(item => item.id === pin.id)?.element;
+      if (pin && pinnedEl) {
+        const { top } = pinnedEl.getBoundingClientRect();
+        const reached = top >= 0 && (top <= line || (scrollEnded && top < h));
+        if (reached) {
+          pin.arrived = true;
+          current = pin.id;
+        } else if (pin.arrived) {
+          pinnedRef.current = null;
+        }
+      }
+
       if (current !== activeIdRef.current) {
         activeIdRef.current = current;
         setActiveId(current);
@@ -126,12 +148,16 @@ export function TocSidebar() {
       });
     };
 
+    const onScrollEnd = () => updateState(true);
+
     updateState();
     window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("scrollend", onScrollEnd);
     window.addEventListener("resize", requestUpdate, { passive: true });
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("scrollend", onScrollEnd);
       window.removeEventListener("resize", requestUpdate);
     };
   }, [items]);
@@ -150,7 +176,7 @@ export function TocSidebar() {
       <Link
         href="/"
         aria-label="Back to index"
-        className="inline-flex items-center gap-2 text-[13px] leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-200 max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
+        className="inline-flex items-center gap-2 text-[13px] leading-none tracking-[0.04em] text-[var(--color-dim)] no-underline mb-5 min-h-6 transition-[color] duration-150 ease-[ease] max-md:min-h-11 max-md:items-center [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-body)]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -211,6 +237,7 @@ export function TocSidebar() {
                       e.preventDefault();
                       activeIdRef.current = it.id;
                       setActiveId(it.id);
+                      pinnedRef.current = { id: it.id, arrived: false };
                       document
                         .getElementById(it.id)
                         ?.scrollIntoView({
@@ -220,7 +247,7 @@ export function TocSidebar() {
                       history.replaceState(null, "", `#${it.id}`);
                     }}
                     className={[
-                      "block break-words py-[2px] pr-0.5 no-underline transition-[color] duration-200",
+                      "block origin-left break-words py-[2px] pr-0.5 no-underline transition-[color] duration-150 ease-[ease]",
                       "max-md:min-h-11 max-md:py-2.5 max-md:leading-snug",
                       "md:py-1 md:leading-snug",
                       active ? "text-[var(--color-body)]" : "text-[var(--color-dim)]",

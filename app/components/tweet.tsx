@@ -77,7 +77,7 @@ const tweetUrl = (tweet: AnyTweet) =>
 
 // Same underline treatment as the site's own links (app/components/a.tsx).
 const linkClass =
-  "border-b border-gray-300 transition-[border-color] duration-100 ease-out motion-reduce:transition-none dark:border-gray-500 [@media(hover:hover)_and_(pointer:fine)]:hover:border-gray-600 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:border-white";
+  "border-b border-gray-300 transition-[border-color] duration-100 ease-[ease] motion-reduce:transition-none dark:border-gray-500 [@media(hover:hover)_and_(pointer:fine)]:hover:border-gray-600 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:border-white";
 
 type Segment = { start: number; end: number; node: ReactNode };
 

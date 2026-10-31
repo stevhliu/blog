@@ -20,7 +20,7 @@ export function withHeadingId(children) {
                 [@media(hover:hover)_and_(pointer:fine)]:[span:hover_&]:opacity-100
                 transition-opacity
                 duration-100
-                ease-out
+                ease-[ease]
                 font-normal
                 text-[var(--color-subtext)]
                 [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--color-text)]

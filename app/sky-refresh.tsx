@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import { SEBASTOPOL_LAT, SEBASTOPOL_LON, lightDocument, skyContext } from "./sky-lighting";
 
 // The sun moves a quarter of a degree a minute, about one level in 255 of
-// any colour on the page; globals.css eases each step over eight seconds,
-// so the day passes without a visible step.
+// any colour on the page, too small to see, so each step goes in at once.
+// Only a visible step (dusk, clouds arriving) eases, over eight seconds.
 const REFRESH_MS = 60_000;
 // Cloud cover over Sebastopol from Open-Meteo (no key, no account). Half
 // an hour matches how often the forecast itself updates.

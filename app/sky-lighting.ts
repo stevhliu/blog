@@ -352,6 +352,46 @@ export function pageLight(
  * detail; `--sky-adapted` on the root for CSS). Self-contained. */
 export function applyPageLight(light: PageLight): void {
   const root = document.documentElement;
+  // Ease only changes big enough to see: a light/dark flip, or clouds
+  // rolling in. A minute of sun is about one level in 255 and goes in as
+  // is, because easing it recalculates every element's style on every
+  // frame for eight seconds. The first lighting has nothing to ease from.
+  const channels = (value: string) => (value.match(/[\d.]+/g) || []).map(Number);
+  // "Big enough to see" is judged the way eyes judge it, in OKLab, where
+  // equal distances look equally different: one level in 255 is invisible
+  // on white paper but can show in near-black ink. 0.02 is the
+  // just-noticeable difference CSS Color 4 uses for gamut mapping. A
+  // translucent colour (a rule, a surface tint) shows only as much of its
+  // change as its alpha lets through, plus any change in the alpha itself.
+  const oklab = (c: number[]): number[] => {
+    const [r, g, b] = c.slice(0, 3).map((v) => {
+      const s = v / 255;
+      return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    });
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [
+      0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+      1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+      0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+    ];
+  };
+  const isVisibleChange = (from: number[], to: number[]): boolean => {
+    const a = oklab(from);
+    const b = oklab(to);
+    const distance = Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    const fromAlpha = from.length > 3 ? from[3] : 1;
+    const toAlpha = to.length > 3 ? to[3] : 1;
+    return distance * Math.max(fromAlpha, toAlpha) + Math.abs(fromAlpha - toAlpha) > 0.02;
+  };
+  const lit = root.dataset.night !== undefined;
+  let ease = lit && light.dark !== (root.dataset.night === "true");
+  for (const name in light.vars) {
+    const before = root.style.getPropertyValue(name);
+    if (lit && before && isVisibleChange(channels(before), channels(light.vars[name]))) ease = true;
+  }
+  root.dataset.skyEase = ease ? "true" : "false";
   for (const name in light.vars) root.style.setProperty(name, light.vars[name]);
   root.style.setProperty("--sky-adapted", String(Math.round(light.adapted * 1000) / 1000));
   root.style.colorScheme = light.dark ? "dark" : "light";

@@ -20,7 +20,7 @@ export function SiteShell({
   return (
     // No background of its own: the body carries the paper and the sky's
     // wash down from the top (globals.css).
-    <div className={variant === "chrome" ? "min-h-screen overflow-clip" : "min-h-screen"}>
+    <div className={variant === "chrome" ? "min-h-[100svh] overflow-clip" : "min-h-[100svh]"}>
       <a
         href="#main"
         className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:z-50 focus-visible:p-2 focus-visible:bg-[var(--color-bg)] focus-visible:text-[var(--color-text)]"

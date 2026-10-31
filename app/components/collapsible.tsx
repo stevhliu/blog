@@ -26,7 +26,7 @@ export function Collapsible({
       <button
         type="button"
         onClick={toggleOpen}
-        className="w-full rounded-t-lg px-4 py-2 text-left font-medium transition-[color,background-color,transform] duration-150 ease-[var(--ease-out)] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] active:scale-[0.97] motion-reduce:transition-[color,background-color] motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)]"
+        className="w-full rounded-t-lg px-4 py-2 text-left font-medium [transition:color_150ms_ease,background-color_150ms_ease,transform_160ms_var(--ease-out)] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--color-surface)] active:scale-[0.97] motion-reduce:[transition:color_150ms_ease,background-color_150ms_ease] motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)]"
         aria-expanded={isOpen}
         aria-controls={contentId}
       >
@@ -34,7 +34,7 @@ export function Collapsible({
           {trigger}
           <ChevronRight
             aria-hidden="true"
-            className={`w-4 h-4 shrink-0 text-[var(--color-subtext)] transition-transform duration-150 ease-[var(--ease-out)] motion-reduce:transition-none ${
+            className={`w-4 h-4 shrink-0 text-[var(--color-subtext)] transition-transform duration-150 ease-[var(--ease-in-out)] motion-reduce:transition-none ${
               isOpen ? "rotate-90" : ""
             }`}
           />
@@ -50,7 +50,7 @@ export function Collapsible({
       >
         <div className="overflow-hidden">
           <div
-            className={`p-4 rounded-b-lg transition-opacity duration-150 ease-[var(--ease-out)] motion-reduce:transition-none ${
+            className={`p-4 rounded-b-lg transition-opacity duration-150 ease-[var(--ease-out)] ${
               isOpen ? "opacity-100" : "opacity-0"
             }`}
           >

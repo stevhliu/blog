@@ -6,7 +6,7 @@ export function Posts({ posts, page }: { posts: Post[]; page?: string }) {
   const grouped = groupByYear(posts);
 
   return (
-    <section className="mt-8 md:mt-12 flex flex-col min-h-[calc(100vh-20rem)]">
+    <section className="mt-8 md:mt-12 flex flex-col min-h-[calc(100svh-20rem)]">
       <PostIndex grouped={grouped} page={page} />
     </section>
   );

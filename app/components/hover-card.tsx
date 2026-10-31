@@ -179,9 +179,12 @@ function HoverContent({
         top: position.top,
         left: position.left,
         transformOrigin: transformOriginForSide(side),
-        transition: prefersReducedMotion || isInstant
+        // Reduced motion keeps the fade and drops only the scale.
+        transition: isInstant
           ? "opacity 0ms, transform 0ms"
-          : "opacity 150ms var(--ease-out), transform 150ms var(--ease-out)",
+          : prefersReducedMotion
+            ? "opacity 150ms var(--ease-out), transform 0ms"
+            : "opacity 150ms var(--ease-out), transform 150ms var(--ease-out)",
         opacity: isOpen ? 1 : 0,
         transform: isOpen ? "scale(1)" : "scale(0.95)",
         pointerEvents: isOpen ? "auto" : "none",
@@ -213,7 +216,11 @@ export function HoverCard({
   const { setTimeout, clearTimeout } = useTimeout();
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const updatePosition = useCallback(() => {
+  // `follow` is the per-frame scroll path: it moves the card through its
+  // style directly, so following the trigger doesn't re-render every frame.
+  // React only diffs against the last rendered position, so it won't undo
+  // the direct write; the next placement writes both anyway.
+  const updatePosition = useCallback((follow = false) => {
     if (!triggerRef.current || !contentRef.current) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
@@ -229,11 +236,13 @@ export function HoverCard({
     };
 
     const finalPosition = constrainToViewport(combinedPosition, contentRect);
-    setPosition(finalPosition);
+    contentRef.current.style.top = `${finalPosition.top}px`;
+    contentRef.current.style.left = `${finalPosition.left}px`;
+    if (!follow) setPosition(finalPosition);
   }, [side, align]);
 
   const openTooltip = useCallback((source: "pointer" | "keyboard") => {
-    const instant = prefersReducedMotion || source === "keyboard" || shouldOpenInstantly();
+    const instant = source === "keyboard" || shouldOpenInstantly();
     clearTimeout();
     setIsInstant(instant);
     setIsMounted(true);
@@ -241,7 +250,7 @@ export function HoverCard({
       keepTooltipsWarm();
       setIsOpen(true);
       updatePosition();
-    }, instant ? 0 : delay);
+    }, instant || prefersReducedMotion ? 0 : delay);
   }, [clearTimeout, delay, prefersReducedMotion, setTimeout, updatePosition]);
 
   const handleMouseEnter = useCallback(() => {
@@ -265,6 +274,8 @@ export function HoverCard({
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLSpanElement>) => {
     if (event.key !== "Escape") return;
     clearTimeout();
+    // A keyboard dismissal closes at once, even if the pointer opened it.
+    setIsInstant(true);
     setIsOpen(false);
   }, [clearTimeout]);
 
@@ -280,7 +291,7 @@ export function HoverCard({
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        updatePosition();
+        updatePosition(true);
       });
     };
     window.addEventListener("scroll", schedule, { capture: true, passive: true });
@@ -297,7 +308,7 @@ export function HoverCard({
       ref={triggerRef}
       tabIndex={0}
       aria-describedby={isOpen ? contentId : undefined}
-      className={`inline-block rounded-sm transition-[opacity,transform] duration-150 ease-[var(--ease-out)] active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] ${className}`}
+      className={`inline-block rounded-sm [touch-action:manipulation] transition-opacity duration-150 ease-[var(--ease-out)] active:opacity-90 motion-reduce:transition-none motion-reduce:active:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}

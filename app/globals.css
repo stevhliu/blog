@@ -141,6 +141,14 @@
   [role="button"] {
     touch-action: manipulation;
   }
+
+  /* A long press on a button selects its label on iOS. Links stay
+     selectable, since in a post they are part of the prose. */
+  button,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
 /* Add generous padding inside all highlighted code blocks. The scroll
@@ -202,7 +210,9 @@ pre.highlights {
    so they animate: the transition lives on the root alone, every var()
    below follows it frame by frame, and nothing else on the page (hover
    colours, focus rings) is slowed. A minute's step of sun is about one
-   level in 255, so eight seconds of easing reads as a sky changing. */
+   level in 255, which nobody sees, so it goes in at once: easing it would
+   recalculate every element's style on every frame. applyPageLight sets
+   data-sky-ease only for a step big enough to see, and that eases. */
 @property --sky-wash {
   syntax: "<color>";
   inherits: true;
@@ -278,6 +288,8 @@ pre.highlights {
    light to dark the ink is grey-on-grey for a moment, not for seconds. */
 :root {
   --ink-curve: cubic-bezier(0.9, 0, 0.1, 1);
+}
+:root[data-sky-ease="true"] {
   transition:
     --sky-wash 8s ease,
     --color-page-chrome 8s ease,
@@ -360,7 +372,9 @@ button:focus-visible,
   align-items: baseline;
   min-height: 2.75rem;
   padding-block: 6px;
-  transition: background-color 120ms var(--ease-out);
+  /* The press scale shrinks toward the left edge, so the title stays put
+     instead of sliding right by half the shrink. */
+  transform-origin: left center;
 }
 
 @media (min-width: 768px) {
@@ -467,14 +481,6 @@ li a,
 @media (hover: hover) and (pointer: fine) {
   .nav-link:hover {
     opacity: 0.8;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .post-title,
-  .archive-date,
-  .archive-views {
-    transition: none;
   }
 }
 

@@ -47,7 +47,7 @@ function spotlightCss(root: string, rules: { chip: string; keep: string[] }[]) {
         `.${root}:has(.${r.chip}:hover) .cvd-step:not(.${r.keep.join("):not(.")}) { opacity: 0.18; }`,
     )
     .join("\n");
-  return `.cvd-step { transition: opacity 0.3s ease; }\n@media (hover: hover) and (pointer: fine) {\n${dim}\n}`;
+  return `.cvd-step { transition: opacity 150ms ease; }\n@media (hover: hover) and (pointer: fine) {\n${dim}\n}`;
 }
 
 function ExpertStack({ x, w }: { x: number; w: number }) {

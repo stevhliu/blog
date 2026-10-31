@@ -70,7 +70,7 @@ export function Snippet({
   return (
     <div className="my-6">
       <div
-        className="overflow-auto rounded-lg text-xs md:text-sm"
+        className="overflow-auto overscroll-x-contain rounded-lg text-xs md:text-sm"
         style={{ maxHeight, fontFeatureSettings: '"liga" 0' }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
