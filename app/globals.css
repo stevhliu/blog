@@ -488,7 +488,9 @@ li a,
    The coffee pouch in <model-viewer>. The element has no intrinsic size,
    and its own :host style fixes the height at 150px, which would win over
    aspect-ratio, so release it. The background stays transparent so the
-   page shows through, and grab cursors say it can be turned. */
+   page shows through, and grab cursors say it can be turned. The poster
+   already stands in while the model loads, so model-viewer's own loading
+   bar (a grey strip across the top that reads as a scrollbar) is hidden. */
 .drink-model {
   display: block;
   width: 100%;
@@ -496,6 +498,7 @@ li a,
   aspect-ratio: 13 / 11;
   background-color: transparent;
   --poster-color: transparent;
+  --progress-bar-height: 0px;
   cursor: grab;
 }
 
