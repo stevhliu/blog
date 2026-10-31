@@ -81,9 +81,21 @@ export function moonPosition(date: Date, latitude: number, longitude: number): M
 }
 
 /** Colour tokens as CSS values, keyed by variable name; whether the page
- * counts as dark; and how bright it is, 0 (night) to 1 (full day), which
- * anything else lit by the sky (the pouch) follows. */
-export type PageLight = { vars: Record<string, string>; dark: boolean; adapted: number };
+ * counts as dark; how bright it is, 0 (night) to 1 (full day), which
+ * anything else lit by the sky (the pouch) follows; the cloud cover it
+ * was lit under, 0 to 1, which the stars hide behind; the sun's
+ * altitude in degrees, with the lowest it reaches tonight, which is the
+ * stars' timetable; and how much moonlight there is, 0 to 1, which
+ * washes the faint stars out. */
+export type PageLight = {
+  vars: Record<string, string>;
+  dark: boolean;
+  adapted: number;
+  clouds: number;
+  altitude: number;
+  lowest: number;
+  moon: number;
+};
 
 /**
  * The sky for this sun and moon under this much cloud, and the inks
@@ -344,12 +356,17 @@ export function pageLight(
     "--color-code-bg": dark ? css(text, 0.08) : css(paper),
     "--color-code-border": css(text, dark ? 0.28 : 0.14),
   };
-  return { vars, dark, adapted };
+  // Moonlight for the stars: the lit fraction by how high the moon stands,
+  // so a full moon overhead is 1 and a crescent on the horizon is nothing.
+  const moonUp = moon.fraction * Math.max(Math.sin(moon.altitude * rad), 0);
+  return { vars, dark, adapted, clouds, altitude: sun.altitude, lowest: sun.lowest, moon: moonUp };
 }
 
 /** Write the lit page into the document, and tell anything else lit by
  * the sky (a "sky-light" event on the document, with the light as its
- * detail; `--sky-adapted` on the root for CSS). Self-contained. */
+ * detail; `--sky-adapted`, `--sky-clouds`, `--sky-moon`, `--sky-sun` and
+ * `--sky-sun-lowest` on the root for CSS, which is how the stars
+ * (stars.tsx, globals.css) know to come out). Self-contained. */
 export function applyPageLight(light: PageLight): void {
   const root = document.documentElement;
   // Ease only changes big enough to see: a light/dark flip, or clouds
@@ -394,6 +411,10 @@ export function applyPageLight(light: PageLight): void {
   root.dataset.skyEase = ease ? "true" : "false";
   for (const name in light.vars) root.style.setProperty(name, light.vars[name]);
   root.style.setProperty("--sky-adapted", String(Math.round(light.adapted * 1000) / 1000));
+  root.style.setProperty("--sky-clouds", String(Math.round(light.clouds * 100) / 100));
+  root.style.setProperty("--sky-sun", String(Math.round(light.altitude * 100) / 100));
+  root.style.setProperty("--sky-sun-lowest", String(Math.round(light.lowest * 100) / 100));
+  root.style.setProperty("--sky-moon", String(Math.round(light.moon * 100) / 100));
   root.style.colorScheme = light.dark ? "dark" : "light";
   root.dataset.night = light.dark ? "true" : "false";
   const metas = document.querySelectorAll('meta[name="theme-color"]');
@@ -408,23 +429,34 @@ export type SkyContext = {
   /** Cloud cover 0..1: `?clouds=` if given, else the last fetched value
    * (sky-refresh.tsx keeps it in sessionStorage for the next page), else 0. */
   clouds: number;
+  /** Whether that cover is settled: given, remembered, or the forecast has
+   * been tried and failed (sky-refresh.tsx notes that too). On a first
+   * visit it is false until the forecast lands, and the stars wait, so
+   * an overcast night never shows them for half a second and then takes
+   * them away. A pinned hour counts as settled, since it is never refreshed. */
+  cloudsKnown: boolean;
 };
 
 /** What the page is lit for; self-contained. */
 export function skyContext(): SkyContext {
-  const out: SkyContext = { at: null, clouds: 0 };
+  const out: SkyContext = { at: null, clouds: 0, cloudsKnown: false };
   try {
     const params = new URLSearchParams(location.search);
     const at = params.get("sky");
     if (at && !isNaN(new Date(at).getTime())) out.at = new Date(at);
     const clouds = params.get("clouds");
-    if (clouds !== null && !isNaN(Number(clouds))) out.clouds = Math.min(Math.max(Number(clouds), 0), 1);
-    else {
+    if (clouds !== null && !isNaN(Number(clouds))) {
+      out.clouds = Math.min(Math.max(Number(clouds), 0), 1);
+      out.cloudsKnown = true;
+    } else {
       const kept = JSON.parse(sessionStorage.getItem("sky-clouds") || "null");
       if (kept && Date.now() - kept.at < 3_600_000) out.clouds = kept.cover;
+      out.cloudsKnown = !!kept || sessionStorage.getItem("sky-clouds-tried") === "1";
     }
+    if (out.at) out.cloudsKnown = true;
   } catch {
     // no location or storage (tests, private windows): clear sky, now
+    out.cloudsKnown = true;
   }
   return out;
 }
@@ -435,6 +467,7 @@ export function lightDocument(latitude: number, longitude: number): void {
   const context = skyContext();
   const at = context.at || new Date();
   applyPageLight(pageLight(sunPosition(at, latitude, longitude), moonPosition(at, latitude, longitude), context.clouds));
+  document.documentElement.style.setProperty("--sky-clouds-known", context.cloudsKnown ? "1" : "0");
 }
 
 /** The script that lights the page before the stylesheet's first paint,

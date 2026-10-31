@@ -5,6 +5,7 @@ import { Analytics } from "./analytics";
 import { doge } from "./doge";
 import { pageLightScript } from "./sky-lighting";
 import { SkyLighting } from "./sky-refresh";
+import { Stars } from "./stars";
 
 // A short hash of the lighting script, for its URL.
 const skyLightVersion = (() => {
@@ -87,6 +88,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-[100svh] bg-[var(--color-bg)] text-[var(--color-text)]">
         <SkyLighting />
+        <Stars />
         {children}
         <Script id="doge-console" strategy="lazyOnload">
           {`(${doge.toString()})();`}

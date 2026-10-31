@@ -35,10 +35,23 @@ export function SkyLighting() {
           refresh();
         }
       } catch {
-        // offline, or the service is down: the sky stays clear
+        // offline, or the service is down: the sky stays clear, and the
+        // stars stop waiting for it
+        settle();
       }
     };
+    // The stars hold until the cover is known (sky-lighting.ts, skyContext),
+    // but not for long: two seconds, and a slow forecast is taken as clear.
+    const settle = () => {
+      try {
+        if (!sessionStorage.getItem("sky-clouds")) sessionStorage.setItem("sky-clouds-tried", "1");
+      } catch {
+        // no storage: the context already counts the cover as known
+      }
+      refresh();
+    };
     weather();
+    const hold = window.setTimeout(settle, 2_000);
     const timer = window.setInterval(refresh, REFRESH_MS);
     const forecast = window.setInterval(weather, WEATHER_MS);
     // A tab left open overnight and brought back in the morning shouldn't
@@ -51,6 +64,7 @@ export function SkyLighting() {
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
+      window.clearTimeout(hold);
       window.clearInterval(timer);
       window.clearInterval(forecast);
       document.removeEventListener("visibilitychange", onVisible);

@@ -288,23 +288,156 @@ pre.highlights {
    light to dark the ink is grey-on-grey for a moment, not for seconds. */
 :root {
   --ink-curve: cubic-bezier(0.9, 0, 0.1, 1);
+  /* How long a visible step of the sky takes, here and for the stars. */
+  --sky-ease: 8s;
 }
 :root[data-sky-ease="true"] {
   transition:
-    --sky-wash 8s ease,
-    --color-page-chrome 8s ease,
-    --color-bg 8s ease,
-    --color-surface 8s ease,
-    --color-code-bg 8s ease,
-    --color-text 8s var(--ink-curve),
-    --color-body 8s var(--ink-curve),
-    --color-subtext 8s var(--ink-curve),
-    --color-dim 8s var(--ink-curve),
-    --color-blue 8s var(--ink-curve),
-    --color-accent 8s var(--ink-curve),
-    --color-rule 8s var(--ink-curve),
-    --color-rule-soft 8s var(--ink-curve),
-    --color-code-border 8s var(--ink-curve);
+    --sky-wash var(--sky-ease) ease,
+    --color-page-chrome var(--sky-ease) ease,
+    --color-bg var(--sky-ease) ease,
+    --color-surface var(--sky-ease) ease,
+    --color-code-bg var(--sky-ease) ease,
+    --color-text var(--sky-ease) var(--ink-curve),
+    --color-body var(--sky-ease) var(--ink-curve),
+    --color-subtext var(--sky-ease) var(--ink-curve),
+    --color-dim var(--sky-ease) var(--ink-curve),
+    --color-blue var(--sky-ease) var(--ink-curve),
+    --color-accent var(--sky-ease) var(--ink-curve),
+    --color-rule var(--sky-ease) var(--ink-curve),
+    --color-rule-soft var(--sky-ease) var(--ink-curve),
+    --color-code-border var(--sky-ease) var(--ink-curve);
+}
+
+/* ─── Stars ──────────────────────────────────────────────
+   The star field (stars.tsx) sits over the top of the document, the same
+   45svh the sky's wash runs down, and scrolls away with it. It is absolute
+   rather than fixed on purpose: the sky is the top of the page, not a
+   layer that follows the reader down a long post. Nothing here knows the
+   hour; the lighting script leaves the sun's altitude on the root as
+   --sky-sun (with tonight's lowest as --sky-sun-lowest), the cloud cover
+   as --sky-clouds and the moonlight as --sky-moon, and each class of star
+   decides from those how far out it is. Without the script --sky-sun is
+   unset and falls back to noon, so a no-JS reader never sees stars on
+   white paper. */
+.sky-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 45svh;
+  pointer-events: none;
+  z-index: 0;
+  /* On a first visit the cover isn't known until the forecast lands, and
+     the field waits for it (sky-refresh.tsx settles it within two seconds
+     either way), then eases in once. Otherwise an overcast night would
+     show the stars for half a second and take them away. */
+  opacity: var(--sky-clouds-known, 1);
+  transition: opacity var(--sky-ease) ease;
+  /* The timetable, in the sun's altitude over Sebastopol (degrees; 90,
+     high noon, without the script). After sunset there the sun sinks about
+     0.18° a minute, so minutes after sunset convert to degrees below the
+     horizon. The schedule:
+       20 to 30 min   (-3.6° to -5.4°)   the brightest stars show
+       30 to 45 min   (-5.4° to -8.1°)   constellations and ordinary stars
+       45 to 90 min   (-8.1° to -16.2°)  the faint dust fills in
+       midnight to 4  (deep night)        darkest and steadiest
+     Dawn runs the same table backwards on its own, since it is the same
+     altitudes in the other order. */
+  --sun: var(--sky-sun, 90);
+  /* Cloud takes a share of every class. Moonlight takes a share of the
+     fainter ones: a full moon overhead (--sky-moon 1) hides most of the
+     dust and dims the ordinary stars a little, and leaves the bright ones. */
+  --cover: calc(1 - var(--sky-clouds, 0));
+  --moon: var(--sky-moon, 0);
+  --stars-bright: calc(clamp(0, calc((-3.6 - var(--sun)) / 1.8), 1) * var(--cover));
+  --stars-mid: calc(clamp(0, calc((-5.4 - var(--sun)) / 2.7), 1) * var(--cover) * (1 - 0.2 * var(--moon)));
+  /* Deep night is the darkest stretch of the sun's arc under the horizon:
+     how far it is from astronomical dusk (-18°) to tonight's lowest point,
+     full from a little past halfway. In midwinter that is about 10:40pm
+     to 3:40am; in midsummer, when the sun barely clears -28°, a tighter
+     11:40pm to 2:40am. The faint stars only come all the way out then,
+     and every star twinkles less, the way a settled night air lets it. */
+  --sky-arc: calc((-18 - var(--sun)) / (-18 - min(-18.01, var(--sky-sun-lowest, -60))));
+  --sky-deep: clamp(0, calc((var(--sky-arc) - 0.45) / 0.2), 1);
+  --stars-faint: calc(
+    clamp(0, calc((-8.1 - var(--sun)) / 8.1), 1) * (0.7 + 0.3 * var(--sky-deep)) * var(--cover) * (1 - 0.6 * var(--moon))
+  );
+}
+/* Each layer is one compositor layer (will-change) whose opacity is the
+   twinkle; its own duration and negative delay are set inline by
+   stars.tsx, so no two layers breathe in step. How deep a breath goes is
+   the layer's --twinkle-base, lifted toward 1 in deep night. */
+.sky-stars-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: rgb(255 250 240);
+  will-change: opacity;
+  --twinkle-low: calc(var(--twinkle-base, 0.8) + (1 - var(--twinkle-base, 0.8)) * 0.7 * var(--sky-deep));
+}
+/* A star's own opacity is its class's share, times its fade toward the
+   horizon (--h, inline, for the low ones). It changes once a minute, and
+   eases only with a step big enough to see, like the page's own colours. */
+.sky-stars circle {
+  fill-opacity: calc(var(--stars-faint) * var(--h, 1));
+}
+.sky-stars circle.mid {
+  fill-opacity: calc(var(--stars-mid) * var(--h, 1));
+}
+.sky-stars circle.bright {
+  fill-opacity: calc(var(--stars-bright) * var(--h, 1));
+}
+:root[data-sky-ease="true"] .sky-stars circle {
+  transition: fill-opacity var(--sky-ease) ease;
+}
+/* The shooting star: a short streak, bright at its head, that falls down
+   and to the left once a visit at most (stars-effects.tsx places it and
+   sets it off). Transform and opacity only, so it too stays off the paint. */
+.sky-meteor {
+  position: absolute;
+  left: var(--mx, 70%);
+  top: var(--my, 20%);
+  width: 110px;
+  height: 1.5px;
+  border-radius: 1px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgb(255 250 240));
+  transform-origin: 100% 50%;
+  transform: rotate(153deg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sky-stars-layer {
+    animation: star-twinkle 6s ease-in-out infinite;
+  }
+  .sky-stars-layer.glint {
+    animation-name: star-glint;
+  }
+  /* Scrolled past, or by day when every star is at zero, the layers rest. */
+  .sky-stars.is-offscreen .sky-stars-layer,
+  .sky-stars.is-day .sky-stars-layer {
+    animation-play-state: paused;
+    will-change: auto;
+  }
+  .sky-meteor.is-live {
+    animation: sky-meteor 1.1s linear forwards;
+  }
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: var(--twinkle-low, 0.8); }
+}
+/* A glint holds steady and dips quickly, the way a star flickers rather
+   than breathes. */
+@keyframes star-glint {
+  0%, 40%, 60%, 100% { opacity: 1; }
+  50% { opacity: var(--twinkle-low, 0.8); }
+}
+@keyframes sky-meteor {
+  0% { opacity: 0; transform: rotate(153deg) translateX(0); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(153deg) translateX(240px); }
 }
 
 .subtext {
