@@ -1,158 +1,43 @@
-import dynamic from "next/dynamic";
-
-const CausalDiagram = dynamic(
-  () => import("./app/components/attention/causal-diagram").then(mod => mod.CausalDiagram),
-  { ssr: true }
-);
-const MHADiagram = dynamic(
-  () => import("./app/components/attention/mha-diagram").then(mod => mod.MHADiagram),
-  { ssr: true }
-);
-const MQADiagram = dynamic(
-  () => import("./app/components/attention/mqa-diagram").then(mod => mod.MQADiagram),
-  { ssr: true }
-);
-const GQADiagram = dynamic(
-  () => import("./app/components/attention/gqa-diagram").then(mod => mod.GQADiagram),
-  { ssr: true }
-);
-const SelfAttentionDiagram = dynamic(
-  () => import("./app/components/attention/self-attention-diagram").then(mod => mod.SelfAttentionDiagram),
-  { ssr: true }
-);
-const FlashAttentionDiagram = dynamic(
-  () => import("./app/components/attention/flash-attention-diagram").then(mod => mod.FlashAttentionDiagram),
-  { ssr: true }
-);
-const FAParallelismDiagram = dynamic(
-  () => import("./app/components/attention/fa-parallelism-diagram").then(mod => mod.FAParallelismDiagram),
-  { ssr: true }
-);
-const FAWarpDiagram = dynamic(
-  () => import("./app/components/attention/fa-warp-diagram").then(mod => mod.FAWarpDiagram),
-  { ssr: true }
-);
-const FA3PipelineDiagram = dynamic(
-  () => import("./app/components/attention/fa3-pipeline-diagram").then(mod => mod.FA3PipelineDiagram),
-  { ssr: true }
-);
-const FA3WGMMADiagram = dynamic(
-  () => import("./app/components/attention/fa3-wgmma-diagram").then(mod => mod.FA3WGMMADiagram),
-  { ssr: true }
-);
-const FP8OutlierDiagram = dynamic(
-  () => import("./app/components/attention/fp8-outlier-diagram").then(mod => mod.FP8OutlierDiagram),
-  { ssr: true }
-);
-const IncoherentDiagram = dynamic(
-  () => import("./app/components/attention/incoherent-diagram").then(mod => mod.IncoherentDiagram),
-  { ssr: true }
-);
-const MLADiagram = dynamic(
-  () => import("./app/components/attention/mla-diagram").then(mod => mod.MLADiagram),
-  { ssr: true }
-);
-const MLAAbsorbDiagram = dynamic(
-  () => import("./app/components/attention/mla-wcombined-diagram").then(mod => mod.MLAAbsorbDiagram),
-  { ssr: true }
-);
-const MLARoPEDiagram = dynamic(
-  () => import("./app/components/attention/mla-rope-diagram").then(mod => mod.MLARoPEDiagram),
-  { ssr: true }
-);
-const MLADecoupleDiagram = dynamic(
-  () => import("./app/components/attention/mla-decouple-diagram").then(mod => mod.MLADecoupleDiagram),
-  { ssr: true }
-);
-
-const AsymmetricQuantizationDiagram = dynamic(
-  () => import("./app/components/quantization/asymmetric-quantization-diagram").then(mod => mod.AsymmetricQuantizationDiagram),
-  { ssr: true }
-);
-const TensorParallelismDiagram = dynamic(
-  () => import("./app/components/quantization/tensor-parallelism-diagram").then(mod => mod.TensorParallelismDiagram),
-  { ssr: true }
-);
-const DeviceMapDiagram = dynamic(
-  () => import("./app/components/quantization/device-map-diagram").then(mod => mod.DeviceMapDiagram),
-  { ssr: true }
-);
-const BMIDiagram = dynamic(
-  () => import("./app/components/quantization/bmi-diagram").then(mod => mod.BMIDiagram),
-  { ssr: true }
-);
-const FP32Diagram = dynamic(
-  () => import("./app/components/quantization/fp32-diagram").then(mod => mod.FP32Diagram),
-  { ssr: true }
-);
-const FP16Diagram = dynamic(
-  () => import("./app/components/quantization/fp16-diagram").then(mod => mod.FP16Diagram),
-  { ssr: true }
-);
-const Int8Diagram = dynamic(
-  () => import("./app/components/quantization/int8-diagram").then(mod => mod.Int8Diagram),
-  { ssr: true }
-);
-const KVCacheDiagram = dynamic(
-  () => import("./app/components/quantization/kv-cache-diagram").then(mod => mod.KVCacheDiagram),
-  { ssr: true }
-);
-const GilTimelineDiagram = dynamic(
-  () => import("./app/components/transformers/gil-timeline-diagram").then(mod => mod.GilTimelineDiagram),
-  { ssr: true }
-);
-const MmapLazyReadDiagram = dynamic(
-  () => import("./app/components/transformers/mmap-lazy-read-diagram").then(mod => mod.MmapLazyReadDiagram),
-  { ssr: true }
-);
-const CudaAllocatorDiagram = dynamic(
-  () => import("./app/components/transformers/cuda-allocator-diagram").then(mod => mod.CudaAllocatorDiagram),
-  { ssr: true }
-);
-const MetaDeviceDiagram = dynamic(
-  () => import("./app/components/transformers/meta-device-diagram").then(mod => mod.MetaDeviceDiagram),
-  { ssr: true }
-);
-const SafetensorSliceDiagram = dynamic(
-  () => import("./app/components/transformers/safetensor-slice-diagram").then(mod => mod.SafetensorSliceDiagram),
-  { ssr: true }
-);
-const ConversionBucketsDiagram = dynamic(
-  () => import("./app/components/transformers/conversion-buckets-diagram").then(mod => mod.ConversionBucketsDiagram),
-  { ssr: true }
-);
-const AsyncVsSyncDiagram = dynamic(
-  () => import("./app/components/transformers/async-vs-sync-diagram").then(mod => mod.AsyncVsSyncDiagram),
-  { ssr: true }
-);
-const DiskOffloadDiagram = dynamic(
-  () => import("./app/components/transformers/disk-offload-diagram").then(mod => mod.DiskOffloadDiagram),
-  { ssr: true }
-);
-const WorkersVsLoadTimeChart = dynamic(
-  () => import("./app/components/transformers/workers-vs-load-time-chart").then(mod => mod.WorkersVsLoadTimeChart),
-  { ssr: true }
-);
-const MoEModelsOverTimeChart = dynamic(
-  () => import("./app/components/transformers/moe-models-over-time-chart").then(mod => mod.MoEModelsOverTimeChart),
-  { ssr: true }
-);
-const MixtralConversionDiagram = dynamic(
-  () => import("./app/components/transformers/conversion-pipeline-diagrams").then(mod => mod.MixtralConversionDiagram),
-  { ssr: true }
-);
-const Qwen2ConversionDiagram = dynamic(
-  () => import("./app/components/transformers/conversion-pipeline-diagrams").then(mod => mod.Qwen2ConversionDiagram),
-  { ssr: true }
-);
-const Qwen3VLConversionDiagram = dynamic(
-  () => import("./app/components/transformers/conversion-pipeline-diagrams").then(mod => mod.Qwen3VLConversionDiagram),
-  { ssr: true }
-);
-const DeepSeekV3ConversionDiagram = dynamic(
-  () => import("./app/components/transformers/conversion-pipeline-diagrams").then(mod => mod.DeepSeekV3ConversionDiagram),
-  { ssr: true }
-);
+import { CausalDiagram } from "./app/components/attention/causal-diagram";
+import { MHADiagram } from "./app/components/attention/mha-diagram";
+import { MQADiagram } from "./app/components/attention/mqa-diagram";
+import { GQADiagram } from "./app/components/attention/gqa-diagram";
+import { SelfAttentionDiagram } from "./app/components/attention/self-attention-diagram";
+import { FlashAttentionDiagram } from "./app/components/attention/flash-attention-diagram";
+import { FAParallelismDiagram } from "./app/components/attention/fa-parallelism-diagram";
+import { FAWarpDiagram } from "./app/components/attention/fa-warp-diagram";
+import { FA3PipelineDiagram } from "./app/components/attention/fa3-pipeline-diagram";
+import { FA3WGMMADiagram } from "./app/components/attention/fa3-wgmma-diagram";
+import { FP8OutlierDiagram } from "./app/components/attention/fp8-outlier-diagram";
+import { IncoherentDiagram } from "./app/components/attention/incoherent-diagram";
+import { MLADiagram } from "./app/components/attention/mla-diagram";
+import { MLAAbsorbDiagram } from "./app/components/attention/mla-wcombined-diagram";
+import { MLARoPEDiagram } from "./app/components/attention/mla-rope-diagram";
+import { MLADecoupleDiagram } from "./app/components/attention/mla-decouple-diagram";
+import { AsymmetricQuantizationDiagram } from "./app/components/quantization/asymmetric-quantization-diagram";
+import { TensorParallelismDiagram } from "./app/components/quantization/tensor-parallelism-diagram";
+import { DeviceMapDiagram } from "./app/components/quantization/device-map-diagram";
+import { BMIDiagram } from "./app/components/quantization/bmi-diagram";
+import { FP32Diagram } from "./app/components/quantization/fp32-diagram";
+import { FP16Diagram } from "./app/components/quantization/fp16-diagram";
+import { Int8Diagram } from "./app/components/quantization/int8-diagram";
+import { KVCacheDiagram } from "./app/components/quantization/kv-cache-diagram";
+import { GilTimelineDiagram } from "./app/components/transformers/gil-timeline-diagram";
+import { MmapLazyReadDiagram } from "./app/components/transformers/mmap-lazy-read-diagram";
+import { CudaAllocatorDiagram } from "./app/components/transformers/cuda-allocator-diagram";
+import { MetaDeviceDiagram } from "./app/components/transformers/meta-device-diagram";
+import { SafetensorSliceDiagram } from "./app/components/transformers/safetensor-slice-diagram";
+import { ConversionBucketsDiagram } from "./app/components/transformers/conversion-buckets-diagram";
+import { AsyncVsSyncDiagram } from "./app/components/transformers/async-vs-sync-diagram";
+import { DiskOffloadDiagram } from "./app/components/transformers/disk-offload-diagram";
+import { WorkersVsLoadTimeChart } from "./app/components/transformers/workers-vs-load-time-chart";
+import { MoEModelsOverTimeChart } from "./app/components/transformers/moe-models-over-time-chart";
+import {
+  MixtralConversionDiagram,
+  Qwen2ConversionDiagram,
+  Qwen3VLConversionDiagram,
+  DeepSeekV3ConversionDiagram,
+} from "./app/components/transformers/conversion-pipeline-diagrams";
 
 export const diagramComponents = {
   CausalDiagram,

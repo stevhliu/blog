@@ -48,7 +48,6 @@ export function EnvDatetime() {
   return (
     <span
       aria-live="polite"
-      suppressHydrationWarning
       data-revealed={revealed}
       className="inline-block opacity-0 transition-opacity duration-200 ease-[var(--ease-out)] data-[revealed=true]:opacity-100"
     >

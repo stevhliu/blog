@@ -7,7 +7,7 @@ import { pierreLight, pierreDark } from "@pierre/highlights/themes";
 // Pierre themes (https://diffs.com/theme), highlighted with Highlights
 // (https://diffs.com/docs#highlights). Dual-theme output emits
 // --hls-light / --hls-dark CSS vars; globals.css switches between them
-// via prefers-color-scheme.
+// on the sky's data-night, with prefers-color-scheme as the fallback.
 const THEMES = { light: pierreLight, dark: pierreDark };
 
 const decoder = new TextDecoder();

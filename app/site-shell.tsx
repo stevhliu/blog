@@ -44,6 +44,9 @@ export function SiteShell({
             : "mx-auto max-w-6xl px-6 pt-5 md:px-10"
         }`}
       >
+        {/* Fades text into the paper as it scrolls under the top of the
+            window (globals.css, Top fade). */}
+        <div aria-hidden="true" className="top-fade" />
         {variant === "chrome" ? (
           <div className="relative min-[1120px]:mx-auto min-[1120px]:max-w-[978px]">
             <div className="max-w-[550px]">

@@ -167,7 +167,8 @@ export function TocSidebar() {
       id="post-sidebar-nav"
       className={[
         "hidden w-full min-w-0 [touch-action:manipulation] md:block",
-        "md:sticky md:self-start",
+        // z-2 keeps it above the top fade (globals.css).
+        "md:sticky md:z-[2] md:self-start",
         "md:top-8 md:-ml-9",
         "lg:top-10 lg:-ml-9",
         "xl:top-12 xl:-ml-9 2xl:-ml-9",

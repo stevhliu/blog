@@ -21,18 +21,12 @@ import { Callout, Tip, Warning } from "./app/components/callout";
 import { ProBadge } from "./app/components/pro-badge";
 import { ZeroBadge } from "./app/components/zero-badge";
 import { Blockquote as blockquote } from "./app/components/blockquote";
+import { HoverWord } from "./app/components/hover-word";
+import { Table } from "./app/components/table";
 
-// Lazy-load client components to reduce initial bundle size
-const HoverWord = dynamic(
-  () => import("./app/components/hover-word").then(mod => mod.HoverWord),
-  { ssr: true }
-);
-
-const Table = dynamic(
-  () => import("./app/components/table").then(mod => mod.Table),
-  { ssr: true }
-);
-
+// Lazy-load client components to reduce initial bundle size. Server
+// components (the diagrams, Table, HoverWord) send no JavaScript of their
+// own, so dynamic() would split nothing for them.
 const Collapsible = dynamic(
   () => import("./app/components/collapsible").then(mod => mod.Collapsible),
   { ssr: true }

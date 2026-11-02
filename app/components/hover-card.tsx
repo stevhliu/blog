@@ -31,16 +31,8 @@ function shouldOpenInstantly() {
   return Date.now() < instantHoverUntil;
 }
 
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mql.matches);
-    const onChange = () => setReduced(mql.matches);
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
-  return reduced;
+function shouldReduceMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 const useTimeout = () => {
@@ -154,7 +146,6 @@ function HoverContent({
   side,
   isOpen,
   isInstant,
-  prefersReducedMotion,
 }: {
   id: string;
   content: React.ReactNode;
@@ -166,7 +157,6 @@ function HoverContent({
   side: Side;
   isOpen: boolean;
   isInstant: boolean;
-  prefersReducedMotion: boolean;
 }) {
   return (
     <span
@@ -174,17 +164,13 @@ function HoverContent({
       ref={contentRef}
       role="tooltip"
       inert={!isOpen ? true : undefined}
-      className={`fixed z-50 block max-w-xs rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-lg dark:border-gray-700 dark:bg-gray-800 ${contentClassName}`}
+      // Reduced motion keeps the fade and drops only the scale.
+      className={`fixed z-50 block max-w-xs rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-lg transition-[opacity,transform] duration-150 ease-[var(--ease-out)] motion-reduce:[transition-property:opacity] dark:border-gray-700 dark:bg-gray-800 ${contentClassName}`}
       style={{
         top: position.top,
         left: position.left,
         transformOrigin: transformOriginForSide(side),
-        // Reduced motion keeps the fade and drops only the scale.
-        transition: isInstant
-          ? "opacity 0ms, transform 0ms"
-          : prefersReducedMotion
-            ? "opacity 150ms var(--ease-out), transform 0ms"
-            : "opacity 150ms var(--ease-out), transform 150ms var(--ease-out)",
+        transitionDuration: isInstant ? "0ms" : undefined,
         opacity: isOpen ? 1 : 0,
         transform: isOpen ? "scale(1)" : "scale(0.95)",
         pointerEvents: isOpen ? "auto" : "none",
@@ -214,7 +200,6 @@ export function HoverCard({
   const triggerRef = useRef<HTMLSpanElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
   const { setTimeout, clearTimeout } = useTimeout();
-  const prefersReducedMotion = usePrefersReducedMotion();
 
   // `follow` is the per-frame scroll path: it moves the card through its
   // style directly, so following the trigger doesn't re-render every frame.
@@ -250,8 +235,8 @@ export function HoverCard({
       keepTooltipsWarm();
       setIsOpen(true);
       updatePosition();
-    }, instant || prefersReducedMotion ? 0 : delay);
-  }, [clearTimeout, delay, prefersReducedMotion, setTimeout, updatePosition]);
+    }, instant || shouldReduceMotion() ? 0 : delay);
+  }, [clearTimeout, delay, setTimeout, updatePosition]);
 
   const handleMouseEnter = useCallback(() => {
     openTooltip("pointer");
@@ -328,7 +313,6 @@ export function HoverCard({
           side={side}
           isOpen={isOpen}
           isInstant={isInstant}
-          prefersReducedMotion={prefersReducedMotion}
         />
       ) : null}
     </span>
