@@ -82,8 +82,7 @@ export function moonPosition(date: Date, latitude: number, longitude: number): M
 
 /** Colour tokens as CSS values, keyed by variable name; whether the page
  * counts as dark; how bright it is, 0 (night) to 1 (full day), which
- * anything else lit by the sky (the pouch) follows; the cloud cover it
- * was lit under, 0 to 1, which the stars hide behind; the sun's
+ * anything else lit by the sky (the pouch) follows; the sun's
  * altitude in degrees, with the lowest it reaches tonight, which is the
  * stars' timetable; and how much moonlight there is, 0 to 1, which
  * washes the faint stars out. */
@@ -91,20 +90,18 @@ export type PageLight = {
   vars: Record<string, string>;
   dark: boolean;
   adapted: number;
-  clouds: number;
   altitude: number;
   lowest: number;
   moon: number;
 };
 
 /**
- * The sky for this sun and moon under this much cloud, and the inks
- * solved from it; self-contained. clouds is cover from 0 (clear) to 1.
+ * The sky for this sun and moon, and the inks solved from it;
+ * self-contained.
  */
 export function pageLight(
   sun: { altitude: number; bearing: number; lowest: number },
   moon: { altitude: number; fraction: number } = { altitude: -90, fraction: 0 },
-  clouds = 0,
 ): PageLight {
   type Rgb = [number, number, number];
   type Lch = [number, number, number];
@@ -244,21 +241,16 @@ export function pageLight(
   // A page outdoors is lit by the sun as well as the sky: direct sunlight
   // through the air, by how high the sun stands. It is what keeps a noon
   // page near white rather than sky-blue, and goes amber as the sun sets.
-  const sunlight = toSun(eye, sunDir).map((v) => 20 * v * Math.max(sunDir[1], 0) * 0.12 * (1 - 0.85 * clouds));
-  // Cloud turns the sky toward a grey of the same brightness (an overcast
-  // sky is a white diffuser) and takes most of the direct sun.
-  const overcast = (c: Rgb): Rgb => {
-    const grey = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-    return c.map((v) => v + (grey - v) * 0.8 * clouds) as Rgb;
-  };
-  const upC = overcast(up), ringC = overcast(ring);
+  const sunlight = toSun(eye, sunDir).map((v) => 20 * v * Math.max(sunDir[1], 0) * 0.12);
   // Moonlight: by the lit fraction and the moon's height, a touch cool.
   // Far fainter than the night sky's floor in truth; here it is a visible
   // lift of a moonlit night over a moonless one.
-  const moonlight = 0.02 * moon.fraction * Math.max(Math.sin(moon.altitude * rad), 0) * (1 - 0.7 * clouds);
+  const moonlight = 0.02 * moon.fraction * Math.max(Math.sin(moon.altitude * rad), 0);
   const moonColour = [0.85, 0.92, 1.0];
-  const zenith = tone([0, 1, 2].map((c) => upC[c] + 0.2 * ringC[c] + moonColour[c] * moonlight) as Rgb);
-  const horizon = tone([0, 1, 2].map((c) => ringC[c] + 0.5 * upC[c] + sunlight[c] + moonColour[c] * moonlight) as Rgb);
+  // The top of the sky is the ray straight up, with only a trace of the
+  // horizon ring, so it stays blue while the horizon goes gold.
+  const zenith = tone([0, 1, 2].map((c) => up[c] + 0.05 * ring[c] + moonColour[c] * moonlight) as Rgb);
+  const horizon = tone([0, 1, 2].map((c) => ring[c] + 0.5 * up[c] + sunlight[c] + moonColour[c] * moonlight) as Rgb);
 
   // How bright the page is follows the light on it, the way eyes adapt:
   // a soft curve from the night's floor up to white paper, saturating
@@ -266,7 +258,7 @@ export function pageLight(
   // fall is the long, even slide a real dusk is. One continuous function
   // of the light, so nothing about the page steps from one phase of the
   // day to the next.
-  const onPage = [0, 1, 2].map((c) => (ringC[c] + 0.5 * upC[c]) * (1 - 0.5 * clouds) + sunlight[c] + moonColour[c] * moonlight);
+  const onPage = [0, 1, 2].map((c) => ring[c] + 0.5 * up[c] + sunlight[c] + moonColour[c] * moonlight);
   // Single scattering on eight steps undercounts twilight: the glow that
   // light scattered twice or more spreads over the whole sky after the
   // sun has set, which is what keeps the evening going until the sun is
@@ -283,13 +275,73 @@ export function pageLight(
   const bottomL = 0.15 + 0.835 * adapted;
   // The top of the sky is a little darker than the page by day (blue
   // against cream) and a little darker than it by night too.
-  const topL = Math.max(bottomL - 0.08, 0.07);
   // The atmosphere's hue and chroma at that lightness. The page is paper,
   // not sky, so it takes the colour at a fraction of the chroma, and
   // never past a cap: a sunset horizon is orange; a page at sunset is
   // warm.
-  let top = rgb([topL, Math.min(zenith[0] * 0.7, 0.08), zenith[1]]);
-  let bottom = rgb([bottomL, Math.min(horizon[0] * 0.45, 0.05), horizon[1]]);
+  // Dusk leans violet: from civil twilight to the end of nautical the
+  // top's hue is drawn toward 293°, the colour of the sky a half hour
+  // after sunset, and lets go into the night's blue.
+  const duskW = smooth(-1, -5, sun.altitude) * (1 - smooth(-9, -15, sun.altitude));
+  const toward = (h: number, target: number, w: number) => {
+    let dh = target - h;
+    if (dh > Math.PI) dh -= 2 * Math.PI;
+    if (dh < -Math.PI) dh += 2 * Math.PI;
+    return h + dh * w;
+  };
+  // Three-band scattering overshoots yellow before sunset, so the page
+  // takes its tint by day from the colour temperature of daylight
+  // instead: one smooth curve from 3000K with the sun on the horizon
+  // through 3800K at 5° (golden hour) and 4900K at 15°, so the afternoon
+  // starts to warm with the sun still a third of the way up, toward
+  // 6000K overhead. The Planckian locus is Kang et al. (2002)'s fit.
+  const cctAt = (alt: number) => 6000 - 3000 / (1 + Math.pow(Math.max(alt, 0) / 10, 1.4));
+  const planck = (T: number): [number, number] => {
+    const x = T <= 4000
+      ? -0.2661239e9 / T ** 3 - 0.2343589e6 / T ** 2 + 0.8776956e3 / T + 0.17991
+      : -3.0258469e9 / T ** 3 + 2.1070379e6 / T ** 2 + 0.2226347e3 / T + 0.24039;
+    const y = T <= 2222
+      ? -1.1063814 * x ** 3 - 1.3481102 * x ** 2 + 2.18555832 * x - 0.20219683
+      : T <= 4000
+        ? -0.9549476 * x ** 3 - 1.37418593 * x ** 2 + 2.09137015 * x - 0.16748867
+        : 3.081758 * x ** 3 - 5.8733867 * x ** 2 + 3.75112997 * x - 0.37001483;
+    const X = x / y, Z = (1 - x - y) / y;
+    const lin: Rgb = [3.2404542 * X - 1.5371385 - 0.4985314 * Z, -0.969266 * X + 1.8760108 + 0.041556 * Z, 0.0556434 * X - 0.2040259 + 1.0572252 * Z];
+    const peak = Math.max(...lin);
+    const [, C, h] = lch(lin.map((v) => toByte(0.6 * (v / peak))) as Rgb);
+    return [C, h];
+  };
+  const cct = cctAt(sun.altitude);
+  const [dayC, dayH] = planck(cct);
+  // The page takes most of its light's colour, nudged a few degrees
+  // toward gold, with a soft ceiling: chroma approaches 0.16 and never
+  // sits on it, so the low sun deepens steadily rather than saturating.
+  const CAP = 0.16;
+  const sunChroma = CAP * Math.tanh(dayC / CAP), sunHue = dayH + (8 * Math.PI) / 180;
+  // A page outdoors is also lit by the blue of the sky, more so as the
+  // sun lowers and its own light thins. Blended in OKLab, the two
+  // near-opposite hues meet through a neutral, so the gold is cut with
+  // grey rather than swung toward green.
+  const skyFill = 0.06 + 0.08 * (1 - smooth(0, 20, sun.altitude));
+  const sunTint = rgb([bottomL, sunChroma, sunHue]);
+  const skyTint = rgb([bottomL, Math.min(zenith[0] * 0.3, 0.03), zenith[1]]);
+  const dayTint = mix(sunTint, skyTint, skyFill, true);
+  // Hand the page to the sky's own horizon colour across sunset, slowly
+  // (from 3° up to 3° down, about half an hour), so the amber of the
+  // last sun and the rose of the first dusk overlap instead of taking
+  // turns.
+  // Blended in OKLCH the short way round and without the mute `mix`
+  // gives keyframes, so the chroma carries straight across and the page
+  // never dips grey between the two.
+  // The page after sunset is the lit side of a cloud: salmon rather
+  // than the horizon's own rose, and still coloured.
+  const duskC = Math.min(horizon[0] * 0.6, 0.08), duskH = toward(horizon[1], (28 * Math.PI) / 180, 0.6 * duskW);
+  const [, dayC2, dayH2] = lch(dayTint);
+  const wd = smooth(3, -3, sun.altitude);
+  let dh = duskH - dayH2;
+  if (dh > Math.PI) dh -= 2 * Math.PI;
+  if (dh < -Math.PI) dh += 2 * Math.PI;
+  let bottom = rgb([bottomL, dayC2 + (duskC - dayC2) * wd, dayH2 + dh * wd]);
 
   // Dark or light is decided by the paper's lightness. At the switch
   // (OKLab L 0.564, where black and white ink read equally, at 4.5:1) a
@@ -305,12 +357,51 @@ export function pageLight(
   bottom = settle(bottom);
   const paperL = lch(bottom)[0];
   const dark = paperL < SWITCH;
+  // By day the sky sits well below the paper in lightness, the way a
+  // blue sky stands behind a sunlit white, and keeps its blue beside the
+  // page's gold instead of greying toward it.
+  // The gap closes as the paper dims toward the switch, so dark ink still
+  // reads on the wash at dusk.
+  const gap = dark ? 0.08 : 0.05 + 0.15 * smooth(0.62, 0.9, bottomL);
+  const topL = Math.max(bottomL - gap, 0.07);
+  // Single scattering lets the zenith drift pink and thin as the sun
+  // nears the horizon; multiple scattering keeps a real one blue. With
+  // the sun low but up, the top is held toward blue with a floor on its
+  // chroma, then dusk draws it violet.
+  const lowW = smooth(10, -1, sun.altitude) * (1 - duskW);
+  const floorW = smooth(15, 4, sun.altitude) * (1 - duskW);
+  const topC = Math.max(Math.min(zenith[0] * 0.9, 0.09), 0.045 * floorW);
+  const topH = toward(toward(zenith[1], (250 * Math.PI) / 180, 0.8 * lowW), (293 * Math.PI) / 180, 0.7 * duskW);
+  let top = rgb([topL, topC, topH]);
   const paper = bottom;
   // The page is washed from a little of the sky's top down into the
   // paper: a blue sky over cream by day, violet over amber at dusk. A
   // fifth of the top is as much as a page of text takes.
-  const wash = mix(top, bottom, 0.8, true);
-  top = mix(top, bottom, 0.3, true);
+  // The wash runs from the sky's top into the paper. Blue over gold are
+  // near-opposite hues, and a straight blend between them passes through
+  // grey, so at golden hour the wash takes the hue path that avoids green
+  // (100° to 200°) and crosses through pink instead, the way a sky near
+  // the sun does.
+  const washT = dark ? 0.8 : 0.85 - 0.3 * smooth(0.62, 0.9, bottomL);
+  const washBlend = (a: Rgb, b: Rgb, t: number): Rgb => {
+    const [La, Ca, ha] = lch(a), [Lb, Cb, hb] = lch(b);
+    let dh = hb - ha;
+    if (dh > Math.PI) dh -= 2 * Math.PI;
+    if (dh < -Math.PI) dh += 2 * Math.PI;
+    const green = (h: number) => { const d = ((h * 180) / Math.PI + 360) % 360; return d > 100 && d < 200; };
+    let crosses = false;
+    for (let k = 1; k < 16; k++) if (green(ha + (dh * k) / 16)) crosses = true;
+    if (crosses) dh = dh > 0 ? dh - 2 * Math.PI : dh + 2 * Math.PI;
+    const w = Ca < 0.01 ? 1 : Cb < 0.01 ? 0 : t;
+    return rgb([La + (Lb - La) * t, Ca + (Cb - Ca) * t, ha + dh * w]);
+  };
+  // Only when both ends carry real colour (a blue top over a gold page)
+  // does the wash take the pink road; over a near-neutral page it blends
+  // straight, through the pale grey-blue a sky has near the horizon.
+  const [, Ct] = lch(top), [, Cp] = lch(bottom);
+  const pinkW = smooth(0.02, 0.04, Math.min(Ct, Cp));
+  const wash = mix(mix(top, bottom, washT, true), washBlend(top, bottom, washT), pinkW);
+  top = mix(top, bottom, 0.1, true);
 
   // An ink of the sky's hue at `chroma`, as light or dark as it must be
   // to read at `ratio` against the paper, or as far as sRGB can go.
@@ -323,7 +414,8 @@ export function pageLight(
     let lo = dark ? paperL : 0, hi = dark ? 1 : paperL;
     for (let n = 0; n < 24; n++) {
       const mid = (lo + hi) / 2;
-      const ok = contrast(rgb([mid, chroma, h]), paper) >= ratio;
+      const c = rgb([mid, chroma, h]);
+      const ok = contrast(c, paper) >= ratio && contrast(c, wash) >= ratio;
       if (dark) ok ? (hi = mid) : (lo = mid);
       else ok ? (lo = mid) : (hi = mid);
     }
@@ -359,18 +451,18 @@ export function pageLight(
   // Moonlight for the stars: the lit fraction by how high the moon stands,
   // so a full moon overhead is 1 and a crescent on the horizon is nothing.
   const moonUp = moon.fraction * Math.max(Math.sin(moon.altitude * rad), 0);
-  return { vars, dark, adapted, clouds, altitude: sun.altitude, lowest: sun.lowest, moon: moonUp };
+  return { vars, dark, adapted, altitude: sun.altitude, lowest: sun.lowest, moon: moonUp };
 }
 
 /** Write the lit page into the document, and tell anything else lit by
  * the sky (a "sky-light" event on the document, with the light as its
- * detail; `--sky-adapted`, `--sky-clouds`, `--sky-moon`, `--sky-sun` and
+ * detail; `--sky-adapted`, `--sky-moon`, `--sky-sun` and
  * `--sky-sun-lowest` on the root for CSS, which is how the stars
  * (stars.tsx, globals.css) know to come out). Self-contained. */
 export function applyPageLight(light: PageLight): void {
   const root = document.documentElement;
-  // Ease only changes big enough to see: a light/dark flip, or clouds
-  // rolling in. A minute of sun is about one level in 255 and goes in as
+  // Ease only changes big enough to see: a light/dark flip. A minute of
+  // sun is about one level in 255 and goes in as
   // is, because easing it recalculates every element's style on every
   // frame for eight seconds. The first lighting has nothing to ease from.
   const channels = (value: string) => (value.match(/[\d.]+/g) || []).map(Number);
@@ -411,7 +503,6 @@ export function applyPageLight(light: PageLight): void {
   root.dataset.skyEase = ease ? "true" : "false";
   for (const name in light.vars) root.style.setProperty(name, light.vars[name]);
   root.style.setProperty("--sky-adapted", String(Math.round(light.adapted * 1000) / 1000));
-  root.style.setProperty("--sky-clouds", String(Math.round(light.clouds * 100) / 100));
   root.style.setProperty("--sky-sun", String(Math.round(light.altitude * 100) / 100));
   root.style.setProperty("--sky-sun-lowest", String(Math.round(light.lowest * 100) / 100));
   root.style.setProperty("--sky-moon", String(Math.round(light.moon * 100) / 100));
@@ -426,37 +517,17 @@ export type SkyContext = {
   /** The instant to light for; null means now. `?sky=<ISO time>` pins it
    * (and stops the refresh). */
   at: Date | null;
-  /** Cloud cover 0..1: `?clouds=` if given, else the last fetched value
-   * (sky-refresh.tsx keeps it in sessionStorage for the next page), else 0. */
-  clouds: number;
-  /** Whether that cover is settled: given, remembered, or the forecast has
-   * been tried and failed (sky-refresh.tsx notes that too). On a first
-   * visit it is false until the forecast lands, and the stars wait, so
-   * an overcast night never shows them for half a second and then takes
-   * them away. A pinned hour counts as settled, since it is never refreshed. */
-  cloudsKnown: boolean;
 };
 
 /** What the page is lit for; self-contained. */
 export function skyContext(): SkyContext {
-  const out: SkyContext = { at: null, clouds: 0, cloudsKnown: false };
+  const out: SkyContext = { at: null };
   try {
     const params = new URLSearchParams(location.search);
     const at = params.get("sky");
     if (at && !isNaN(new Date(at).getTime())) out.at = new Date(at);
-    const clouds = params.get("clouds");
-    if (clouds !== null && !isNaN(Number(clouds))) {
-      out.clouds = Math.min(Math.max(Number(clouds), 0), 1);
-      out.cloudsKnown = true;
-    } else {
-      const kept = JSON.parse(sessionStorage.getItem("sky-clouds") || "null");
-      if (kept && Date.now() - kept.at < 3_600_000) out.clouds = kept.cover;
-      out.cloudsKnown = !!kept || sessionStorage.getItem("sky-clouds-tried") === "1";
-    }
-    if (out.at) out.cloudsKnown = true;
   } catch {
-    // no location or storage (tests, private windows): clear sky, now
-    out.cloudsKnown = true;
+    // no location (tests): now
   }
   return out;
 }
@@ -466,8 +537,7 @@ export function skyContext(): SkyContext {
 export function lightDocument(latitude: number, longitude: number): void {
   const context = skyContext();
   const at = context.at || new Date();
-  applyPageLight(pageLight(sunPosition(at, latitude, longitude), moonPosition(at, latitude, longitude), context.clouds));
-  document.documentElement.style.setProperty("--sky-clouds-known", context.cloudsKnown ? "1" : "0");
+  applyPageLight(pageLight(sunPosition(at, latitude, longitude), moonPosition(at, latitude, longitude)));
 }
 
 /** The script that lights the page before the stylesheet's first paint,

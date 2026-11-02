@@ -42,8 +42,8 @@ export function StarsEffects() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (!reduce && !sessionStorage.getItem("sky-meteor") && Math.random() < METEOR_ODDS) {
         meteor = window.setTimeout(() => {
-          // Only across a dark, mostly clear sky the reader can see.
-          const dark = number("--sky-sun", 90) < -8 && number("--sky-clouds", 0) < 0.5;
+          // Only across a dark sky the reader can see.
+          const dark = number("--sky-sun", 90) < -8;
           if (!dark || !onScreen || document.hidden) return;
           sessionStorage.setItem("sky-meteor", "1");
           const streak = field.querySelector<HTMLElement>(".sky-meteor");

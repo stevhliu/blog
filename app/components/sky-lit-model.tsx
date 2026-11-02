@@ -114,7 +114,7 @@ export function SkyLitModel({
     if (!element) return;
     const sky = () => {
       const context = skyContext();
-      element.setAttribute("environment-image", skyEnvironment(context.at ?? new Date(), context.clouds).url);
+      element.setAttribute("environment-image", skyEnvironment(context.at ?? new Date()).url);
     };
     const expose = (event: Event) => {
       const light = (event as CustomEvent<PageLight>).detail;

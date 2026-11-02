@@ -315,8 +315,8 @@ pre.highlights {
    rather than fixed on purpose: the sky is the top of the page, not a
    layer that follows the reader down a long post. Nothing here knows the
    hour; the lighting script leaves the sun's altitude on the root as
-   --sky-sun (with tonight's lowest as --sky-sun-lowest), the cloud cover
-   as --sky-clouds and the moonlight as --sky-moon, and each class of star
+   --sky-sun (with tonight's lowest as --sky-sun-lowest) and the moonlight
+   as --sky-moon, and each class of star
    decides from those how far out it is. Without the script --sky-sun is
    unset and falls back to noon, so a no-JS reader never sees stars on
    white paper. */
@@ -328,12 +328,6 @@ pre.highlights {
   height: 45svh;
   pointer-events: none;
   z-index: 0;
-  /* On a first visit the cover isn't known until the forecast lands, and
-     the field waits for it (sky-refresh.tsx settles it within two seconds
-     either way), then eases in once. Otherwise an overcast night would
-     show the stars for half a second and take them away. */
-  opacity: var(--sky-clouds-known, 1);
-  transition: opacity var(--sky-ease) ease;
   /* The timetable, in the sun's altitude over Sebastopol (degrees; 90,
      high noon, without the script). After sunset there the sun sinks about
      0.18° a minute, so minutes after sunset convert to degrees below the
@@ -345,13 +339,12 @@ pre.highlights {
      Dawn runs the same table backwards on its own, since it is the same
      altitudes in the other order. */
   --sun: var(--sky-sun, 90);
-  /* Cloud takes a share of every class. Moonlight takes a share of the
-     fainter ones: a full moon overhead (--sky-moon 1) hides most of the
-     dust and dims the ordinary stars a little, and leaves the bright ones. */
-  --cover: calc(1 - var(--sky-clouds, 0));
+  /* Moonlight takes a share of the fainter classes: a full moon overhead
+     (--sky-moon 1) hides most of the dust and dims the ordinary stars a
+     little, and leaves the bright ones. */
   --moon: var(--sky-moon, 0);
-  --stars-bright: calc(clamp(0, calc((-3.6 - var(--sun)) / 1.8), 1) * var(--cover));
-  --stars-mid: calc(clamp(0, calc((-5.4 - var(--sun)) / 2.7), 1) * var(--cover) * (1 - 0.2 * var(--moon)));
+  --stars-bright: clamp(0, calc((-3.6 - var(--sun)) / 1.8), 1);
+  --stars-mid: calc(clamp(0, calc((-5.4 - var(--sun)) / 2.7), 1) * (1 - 0.2 * var(--moon)));
   /* Deep night is the darkest stretch of the sun's arc under the horizon:
      how far it is from astronomical dusk (-18°) to tonight's lowest point,
      full from a little past halfway. In midwinter that is about 10:40pm
@@ -361,7 +354,7 @@ pre.highlights {
   --sky-arc: calc((-18 - var(--sun)) / (-18 - min(-18.01, var(--sky-sun-lowest, -60))));
   --sky-deep: clamp(0, calc((var(--sky-arc) - 0.45) / 0.2), 1);
   --stars-faint: calc(
-    clamp(0, calc((-8.1 - var(--sun)) / 8.1), 1) * (0.7 + 0.3 * var(--sky-deep)) * var(--cover) * (1 - 0.6 * var(--moon))
+    clamp(0, calc((-8.1 - var(--sun)) / 8.1), 1) * (0.7 + 0.3 * var(--sky-deep)) * (1 - 0.6 * var(--moon))
   );
 }
 /* Each layer is one compositor layer (will-change) whose opacity is the

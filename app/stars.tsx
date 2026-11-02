@@ -9,8 +9,8 @@ import { StarsEffects } from "./stars-effects";
  * classes the way a real dusk fills in: a handful of bright stars first,
  * then the ordinary ones, then the faint dust last. Which class shows,
  * and how much, is decided in CSS (globals.css, .sky-stars) from the
- * sun's altitude (`--sky-sun`), the cloud cover (`--sky-clouds`) and the
- * moonlight (`--sky-moon`), all set on the root by sky-lighting.ts. So
+ * sun's altitude (`--sky-sun`) and the moonlight (`--sky-moon`), both
+ * set on the root by sky-lighting.ts. So
  * this file knows nothing about time; it only lays the stars out.
  *
  * The field is six SVGs stacked, not one. A circle inside an SVG can't

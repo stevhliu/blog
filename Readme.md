@@ -62,9 +62,7 @@ home index and the feed but remain reachable by URL.
   `app/sky-light.js/route.ts`, loaded blocking from the head and cached) and
   `app/sky-refresh.tsx` refreshes it every minute, with the colour variables
   registered through `@property` so each step eases. The moon lifts a
-  moonlit night over a moonless one, and live cloud cover from Open-Meteo
-  (fetched every half hour, kept in sessionStorage) greys the sky and takes
-  the direct sun; `&clouds=0.8` previews it. The home page's coffee is any
+  moonlit night over a moonless one. The home page's coffee is any
   GLB handed to `app/components/sky-lit-model.tsx`, whose exposure follows
   the page's light; to change the coffee, build a model with
   `tools/miniature` and update the four values in
