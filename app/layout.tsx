@@ -86,7 +86,7 @@ export default function RootLayout({
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script id="sky-light" src={`/sky-light.js?v=${skyLightVersion}`} />
       </head>
-      <body className="min-h-[100svh] bg-[var(--color-bg)] text-[var(--color-text)]">
+      <body className="min-h-[100svh] text-[var(--color-text)]">
         <SkyLighting />
         <Stars />
         {children}
