@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
  * hydration; the real value appears on first client tick.
  */
 const TZ = "America/Los_Angeles";
+const PLACEHOLDER = "—";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
@@ -32,13 +33,13 @@ function format(now: Date): string {
 }
 
 export function EnvDatetime() {
-  const [stamp, setStamp] = useState<string>("—");
-  const [revealed, setRevealed] = useState(false);
+  const [stamp, setStamp] = useState<string>(PLACEHOLDER);
+  // Derived rather than stored, so revealing doesn't cost a second render.
+  const revealed = stamp !== PLACEHOLDER;
 
   useEffect(() => {
     const tick = () => setStamp(format(new Date()));
     tick();
-    setRevealed(true);
     const id = window.setInterval(tick, 30_000);
     return () => window.clearInterval(id);
   }, []);

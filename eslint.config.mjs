@@ -1,12 +1,5 @@
-// Flat config for the ESLint CLI. `next lint` is removed in Next 16, and
-// eslint-config-next 15 still ships the legacy format, so FlatCompat wraps it.
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const compat = new FlatCompat({
-  baseDirectory: dirname(fileURLToPath(import.meta.url)),
-});
+// Flat config for the ESLint CLI (`next lint` is removed in Next 16).
+import nextVitals from "eslint-config-next/core-web-vitals";
 
 const config = [
   {
@@ -26,7 +19,7 @@ const config = [
       "tools/miniature/work/**",
     ],
   },
-  ...compat.extends("next/core-web-vitals"),
+  ...nextVitals,
   {
     rules: {
       "react/jsx-no-target-blank": "off",
