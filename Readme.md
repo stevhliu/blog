@@ -51,18 +51,19 @@ home index and the feed but remain reachable by URL.
   route groups pick its variant so every page renders statically.
 - The MDX component registry is `mdx-components.ts` plus `mdx-diagrams.ts`.
 - The site is lit by the sky over Sebastopol at the current time, the way
-  pengzhe.ng lights its pages. `app/sky-lighting.ts` works out the sun's
-  altitude, takes the page's hue and chroma from a single-scattering
-  atmosphere (the sun through the air plus the sky's own light, on nine
-  rays), takes its lightness from a table of keyframes (day, golden hour,
-  dusk, blue hour, three stages of night) blended in OKLCH, and solves every
-  ink from that paper by contrast ratio, so text, secondary text, rules and
-  links all shift together and never fall under 4.5:1. An inline script in the root layout
+  pengzhe.ng lights its pages. `app/sky-lighting.ts` takes the page's colours
+  from the eight frames of the macOS Big Sur dynamic wallpaper (sky top,
+  mid-sky, horizon and glow for night, dawn, sunrise, morning, midday,
+  afternoon, sunset and dusk), timed from today's sunrise and sunset with
+  four hours of twilight each side rather than by the sun's real altitude,
+  and solves every ink from that paper by contrast ratio, so text,
+  secondary text, rules and links all shift together and never fall under
+  4.5:1. An inline script in the root layout
   applies it before first paint (served as `/sky-light.js` from
   `app/sky-light.js/route.ts`, loaded blocking from the head and cached) and
   `app/sky-refresh.tsx` refreshes it every minute, with the colour variables
-  registered through `@property` so each step eases. The moon lifts a
-  moonlit night over a moonless one. The home page's coffee is any
+  registered through `@property` so each step eases. The moon washes out
+  the faint stars. The home page's coffee is any
   GLB handed to `app/components/sky-lit-model.tsx`, whose exposure follows
   the page's light; to change the coffee, build a model with
   `tools/miniature` and update the four values in
