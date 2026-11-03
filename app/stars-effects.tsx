@@ -6,6 +6,33 @@ import { useEffect } from "react";
 const METEOR_ODDS = 0.35;
 const METEOR_EARLIEST_MS = 15_000;
 const METEOR_WINDOW_MS = 45_000;
+// The streak's shape and flight, as globals.css draws it (.sky-meteor and
+// @keyframes sky-meteor): this long, turned this far about its head, and
+// carried this far along that line.
+const METEOR_LENGTH = 110;
+const METEOR_ANGLE = (153 * Math.PI) / 180;
+const METEOR_TRAVEL = 240;
+// Room kept between the streak and the field's edge.
+const METEOR_MARGIN = 8;
+
+/**
+ * Where the streak's head may start so that all of it, tail and flight,
+ * stays inside a field this size: the head as `left`/`top` for the
+ * element, in pixels, or null when the field is too small to hold it.
+ */
+function meteorStart(width: number, height: number): { left: number; top: number } | null {
+  // Every point of the streak over the flight lies on the line through the
+  // head, from METEOR_LENGTH behind it (the tail before it moves) to
+  // METEOR_TRAVEL ahead (the head when it lands).
+  const dx = Math.cos(METEOR_ANGLE), dy = Math.sin(METEOR_ANGLE);
+  const xs = [-METEOR_LENGTH * dx, METEOR_TRAVEL * dx], ys = [-METEOR_LENGTH * dy, METEOR_TRAVEL * dy];
+  const minX = METEOR_MARGIN - Math.min(...xs), maxX = width - METEOR_MARGIN - Math.max(...xs);
+  const minY = METEOR_MARGIN - Math.min(...ys), maxY = height - METEOR_MARGIN - Math.max(...ys);
+  if (maxX < minX || maxY < minY) return null;
+  const headX = minX + Math.random() * (maxX - minX), headY = minY + Math.random() * (maxY - minY);
+  // The element's box starts METEOR_LENGTH left of its head, at the head's height.
+  return { left: headX - METEOR_LENGTH, top: headY };
+}
 
 /**
  * The small amount of JavaScript the star field needs. It pauses the
@@ -45,11 +72,16 @@ export function StarsEffects() {
           // Only across a dark sky the reader can see.
           const dark = number("--sky-sun", 90) < -8;
           if (!dark || !onScreen || document.hidden) return;
-          sessionStorage.setItem("sky-meteor", "1");
           const streak = field.querySelector<HTMLElement>(".sky-meteor");
           if (!streak) return;
-          streak.style.setProperty("--mx", `${(20 + Math.random() * 60).toFixed(1)}%`);
-          streak.style.setProperty("--my", `${(5 + Math.random() * 30).toFixed(1)}%`);
+          // Placed in pixels from the field's real size, so the whole flight
+          // shows: the field clips, and a streak placed by percentage near
+          // the right edge of a phone lost its tail.
+          const start = meteorStart(field.clientWidth, field.clientHeight);
+          if (!start) return;
+          sessionStorage.setItem("sky-meteor", "1");
+          streak.style.setProperty("--mx", `${start.left.toFixed(1)}px`);
+          streak.style.setProperty("--my", `${start.top.toFixed(1)}px`);
           streak.classList.add("is-live");
         }, METEOR_EARLIEST_MS + Math.random() * METEOR_WINDOW_MS);
       }
