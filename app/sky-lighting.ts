@@ -1,16 +1,15 @@
 /**
  * The page lit by the sky over Sebastopol right now.
  *
- * The colours are the macOS Big Sur dynamic wallpaper's: its eight frames,
- * night to dusk, each sampled at the top of the sky, halfway down and
- * just above the ridge, with the warm glow low beside the sun. The sun's
- * altitude picks a place between frames, but not the real altitude: by
- * that, the evening's colour is spent in an hour and the night after it
- * holds still for nine, so feltSun() times the frames from today's
- * sunrise and sunset instead, four hours each side, the way pengzhe.ng
- * stretches its twilight. The paper is the horizon taken halfway to the
- * glow, kept out of green hues, and held clear of the light/dark switch
- * so ink always reads on it. Every ink is then solved from the sky rather
+ * White by day. Through the evening the page goes pale blue, light blue,
+ * dark blue and then night, when the stars come out; the morning is the
+ * same run backwards. The sun's altitude picks a place between those
+ * keyframes, but not the real altitude: by that, the evening's colour is
+ * spent in an hour and the night after it holds still for nine, so
+ * feltSun() times them from today's sunrise and sunset instead, four
+ * hours each side, the way pengzhe.ng stretches its twilight. The paper
+ * steps across the light/dark switch rather than lingering at it, so ink
+ * always reads on it. Every ink is then solved from the sky rather
  * than chosen: text, secondary text, dim text and the link colour each
  * take the sky's hue, faintly, at the lightness that gives a set contrast
  * against the paper and the wash. So a dozen colours move together, and
@@ -226,101 +225,48 @@ export function pageLight(
     return rgb([La + (Lb - La) * t, (Ca + (Cb - Ca) * t) * mute, ha + dh * w]);
   };
 
-  // The sky is the macOS Big Sur dynamic wallpaper's: its eight frames,
-  // each tied to a sun altitude, sampled at the top of the frame, halfway
-  // down, and just above the ridge. The morning and the afternoon are
-  // separate frames at the same altitudes, so the side of the sky the sun
-  // is on picks which run of keyframes the page follows. Above 25° it is
-  // midday; below -25° it is night. The last colour is the frame's glow,
-  // the warm light low in the sky to one side of the sun, or the horizon
-  // again where a frame has none.
-  type Key = [number, string, string, string, string];
-  const rising: Key[] = [
-    [-25, "#041125", "#0a1a35", "#1f385e", "#1f385e"], // night
-    [-9, "#06285b", "#305a81", "#aa8d7d", "#fdc476"], // dawn
-    [0, "#1b3c5b", "#2f546f", "#bfb87e", "#fdda7b"], // sunrise
-    [10, "#254b93", "#5f95cc", "#b5d5f6", "#b5d5f6"], // morning
-    [25, "#245ab0", "#4383ce", "#abcef1", "#abcef1"], // midday
+  // White by day; through the evening a pale blue, a light blue, a dark
+  // blue, and night; the morning is the same run backwards. Each key is a
+  // felt altitude, the wash at the top of the page, and the paper.
+  type Key = [number, string, string];
+  const keys: Key[] = [
+    [-25, "#050e25", "#111c34"], // night
+    [-18, "#162c55", "#2a426a"], // dark blue
+    [-12, "#78a3cf", "#9bbbdd"], // blue hour
+    [-6, "#c0dbf4", "#d8ebfb"], // light blue
+    [0, "#e4f0fb", "#f1f8fd"], // sunset
+    [10, "#f7fafe", "#ffffff"], // late day
+    [25, "#ffffff", "#ffffff"], // day
   ];
-  const setting: Key[] = [
-    [-25, "#041125", "#0a1a35", "#1f385e", "#1f385e"], // night
-    [-9, "#191f3f", "#2f3a6a", "#aa9294", "#f9dba6"], // dusk
-    [0, "#2a3953", "#4e5369", "#cb917d", "#df9882"], // sunset
-    [10, "#294671", "#4a799e", "#adbeb1", "#e5e5bc"], // afternoon
-    [25, "#245ab0", "#4383ce", "#abcef1", "#abcef1"], // midday
-  ];
-  const keys = sun.bearing < 180 ? rising : setting;
   const alt = clamp(sun.altitude, -25, 25);
   let k = 0;
   while (k < keys.length - 2 && alt > keys[k + 1][0]) k++;
   const t = (alt - keys[k][0]) / (keys[k + 1][0] - keys[k][0]);
-  // Between frames, a straight blend in OKLab: the way macOS crossfades
-  // one photograph into the next, perceptually even.
   const at = (i: number): Rgb => mix(hex(keys[k][i] as string), hex(keys[k + 1][i] as string), t, true);
-  let top = at(1);
-  // The paper is the horizon taken halfway to the glow. The middle of a
-  // frame's horizon at sunrise is the khaki where the gold meets the haze;
-  // the gold is what the eye goes to.
-  // Each frame's paper is found first, then blended straight in OKLab from
-  // one frame's to the next, so gold and blue, near-opposite hues, meet
-  // through a near-white the way a sky pales toward the horizon. The pale
-  // middle of that blend still carries a trace of hue, though, and between
-  // gold and blue it is green: a page holds it for twenty minutes as
-  // olive. And the wallpaper's own afternoon horizon is a sage, the haze
-  // over the sea at 153°, which a photograph carries and a page of reads
-  // as mildew. So no paper hue sits inside the green band: one there is
-  // moved to whichever edge is nearer, gold at 85° or pale blue at 200°,
-  // at the chroma it had. The band starts below yellow's 100° because a
-  // pale paper at 100° already reads as lemon going olive.
-  const framePaper = (key: Key): Rgb => mix(hex(key[3]), hex(key[4]), 0.5, true);
-  const GREEN_FROM = (85 * Math.PI) / 180, GREEN_TO = (200 * Math.PI) / 180;
-  const inGreen = (h: number) => {
-    const w = ((h % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-    return w > GREEN_FROM && w < GREEN_TO;
-  };
-  const fence = (c: Rgb): Rgb => {
-    const [L, C, h] = lch(c);
-    if (!inGreen(h)) return c;
-    const w = ((h % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-    return rgb([L, C, w - GREEN_FROM < GREEN_TO - w ? GREEN_FROM : GREEN_TO]);
-  };
-  const sky = fence(mix(fence(framePaper(keys[k])), fence(framePaper(keys[k + 1])), t, true));
+  const sky = at(2);
+  const top = at(1);
   const rad = Math.PI / 180;
   // Dark or light by the sky's lightness, where black and white ink read
-  // equally (OKLab L 0.564, at 4.5:1). Twilight skies sit just above that,
-  // where every ink is grey on grey, so the paper is held away from the
-  // switch: no darker than L 0.8 by day, no lighter than 0.4 by night.
-  // Held there right up to the switch, though, the page would drop from
-  // 0.8 to 0.4 in one step, a hundred times the step of any other two
-  // minutes of the day. So as the sky closes on the switch (from L 0.70
-  // down, or 0.45 up) the paper slides with it, to the edge of the band
-  // where either ink still reads at 5.5:1 (0.609 and 0.519), and the
-  // switch itself is only that band's width. The hue and chroma stay the
-  // sky's.
-  const SWITCH = 0.564, DAY_FLOOR = 0.8, NIGHT_CEILING = 0.4;
-  const BAND = 0.045, RAMP_DAY = 0.7, RAMP_NIGHT = 0.45;
+  // equally (OKLab L 0.564, at 4.5:1). A paper within the band about it is
+  // pushed to the band's edge, where either ink reads at 5.5:1, so the
+  // page steps across the middle instead of lingering grey on grey.
+  const SWITCH = 0.564, BAND = 0.045;
   const [skyL, skyC, skyH] = lch(sky);
   const dark = skyL < SWITCH;
-  const paperL = dark
-    ? skyL <= RAMP_NIGHT
-      ? Math.min(skyL, NIGHT_CEILING)
-      : NIGHT_CEILING + ((skyL - RAMP_NIGHT) / (SWITCH - RAMP_NIGHT)) * (SWITCH - BAND - NIGHT_CEILING)
-    : skyL >= RAMP_DAY
-      ? Math.max(skyL, DAY_FLOOR)
-      : SWITCH + BAND + ((skyL - SWITCH) / (RAMP_DAY - SWITCH)) * (DAY_FLOOR - SWITCH - BAND);
+  const paperL = Math.abs(skyL - SWITCH) >= BAND ? skyL : SWITCH + (dark ? -BAND : BAND);
   const paper = rgb([paperL, skyC, skyH]);
-  // The wash runs down into the paper from the mid-sky, which can be far
-  // darker (navy over a tan dawn). It is held to the paper's side of the
-  // switch, outside the band, and within 0.12 of the paper, so it stays
-  // the sky's colour at a lightness the page's ink can still read on.
-  const [washL, washC, washH] = lch(at(2));
-  const wash = rgb([dark ? Math.min(washL, paperL) : Math.max(washL, paperL - 0.12, SWITCH + BAND), washC, washH]);
-  const bottom = paper;
+  // The wash stays on the paper's side of the switch, outside the band.
+  const [washL, washC, washH] = lch(at(1));
+  const wash = rgb([dark ? Math.min(washL, paperL) : Math.max(washL, SWITCH + BAND), washC, washH]);
   const adapted = clamp((paperL - 0.15) / 0.835, 0, 1);
 
   // An ink of the sky's hue at `chroma`, as light or dark as it must be
-  // to read at `ratio` against the paper, or as far as sRGB can go.
-  const hue = lch(wash)[2];
+  // to read at `ratio` against the paper, or as far as sRGB can go. White
+  // has no hue, only rounding noise, which left daytime ink a warm,
+  // faintly olive grey; so below a trace of chroma the ink takes the blue
+  // the evening goes to.
+  const [, washTrace, washHue] = lch(wash);
+  const hue = washTrace > 0.01 ? washHue : (250 * Math.PI) / 180;
   const contrast = (a: Rgb, b: Rgb) => {
     const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
     return (x + 0.05) / (y + 0.05);

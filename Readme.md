@@ -51,11 +51,11 @@ home index and the feed but remain reachable by URL.
   route groups pick its variant so every page renders statically.
 - The MDX component registry is `mdx-components.ts` plus `mdx-diagrams.ts`.
 - The site is lit by the sky over Sebastopol at the current time, the way
-  pengzhe.ng lights its pages. `app/sky-lighting.ts` takes the page's colours
-  from the eight frames of the macOS Big Sur dynamic wallpaper (sky top,
-  mid-sky, horizon and glow for night, dawn, sunrise, morning, midday,
-  afternoon, sunset and dusk), timed from today's sunrise and sunset with
-  four hours of twilight each side rather than by the sun's real altitude,
+  pengzhe.ng lights its pages. `app/sky-lighting.ts` keeps the page white
+  by day and runs it through pale blue, light blue and dark blue to night
+  each evening (and back again each morning), timed from today's sunrise
+  and sunset with four hours of twilight each side rather than by the
+  sun's real altitude,
   and solves every ink from that paper by contrast ratio, so text,
   secondary text, rules and links all shift together and never fall under
   4.5:1. An inline script in the root layout
