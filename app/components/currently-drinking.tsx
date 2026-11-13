@@ -19,10 +19,7 @@ const CAMERA_ORBIT = "-28deg 80deg 2.45m";
 
 export function CurrentlyDrinking() {
   return (
-    <section
-      aria-labelledby="drinking-heading"
-      className="mt-14 flex flex-col gap-5 min-[1120px]:absolute min-[1120px]:right-0 min-[1120px]:top-0 min-[1120px]:mt-0 min-[1120px]:w-[300px]"
-    >
+    <section aria-labelledby="drinking-heading" className="flex flex-col gap-5">
       <div className="flex w-[300px] max-w-full flex-col gap-4">
         <SkyLitModel src={MODEL} poster={POSTER} alt={ALT} cameraOrbit={CAMERA_ORBIT} className="drink-model" />
         <div className="text-center text-[18px] leading-[1.5] text-[var(--color-text)]">

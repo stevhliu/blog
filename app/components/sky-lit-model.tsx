@@ -47,7 +47,7 @@ export type SkyLitModelProps = {
   /** The GLB. */
   src: string;
   /** Shown until the model loads, and in place of it without WebGL. */
-  poster: string;
+  poster?: string;
   alt: string;
   /** model-viewer's camera-orbit for the composed view. The distance is
    * held, so zoom narrows the field of view; check it fits a new model

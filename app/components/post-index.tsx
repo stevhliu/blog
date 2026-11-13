@@ -3,6 +3,7 @@ import type { Post } from "../get-posts";
 import { EnvDatetime } from "../env-datetime";
 import { PostYearGroup } from "./post-year-group";
 import { CurrentlyDrinking } from "./currently-drinking";
+import { CurrentlyReading } from "./currently-reading";
 
 // Single index page: every year is shown, stacked newest-first.
 const PAGE_SIZE = 99;
@@ -79,9 +80,13 @@ export function PostIndex({
         ))}
       </div>
 
-      {/* Below the list on narrow screens; from 1120px, beside the column at
-          the top right of the centred block SiteShell sets up. */}
-      <CurrentlyDrinking />
+      {/* The coffee, then the book. Below the list on narrow screens; from
+          1120px, beside the column at the top right of the centred block
+          SiteShell sets up. */}
+      <div className="mt-14 flex flex-col gap-12 min-[1120px]:absolute min-[1120px]:right-0 min-[1120px]:top-0 min-[1120px]:mt-0 min-[1120px]:w-[300px]">
+        <CurrentlyDrinking />
+        <CurrentlyReading />
+      </div>
 
       {/* The 3-column grid exists only to hold pagination in the centre, so it
           is used only when there are pages to show. With a single page the

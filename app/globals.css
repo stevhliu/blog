@@ -679,6 +679,7 @@ li a,
   cursor: grabbing;
 }
 
+
 /* ─── Underlined inline links ────────────────────────────
    Keep the underline quieter than the word it sits under. The rule
    is drawn from the link's own color so it still works in both
