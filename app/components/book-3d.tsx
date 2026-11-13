@@ -30,12 +30,15 @@ export type Book = {
 
 /**
  * The composed view, as for the coffee pouch: the camera a little left of
- * front (so the spine shows) and a little above. At 25° a 1m book needs
- * about 2.5m to clear the frame top and bottom; 2.6m leaves room for the
- * pitch, and its widest turn (the cover's diagonal with the spine) is well
- * inside the 13:11 box's width.
+ * front (so the spine shows) and a little above. The tallest the book is
+ * drawn is when it turns edge-on: its near edge is then half a width
+ * (about 0.3m) closer than its centre, and perspective makes it that much
+ * larger. At 25° and 2.6m that fills 99.6% of the box's height, so the
+ * bottom clips; 2.95m keeps every angle and tilt at least 5% clear, as for
+ * the pouch (measured every 15° at 78°, 80° and 90° of tilt). A different
+ * book (a taller or wider one) needs this checked.
  */
-const CAMERA_ORBIT = "-28deg 80deg 2.6m";
+const CAMERA_ORBIT = "-28deg 80deg 2.95m";
 
 function coverCanvas(book: Book, px: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
