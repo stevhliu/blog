@@ -43,10 +43,30 @@ function sharpenTextures(viewer: HTMLElement) {
   });
 }
 
+/**
+ * Whether a model that has just loaded is ready to be shown. The first
+ * frames a model is drawn in are slow ones (shaders compile, textures go
+ * to the GPU, the shadow is drawn), so the model turns out of sight until
+ * they are behind it. `frames` is how long each frame since it loaded
+ * took, in milliseconds, oldest first; a smooth frame at 60Hz is 16.7.
+ */
+function readyToShow(frames: number[]): boolean {
+  // Settled is four frames in a row under 34ms: that is two 60Hz frames,
+  // so one dropped frame still fails, while a machine drawing a steady
+  // 30 frames a second passes. The stalls come in a burst of two or three
+  // frames, so four smooth ones means the burst is over.
+  const settled = frames.length >= 4 && frames.slice(-4).every((ms) => ms < 34);
+  // A machine that never draws that fast still gets its model, a second
+  // after it loaded.
+  const waited = frames.reduce((sum, ms) => sum + ms, 0);
+  return settled || waited > 1000;
+}
+
 export type SkyLitModelProps = {
   /** The GLB. */
   src: string;
-  /** Shown until the model loads, and in place of it without WebGL. */
+  /** An image of the composed view. It holds the space until the model
+   * is ready and fades out as the model fades in; without WebGL it stays. */
   poster?: string;
   alt: string;
   /** model-viewer's camera-orbit for the composed view. The distance is
@@ -95,27 +115,32 @@ export function SkyLitModel({
 
   const viewer = useRef<HTMLElement & { fieldOfView: string; cameraTarget: string }>(null);
 
-  // A plain listener: React doesn't attach onLoad to a custom element.
+  // The sky, redrawn every few minutes, as the model's environment. The
+  // model isn't given its source until the first sky is drawn, so it is
+  // never lit by a stand-in environment first: that would be a second
+  // environment map to build and a change of light a moment after it
+  // appears.
+  const [sky, setSky] = useState<string>();
   useEffect(() => {
-    const element = viewer.current;
-    if (!element) return;
-    const sharpen = () => sharpenTextures(element);
-    element.addEventListener("load", sharpen);
-    return () => element.removeEventListener("load", sharpen);
+    let cancelled = false;
+    const draw = () =>
+      skyEnvironment(skyContext().at ?? new Date()).then(({ url }) => {
+        if (!cancelled) setSky(url);
+      });
+    draw();
+    const timer = window.setInterval(draw, SKY_REFRESH_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
   }, []);
 
-  // The sky, redrawn every few minutes, as the model's environment; the
-  // exposure follows the page's light whenever the page is re-lit. Both
-  // as attributes, so they hold whether or not model-viewer has upgraded
-  // the element yet. The first draw waits for an idle moment: it takes
-  // about 200ms of main thread.
+  // The exposure follows the page's light whenever the page is re-lit. As
+  // an attribute, so it holds whether or not model-viewer has upgraded the
+  // element yet.
   useEffect(() => {
     const element = viewer.current;
     if (!element) return;
-    const sky = () => {
-      const context = skyContext();
-      element.setAttribute("environment-image", skyEnvironment(context.at ?? new Date()).url);
-    };
     const expose = (event: Event) => {
       const light = (event as CustomEvent<PageLight>).detail;
       element.setAttribute("exposure", exposureFor(light.adapted).toFixed(3));
@@ -123,14 +148,57 @@ export function SkyLitModel({
     const adapted = Number(getComputedStyle(document.documentElement).getPropertyValue("--sky-adapted"));
     if (!isNaN(adapted)) element.setAttribute("exposure", exposureFor(adapted).toFixed(3));
     document.addEventListener("sky-light", expose);
-    const idle = window.requestIdleCallback?.(sky) ?? window.setTimeout(sky, 0);
-    const timer = window.setInterval(sky, SKY_REFRESH_MS);
+    return () => document.removeEventListener("sky-light", expose);
+  }, []);
+
+  // Ready: the model has loaded and the sky is lighting it. Plain
+  // listeners, because React doesn't attach events to a custom element.
+  // If the environment never reports (it failed to load), the model is
+  // shown without it after a moment rather than not at all.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const element = viewer.current;
+    if (!element) return;
+    let loaded = false;
+    let lit = false;
+    let giveUp: number | undefined;
+    const check = () => {
+      if (loaded && lit) setReady(true);
+    };
+    const onLoad = () => {
+      sharpenTextures(element);
+      loaded = true;
+      giveUp = window.setTimeout(onLit, 1500);
+      check();
+    };
+    const onLit = () => {
+      lit = true;
+      check();
+    };
+    element.addEventListener("load", onLoad);
+    element.addEventListener("environment-change", onLit);
     return () => {
-      document.removeEventListener("sky-light", expose);
-      (window.cancelIdleCallback ?? window.clearTimeout)(idle);
-      window.clearInterval(timer);
+      element.removeEventListener("load", onLoad);
+      element.removeEventListener("environment-change", onLit);
+      window.clearTimeout(giveUp);
     };
   }, []);
+
+  // Shown: once ready, the model is drawn (and turns) out of sight until
+  // its frames have settled, then fades in.
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (!ready || shown) return;
+    const frames: number[] = [];
+    let last = performance.now();
+    let frame = requestAnimationFrame(function tick(now) {
+      frames.push(now - last);
+      last = now;
+      if (readyToShow(frames)) setShown(true);
+      else frame = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [ready, shown]);
 
   const [focused, setFocused] = useState(false);
   const blur = () => {
@@ -153,33 +221,35 @@ export function SkyLitModel({
 
   const distance = cameraOrbit.trim().split(/\s+/)[2] ?? "auto";
   return (
-    <model-viewer
-      ref={viewer}
-      src={src}
-      poster={poster}
-      alt={alt}
-      camera-controls=""
-      disable-zoom={focused ? undefined : ""}
-      touch-action="pan-y"
-      onFocus={() => setFocused(true)}
-      onBlur={blur}
-      interaction-prompt="none"
-      interpolation-decay="20"
-      auto-rotate={turning ? "" : undefined}
-      auto-rotate-delay="0"
-      rotation-per-second="6deg"
-      camera-orbit={cameraOrbit}
-      min-camera-orbit={`-Infinity ${minPitch}deg ${distance}`}
-      max-camera-orbit={`Infinity ${maxPitch}deg ${distance}`}
-      field-of-view={`${fieldOfView}deg`}
-      min-field-of-view={`${closestFieldOfView}deg`}
-      max-field-of-view={`${fieldOfView}deg`}
-      environment-image="neutral"
-      exposure="1"
-      tone-mapping="neutral"
-      shadow-intensity="0.6"
-      shadow-softness="1"
-      class={className}
-    />
+    <div className={`sky-lit-model ${className ?? ""}`} data-shown={shown ? "" : undefined}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {poster && <img src={poster} alt="" aria-hidden="true" />}
+      <model-viewer
+        ref={viewer}
+        src={sky ? src : undefined}
+        alt={alt}
+        camera-controls=""
+        disable-zoom={focused ? undefined : ""}
+        touch-action="pan-y"
+        onFocus={() => setFocused(true)}
+        onBlur={blur}
+        interaction-prompt="none"
+        interpolation-decay="20"
+        auto-rotate={turning && ready ? "" : undefined}
+        auto-rotate-delay="0"
+        rotation-per-second="6deg"
+        camera-orbit={cameraOrbit}
+        min-camera-orbit={`-Infinity ${minPitch}deg ${distance}`}
+        max-camera-orbit={`Infinity ${maxPitch}deg ${distance}`}
+        field-of-view={`${fieldOfView}deg`}
+        min-field-of-view={`${closestFieldOfView}deg`}
+        max-field-of-view={`${fieldOfView}deg`}
+        environment-image={sky}
+        exposure="1"
+        tone-mapping="neutral"
+        shadow-intensity="0.6"
+        shadow-softness="1"
+      />
+    </div>
   );
 }

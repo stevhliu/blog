@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { Texture } from "three";
 
 import { SkyLitModel } from "./sky-lit-model";
 
@@ -39,6 +40,21 @@ export type Book = {
  * book (a taller or wider one) needs this checked.
  */
 const CAMERA_ORBIT = "-28deg 80deg 2.95m";
+
+/**
+ * How much of each face is shown as printed, whatever the light, with the
+ * rest lit by the sky. Lit only, the book is far darker than its cover:
+ * the sky map gives a face about a sixth of full light, so the white
+ * lettering drew at 109 of 255 and the dark cover lost its pattern. It is
+ * the pouch's model (tools/miniature/miniature/lighting.py),
+ *
+ *     colour = shown * print + (1 - shown) * print * light + reflection
+ *
+ * through glTF's emissive channel, and at the pouch's ceiling of 0.8,
+ * which keeps a fifth of the light for shape. Exposure scales this share
+ * too, so the book still dims with the page at night.
+ */
+const SELF_LIT = 0.8;
 
 function coverCanvas(book: Book, px: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
@@ -127,24 +143,8 @@ function pagesCanvas(book: Book, thicknessAlong: "u" | "v"): HTMLCanvasElement {
   return canvas;
 }
 
-/** An image cropped to a face's proportions (width over height), like CSS
- * object-fit: cover, so a cover scanned at another trim size (a trade
- * edition's art on a mass-market book), or a photo cropped a little loose,
- * is trimmed at the edges rather than squeezed. */
-function fit(image: CanvasImageSource & { width: number; height: number }, aspect: number): HTMLCanvasElement {
-  const canvas = document.createElement("canvas");
-  canvas.height = Math.min(image.height, 2048);
-  canvas.width = Math.round(canvas.height * aspect);
-  const sw = Math.min(image.width, image.height * aspect);
-  const sh = sw / aspect;
-  canvas
-    .getContext("2d")!
-    .drawImage(image, (image.width - sw) / 2, (image.height - sh) / 2, sw, sh, 0, 0, canvas.width, canvas.height);
-  return canvas;
-}
-
 /**
- * The book as a GLB, built in the browser: a three.js box exported with
+ * The book as a glTF, built in the browser: a three.js box exported with
  * GLTFExporter, returned as a blob URL. A mass-market paperback is trimmed
  * after binding, so the cover is flush with the pages on three sides and
  * the whole book really is one block; it is one rounded box, with the cover
@@ -155,6 +155,12 @@ function fit(image: CanvasImageSource & { width: number; height: number }, aspec
  * different winner from frame to frame as the book turns, which reads as
  * flicker. Building it here rather than shipping a file means changing the
  * book is a change to the values in currently-reading.tsx and nothing else.
+ *
+ * The exporter writes every texture into the file as a PNG, which for
+ * three cover-sized images took about 330ms and was then decoded again by
+ * the viewer. So a face with an image is exported with a 2px stand-in, and
+ * the file is written as JSON with the stand-in's address swapped for the
+ * image's own: the viewer loads the image the browser already has.
  */
 async function buildBook(book: Book): Promise<string> {
   const [THREE, { GLTFExporter }, { RoundedBoxGeometry }] = await Promise.all([
@@ -168,17 +174,37 @@ async function buildBook(book: Book): Promise<string> {
     t.colorSpace = THREE.SRGBColorSpace;
     return t;
   };
+  // Material name to the image it shows, for the swap after export.
+  const images = new Map<string, string>();
   // Each printed face is its image, fitted to the face, or the drawn
   // stand-in if there is no image or it fails to load.
-  const face = async (src: string | undefined, aspect: number, fallback: () => HTMLCanvasElement) => {
+  const face = async (name: string, src: string | undefined, aspect: number, fallback: () => HTMLCanvasElement) => {
     if (src) {
       try {
-        return fit(await new THREE.ImageLoader().loadAsync(src), aspect);
+        const image = await new THREE.ImageLoader().loadAsync(src);
+        images.set(name, new URL(src, location.href).href);
+        // The image is cropped to the face's proportions (width over
+        // height), like CSS object-fit: cover, so a cover scanned at
+        // another trim size (a trade edition's art on a mass-market book),
+        // or a photo cropped a little loose, is trimmed at the edges
+        // rather than squeezed. The crop is a texture transform: the face
+        // shows the middle `across` of the width and `down` of the height.
+        // A glTF image's first row is its top, where three.js puts v = 1,
+        // so the height is also flipped.
+        const across = Math.min(1, (image.height * aspect) / image.width);
+        const down = Math.min(1, image.width / aspect / image.height);
+        const standIn = document.createElement("canvas");
+        standIn.width = standIn.height = 2;
+        const t = texture(standIn);
+        t.flipY = false;
+        t.repeat.set(across, -down);
+        t.offset.set((1 - across) / 2, (1 + down) / 2);
+        return t;
       } catch {
         // Fall through to the stand-in.
       }
     }
-    return fallback();
+    return texture(fallback());
   };
   const plainBack = () => {
     const canvas = document.createElement("canvas");
@@ -188,20 +214,30 @@ async function buildBook(book: Book): Promise<string> {
     g.fillRect(0, 0, 4, 4);
     return canvas;
   };
-  const [coverSource, spineSource, backSource] = await Promise.all([
-    face(book.cover, book.width / book.height, () => coverCanvas(book, 1024)),
-    face(book.spine, book.thickness / book.height, () => spineCanvas(book, 1024)),
-    face(book.back, book.width / book.height, plainBack),
+  const [coverMap, spineMap, backMap] = await Promise.all([
+    face("front", book.cover, book.width / book.height, () => coverCanvas(book, 1024)),
+    face("spine", book.spine, book.thickness / book.height, () => spineCanvas(book, 1024)),
+    face("back", book.back, book.width / book.height, plainBack),
   ]);
 
   // A paperback's cover is laminated card, a little glossier than the
   // uncoated pages.
   const gloss = 0.4;
-  const front = new THREE.MeshStandardMaterial({ map: texture(coverSource), roughness: gloss });
-  const back = new THREE.MeshStandardMaterial({ map: texture(backSource), roughness: gloss });
-  const spine = new THREE.MeshStandardMaterial({ map: texture(spineSource), roughness: gloss });
-  const foreEdge = new THREE.MeshStandardMaterial({ map: texture(pagesCanvas(book, "u")), roughness: 0.9 });
-  const headTail = new THREE.MeshStandardMaterial({ map: texture(pagesCanvas(book, "v")), roughness: 0.9 });
+  const material = (name: string, map: Texture, roughness: number) =>
+    new THREE.MeshStandardMaterial({
+      name,
+      map,
+      roughness,
+      color: new THREE.Color().setScalar(1 - SELF_LIT),
+      emissive: 0xffffff,
+      emissiveMap: map,
+      emissiveIntensity: SELF_LIT,
+    });
+  const front = material("front", coverMap, gloss);
+  const back = material("back", backMap, gloss);
+  const spine = material("spine", spineMap, gloss);
+  const foreEdge = material("foreEdge", texture(pagesCanvas(book, "u")), 0.9);
+  const headTail = material("headTail", texture(pagesCanvas(book, "v")), 0.9);
   const materials = [foreEdge, spine, headTail, headTail, front, back];
 
   // World units: the book is 1 tall. Box faces: +x, -x, +y, -y, +z, -z.
@@ -213,20 +249,30 @@ async function buildBook(book: Book): Promise<string> {
   const geometry = new RoundedBoxGeometry(w, 1, d, 4, radius);
   const mesh = new THREE.Mesh(geometry, materials);
 
-  const glb = (await new GLTFExporter().parseAsync(mesh, { binary: true })) as ArrayBuffer;
+  type Gltf = {
+    materials: { name?: string; pbrMetallicRoughness?: { baseColorTexture?: { index: number } } }[];
+    textures: { source: number }[];
+    images: { uri?: string; mimeType?: string }[];
+  };
+  const gltf = (await new GLTFExporter().parseAsync(mesh, { binary: false })) as unknown as Gltf;
+  for (const material of gltf.materials) {
+    const url = images.get(material.name ?? "");
+    const index = material.pbrMetallicRoughness?.baseColorTexture?.index;
+    if (url && index !== undefined) gltf.images[gltf.textures[index].source] = { uri: url };
+  }
 
   geometry.dispose();
   for (const m of [front, back, spine, foreEdge, headTail]) {
     m.map?.dispose();
     m.dispose();
   }
-  return URL.createObjectURL(new Blob([glb], { type: "model/gltf-binary" }));
+  return URL.createObjectURL(new Blob([JSON.stringify(gltf)], { type: "model/gltf+json" }));
 }
 
 /**
  * A book that turns like the coffee pouch above it, because it is the same
  * viewer: SkyLitModel, lit by the sky over Sebastopol, dragged to turn,
- * turning slowly on its own, and zoomed after a click. Until the GLB is
+ * turning slowly on its own, and zoomed after a click. Until the model is
  * built (three.js loads on demand), an empty box of the same size holds the
  * space so nothing below it moves.
  */
@@ -248,5 +294,7 @@ export function Book3D({ book, alt, className }: { book: Book; alt: string; clas
   }, [book]);
 
   if (!src) return <div role="img" aria-label={alt} className={className} />;
-  return <SkyLitModel src={src} poster={book.cover} alt={alt} cameraOrbit={CAMERA_ORBIT} className={className} />;
+  // No poster: the flat cover is not the composed view, and a flat cover
+  // turning into an angled book reads as a jump.
+  return <SkyLitModel src={src} alt={alt} cameraOrbit={CAMERA_ORBIT} className={className} />;
 }

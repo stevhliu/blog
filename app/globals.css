@@ -669,10 +669,43 @@ li a,
   width: 100%;
   height: auto;
   aspect-ratio: 13 / 11;
+  cursor: grab;
+}
+
+/* A 3D model (SkyLitModel): the viewer fills its box and stays clear until
+   the model can be drawn smoothly, then fades in while its poster, if it
+   has one, fades out beneath it. */
+.sky-lit-model {
+  position: relative;
+}
+
+.sky-lit-model > model-viewer,
+.sky-lit-model > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 300ms ease-out;
+}
+
+.sky-lit-model > model-viewer {
   background-color: transparent;
   --poster-color: transparent;
   --progress-bar-height: 0px;
-  cursor: grab;
+  opacity: 0;
+}
+
+.sky-lit-model > img {
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.sky-lit-model[data-shown] > model-viewer {
+  opacity: 1;
+}
+
+.sky-lit-model[data-shown] > img {
+  opacity: 0;
 }
 
 .drink-model:active {

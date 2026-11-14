@@ -206,34 +206,101 @@ function toneMap(x: number): number {
  * and a column's longitude runs from +x round through +z.
  */
 export function renderSky(sun: Vec, width: number, height: number): Uint8ClampedArray<ArrayBuffer> {
-  const eye: Vec = [0, PLANET_RADIUS + 0.002, 0]; // two metres up
   const pixels = new Uint8ClampedArray(new ArrayBuffer(width * height * 4));
-  for (let row = 0; row < height; row++) {
-    const elevation = (0.5 - (row + 0.5) / height) * Math.PI;
-    const flat = Math.cos(elevation);
-    for (let col = 0; col < width; col++) {
-      const longitude = ((col + 0.5) / width - 0.5) * 2 * Math.PI;
-      const dir: Vec = [Math.cos(longitude) * flat, Math.sin(elevation), Math.sin(longitude) * flat];
-      const colour = skyRadiance(dir, sun, eye);
-      const at = (row * width + col) * 4;
-      pixels[at] = toneMap(colour[0]);
-      pixels[at + 1] = toneMap(colour[1]);
-      pixels[at + 2] = toneMap(colour[2]);
-      pixels[at + 3] = 255;
-    }
-  }
+  for (let row = 0; row < height; row++) renderSkyRow(pixels, sun, width, height, row);
   return pixels;
+}
+
+/** One row of renderSky, written into `pixels`. */
+function renderSkyRow(pixels: Uint8ClampedArray, sun: Vec, width: number, height: number, row: number) {
+  const eye: Vec = [0, PLANET_RADIUS + 0.002, 0]; // two metres up
+  const elevation = (0.5 - (row + 0.5) / height) * Math.PI;
+  const flat = Math.cos(elevation);
+  for (let col = 0; col < width; col++) {
+    const longitude = ((col + 0.5) / width - 0.5) * 2 * Math.PI;
+    const dir: Vec = [Math.cos(longitude) * flat, Math.sin(elevation), Math.sin(longitude) * flat];
+    const colour = skyRadiance(dir, sun, eye);
+    const at = (row * width + col) * 4;
+    pixels[at] = toneMap(colour[0]);
+    pixels[at + 1] = toneMap(colour[1]);
+    pixels[at + 2] = toneMap(colour[2]);
+    pixels[at + 3] = 255;
+  }
 }
 
 export const SKY_WIDTH = 256;
 export const SKY_HEIGHT = 128;
 
+// The map takes about 120ms to ray-march. Done in one go that is seven
+// dropped frames, so it is drawn a few rows at a time, each slice this
+// long, with the page free to draw and scroll between slices.
+const SLICE_MS = 5;
+
+export type SkyEnvironment = { url: string; elevation: number };
+
+// A sky stays good for this long: the sun moves a quarter of a degree a
+// minute, so four minutes is a degree, under what a model's surface
+// shows. It is a minute under the five at which a page asks again, so
+// that request always gets a new drawing.
+const FRESH_MINUTES = 4;
+const STORE_KEY = "sky-environment";
+
+// The last sky drawn, with its minute. Every model on the page asks for
+// the same sky at the same moment, and they share one drawing (and, since
+// the URL is the same, one environment map inside model-viewer). It is
+// also kept in localStorage, so a reload or a second page within those
+// minutes has its sky at once and the models don't wait on the drawing.
+let drawn: { minute: number; sky: Promise<SkyEnvironment> } | undefined;
+
 /** The sky over Sebastopol at `date`, as an image URL model-viewer can
  * take for environment-image, and the sun's elevation in degrees.
  * Browser only: it draws through a canvas. */
-export function skyEnvironment(date: Date): { url: string; elevation: number } {
+export function skyEnvironment(date: Date): Promise<SkyEnvironment> {
+  const minute = Math.round(date.getTime() / 60_000);
+  const fresh = (at: number) => Math.abs(minute - at) < FRESH_MINUTES;
+  if (drawn && fresh(drawn.minute)) return drawn.sky;
+  try {
+    const kept = JSON.parse(localStorage.getItem(STORE_KEY) ?? "null") as ({ minute: number } & SkyEnvironment) | null;
+    if (kept && fresh(kept.minute)) {
+      drawn = { minute: kept.minute, sky: Promise.resolve({ url: kept.url, elevation: kept.elevation }) };
+      return drawn.sky;
+    }
+  } catch {
+    // No storage, or something else's value under the key: draw it.
+  }
+  const sky = drawSky(date);
+  drawn = { minute, sky };
+  sky.then((value) => {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({ minute, ...value }));
+    } catch {
+      // Storage is full or blocked; the next page draws its own.
+    }
+  });
+  return sky;
+}
+
+/** Lets the page draw and take input, then carries on. A message, not a
+ * timer: nested timers wait at least 4ms each, which would double the
+ * time the sky takes. */
+function pause(): Promise<void> {
+  return new Promise((resume) => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => resume();
+    channel.port2.postMessage(null);
+  });
+}
+
+async function drawSky(date: Date): Promise<SkyEnvironment> {
   const position = sunPosition(date, SEBASTOPOL.latitude, SEBASTOPOL.longitude);
-  const pixels = renderSky(sunVector(position), SKY_WIDTH, SKY_HEIGHT);
+  const sun = sunVector(position);
+  const pixels = new Uint8ClampedArray(new ArrayBuffer(SKY_WIDTH * SKY_HEIGHT * 4));
+  let row = 0;
+  while (row < SKY_HEIGHT) {
+    const until = performance.now() + SLICE_MS;
+    while (row < SKY_HEIGHT && performance.now() < until) renderSkyRow(pixels, sun, SKY_WIDTH, SKY_HEIGHT, row++);
+    if (row < SKY_HEIGHT) await pause();
+  }
   const canvas = document.createElement("canvas");
   canvas.width = SKY_WIDTH;
   canvas.height = SKY_HEIGHT;
