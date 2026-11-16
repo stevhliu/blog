@@ -31,7 +31,7 @@ export function PostChrome({
         <article className="min-w-0">
           {post?.title ? (
             <header className="mb-7">
-              {/* Geist sans, medium weight, tight tracking — NOT Times New Roman. */}
+              {/* Allo, medium weight, tight tracking — NOT Times New Roman. */}
               <h1 className="m-0 text-balance font-sans text-xl font-medium tracking-[-0.03em] text-[var(--color-body)]">
                 {post.title}
               </h1>

@@ -1,22 +1,17 @@
 export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
-import { loadGeistFont } from "@/app/og-assets";
+import { loadFont, loadPublicImageDataUrl } from "@/app/og-assets";
 
-const geistSansMedium = loadGeistFont("geist-medium.ttf");
-const geistMono = loadGeistFont("geist-mono-regular.ttf");
+// Satori reads TTF/OTF but not WOFF2, and not variable fonts, so the card
+// uses Allo's static Medium.
+const alloMedium = loadFont("allo/Allo-Medium.otf");
 
-// Pose A of the dancing ASCII cat that used to head the home page,
-// rendered as a stack of div rows so Satori preserves the exact spacing
-// (it won't respect whitespace in a single <pre>/<div>).
-const CAT_LINES = [
-  "*",
-  "     /\\_/\\   *",
-  "   ( o.o )/",
-  "     > ^ <",
-  "    /     \\",
-  "*  /_/   \\_\\",
-];
+// The same dancing cat as the post cards, drawn near its native 373x368 so
+// it stays crisp.
+const dancingCat = loadPublicImageDataUrl("images/dancing-cat.png", "image/png");
+const CAT_WIDTH = 360;
+const CAT_HEIGHT = Math.round((CAT_WIDTH * 368) / 373);
 
 export async function GET() {
   return new ImageResponse(
@@ -26,24 +21,12 @@ export async function GET() {
         style={{
           backgroundColor: "#faf9f7",
           color: "#000000",
-          fontFamily: "Geist Medium",
+          fontFamily: "Allo Medium",
         }}
       >
-        {/* Left: giant ASCII cat */}
+        {/* Left: the dancing cat */}
         <div tw="flex flex-1 items-center justify-center">
-          <div
-            tw="flex flex-col"
-            style={{
-              fontFamily: "Geist Mono",
-              fontSize: 54,
-              lineHeight: 1.06,
-              whiteSpace: "pre",
-            }}
-          >
-            {CAT_LINES.map((line, i) => (
-              <div key={i} style={{ whiteSpace: "pre" }}>{line}</div>
-            ))}
-          </div>
+          <img alt="" src={dancingCat} width={CAT_WIDTH} height={CAT_HEIGHT} />
         </div>
 
         {/* Right: name */}
@@ -51,7 +34,7 @@ export async function GET() {
           <div
             tw="flex flex-col"
             style={{
-              fontFamily: "Geist Medium",
+              fontFamily: "Allo Medium",
               fontSize: 160,
               letterSpacing: "-0.055em",
               lineHeight: 0.9,
@@ -66,10 +49,7 @@ export async function GET() {
     {
       width: 1200,
       height: 630,
-      fonts: [
-        { name: "Geist Medium", data: geistSansMedium },
-        { name: "Geist Mono", data: geistMono },
-      ],
+      fonts: [{ name: "Allo Medium", data: alloMedium }],
     }
   );
 }

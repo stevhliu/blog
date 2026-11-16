@@ -38,8 +38,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
-    "postinstall": "node ./fonts/init.mjs"
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },
   "packageManager": "pnpm@10.14.0"
 }

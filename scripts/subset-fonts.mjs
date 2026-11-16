@@ -36,7 +36,7 @@ for (const route of routes) {
       hyphens.add(style.hyphens);
       const family = style.fontFamily.toLowerCase();
       const firstFamily = family.split(",")[0].trim().replace(/[\"']/g, "");
-      const key = firstFamily.startsWith("geistmono") ? "mono" : firstFamily.startsWith("geistsans") ? "sans" : null;
+      const key = firstFamily.startsWith("geistmono") ? "mono" : firstFamily.startsWith("allo") ? "sans" : null;
       if (!key) continue;
       for (const character of node.textContent ?? "") familyUsage[key].chars.add(character.codePointAt(0));
       familyUsage[key].weights.add(Number(style.fontWeight));

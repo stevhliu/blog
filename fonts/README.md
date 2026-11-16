@@ -1,10 +1,10 @@
 # Web font subsets
 
-The site uses variable Geist Sans and Geist Mono fonts from the `geist` package. The `.ttf` files beside this README are used to make Open Graph images on the server; web pages do not download them. The four files in `public/fonts` are the web fonts.
+The site uses the variable Allo font for body text and Geist Mono from the `geist` package for UI mono. Code in posts uses Paper Mono, which is built separately by `scripts/build-paper-mono.py`. Allo's source (`allo/AlloVariableFriendly.woff2`, roundness fixed at Friendly) and license are vendored from https://allo.joshpuckett.me. It is also published to npm as `allo-font`, but the Hugging Face npm mirror wasn't serving it yet when it was added. Open Graph images are drawn on the server with `allo/Allo-Light.otf` and `allo/Allo-Medium.otf`, because the image renderer can't read WOFF2 or variable fonts; web pages do not download them. The `allo-*` and `geist-mono-*` files in `public/fonts` are the web fonts.
 
 ## Regenerate by hand
 
-After changing post text, component text, font styles, routes, or the `geist` package version, start the site with `pnpm dev` and run:
+After changing post text, component text, font styles, routes, the vendored Allo file, or the `geist` package version, start the site with `pnpm dev` and run:
 
 ```sh
 node scripts/subset-fonts.mjs

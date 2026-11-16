@@ -8,7 +8,7 @@ export function font(fontFamily: string) {
   return { fontFamily };
 }
 
-export function loadGeistFont(filename: string) {
+export function loadFont(filename: string) {
   return readFileSync(join(fontsDir, filename));
 }
 

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { allPosts } from "@/app/get-posts";
-import { loadGeistFont, loadPublicImageDataUrl } from "@/app/og-assets";
+import { loadFont, loadPublicImageDataUrl } from "@/app/og-assets";
 
 // Drafts get cards too, since their pages are reachable by URL and point
 // og:image here. Unknown ids 404 without rendering.
@@ -10,7 +10,8 @@ export function generateStaticParams() {
   return allPosts.map(post => ({ id: post.id }));
 }
 
-const geistSansMedium = loadGeistFont("geist-medium.ttf");
+// Satori reads TTF/OTF but not WOFF2, so this is Allo's static Medium.
+const alloMedium = loadFont("allo/Allo-Medium.otf");
 
 // Pose A of the dancing cat that used to head the home page, captured from
 // the live page before it was removed. The PNGs are the only copy now.
@@ -33,7 +34,7 @@ const ZIGZAG = 34;
 const ROW_WIDTH = 1200 - SIDE_INSET * 2;
 
 // The ♪ notes are images for the same reason the cat is: Satori has no system
-// font fallback and Geist carries no ♪ glyph.
+// font fallback and Allo Medium carries no ♪ glyph.
 const NOTE_ASPECT = 254 / 174;
 const notes = {
   blue: loadPublicImageDataUrl("images/note-blue.png", "image/png"),
@@ -52,6 +53,16 @@ const FLOATING_NOTES = [
   { src: notes.green, x: 984, y: 22, width: 16 },
 ];
 
+// The title has about 280px of height before it reaches the highest note.
+// Short titles keep the big size; longer ones step down so they wrap into
+// fewer lines. Roughly, a line holds 25 characters at 88px, 31 at 72px and
+// 37 at 60px, and word wrapping wastes some of each line.
+function titleFontSize(title: string) {
+  if (title.length <= 50) return 88; // two lines
+  if (title.length <= 80) return 72; // three lines
+  return 60; // up to four lines, about 140 characters
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -69,7 +80,7 @@ export async function GET(
         style={{
           backgroundColor: "#faf9f7",
           color: "#000000",
-          fontFamily: "Geist Medium",
+          fontFamily: "Allo Medium",
           padding: "48px 64px 40px",
         }}
       >
@@ -78,8 +89,8 @@ export async function GET(
           <div tw="flex flex-1 flex-col">
             <div
               style={{
-                fontFamily: "Geist Medium",
-                fontSize: 88,
+                fontFamily: "Allo Medium",
+                fontSize: titleFontSize(post.title),
                 letterSpacing: "-0.05em",
                 lineHeight: 0.95,
                 display: "flex",
@@ -142,7 +153,7 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts: [{ name: "Geist Medium", data: geistSansMedium }],
+      fonts: [{ name: "Allo Medium", data: alloMedium }],
     }
   );
 }

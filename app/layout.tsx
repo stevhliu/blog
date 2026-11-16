@@ -63,7 +63,7 @@ export default function RootLayout({
       <head>
         <link
           rel="preload"
-          href="/fonts/geist-sans-core.woff2"
+          href="/fonts/allo-core.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"

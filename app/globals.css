@@ -18,7 +18,7 @@
 
 @layer base {
   :root {
-    --font-geist-sans: "GeistSansCore", "GeistSans Fallback";
+    --font-sans: "AlloCore", "Allo Fallback";
     --font-geist-mono:
       "GeistMonoCore", ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco,
       Liberation Mono, DejaVu Sans Mono, Courier New, monospace;
@@ -62,16 +62,18 @@
     background-color: var(--color-bg);
     background-image: linear-gradient(to bottom, var(--sky-wash), var(--color-bg) 45svh);
     background-repeat: repeat-x;
-    font-family: var(--font-geist-sans);
+    font-family: var(--font-sans);
   }
 
+  /* Arial sized to Allo's average letter width and vertical metrics, so
+     text barely shifts when Allo swaps in. */
   @font-face {
-    font-family: "GeistSans Fallback";
+    font-family: "Allo Fallback";
     src: local("Arial");
-    ascent-override: 85.83%;
-    descent-override: 20.53%;
-    line-gap-override: 9.33%;
-    size-adjust: 107.19%;
+    ascent-override: 92.08%;
+    descent-override: 22.93%;
+    line-gap-override: 0%;
+    size-adjust: 105.21%;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -101,8 +103,9 @@
 
   /* Additions from good-css.com's reset. Tailwind's preflight already
      covers box-sizing and block images. Synthesis is turned off for weight
-     only: Geist is a 100–900 variable font so bold is always real, but it
-     ships no italic, so posts still rely on the browser slanting emphasis. */
+     only: Allo is a 100–900 variable font so bold is always real. Its
+     obliques are separate static files the site doesn't load, so posts
+     still rely on the browser slanting emphasis. */
   :root {
     scrollbar-gutter: stable;
     text-wrap: pretty;
@@ -150,8 +153,21 @@
     pointer-events: none;
   }
 
-  /* Disable ligatures globally */
+  /* Disable ligatures globally, and turn on Allo's single-story a (ss01)
+     and its I/l/1/0 disambiguation (ss02). Code is excluded below because
+     Paper Mono has its own, different ss01 and ss02. */
   * {
+    font-feature-settings: "liga" 0, "ss01", "ss02";
+  }
+
+  code,
+  code *,
+  pre,
+  pre *,
+  kbd,
+  samp,
+  .font-mono,
+  .font-code {
     font-feature-settings: "liga" 0;
   }
 
@@ -519,7 +535,7 @@ button:focus-visible,
 
 /* ─── Archive index aesthetic ───────────────────────────── */
 .archive-meta {
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;

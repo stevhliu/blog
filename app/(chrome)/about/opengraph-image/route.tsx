@@ -2,12 +2,12 @@ export const revalidate = 60;
 
 import { ImageResponse } from "next/og";
 import { getPosts } from "@/app/get-posts";
-import { font, loadGeistFont, loadPublicImageDataUrl } from "@/app/og-assets";
+import { font, loadFont, loadPublicImageDataUrl } from "@/app/og-assets";
 import { formatInteger } from "@/app/post-format";
 
 const stevhliuPhoto = loadPublicImageDataUrl("images/stevhliu.PNG", "image/png");
-const geistSans = loadGeistFont("geist-light.ttf");
-const geistSansMedium = loadGeistFont("geist-medium.ttf");
+const alloLight = loadFont("allo/Allo-Light.otf");
+const alloMedium = loadFont("allo/Allo-Medium.otf");
 
 export async function GET() {
   const posts = await getPosts();
@@ -17,7 +17,7 @@ export async function GET() {
     (
       <div
         tw="flex p-10 h-full w-full bg-white flex-col"
-        style={font("Geist")}
+        style={font("Allo")}
       >
         <main tw="flex grow pt-4 w-full justify-center items-center">
           <div tw="flex flex-row">
@@ -30,16 +30,16 @@ export async function GET() {
             </div>
 
             <div tw="flex flex-col px-10 grow text-[28px] h-70 justify-center">
-              <div tw="text-[64px] mb-7" style={font("Geist Medium")}>
+              <div tw="text-[64px] mb-7" style={font("Allo Medium")}>
                 Steven Liu
               </div>
-              <div tw="flex mb-5" style={font("Geist")}>
+              <div tw="flex mb-5" style={font("Allo")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> developer docs at Hugging Face
               </div>
-              <div tw="flex mb-5" style={font("Geist")}>
+              <div tw="flex mb-5" style={font("Allo")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Transformers
               </div>
-              <div tw="flex" style={font("Geist")}>
+              <div tw="flex" style={font("Allo")}>
                 <span tw="text-gray-400 mr-3">&mdash;</span> Bay Area, CA
               </div>
             </div>
@@ -48,7 +48,7 @@ export async function GET() {
 
         <footer
           tw="flex w-full justify-center text-2xl text-gray-500"
-          style={font("Geist")}
+          style={font("Allo")}
         >
           {posts.length} posts / {formatInteger(viewsSum)} views
         </footer>
@@ -59,13 +59,13 @@ export async function GET() {
       height: 630,
       fonts: [
         {
-          name: "Geist",
-          data: geistSans,
+          name: "Allo",
+          data: alloLight,
           weight: 300,
         },
         {
-          name: "Geist Medium",
-          data: geistSansMedium,
+          name: "Allo Medium",
+          data: alloMedium,
           weight: 500,
         },
       ],
